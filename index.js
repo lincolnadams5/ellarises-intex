@@ -45,7 +45,8 @@ app.use((req, res, next) => {
 // ~~~~~ Global Authentication ~~~~~
 app.use((req, res, next) => {
     // Skip authentication for login routes
-    if (req.path === "/" || req.path === "/login" || req.path === "/register") {
+    let public_routes = ['/', '/login', '/register', '/about', '/event-info'];
+    if (public_routes.includes(req.path)) {
         return next();
     }
 
@@ -71,6 +72,14 @@ app.get('/login', (req, res) => {
 
 app.get('/register', (req, res) => {
     res.render('register', { error_message: "" });
+});
+
+app.get('/about', (req, res) => {
+    res.render('about', { error_message: "" });
+});
+
+app.get('/event-info', (req, res) => {
+    res.render('event-info', { error_message: "" });
 });
 
 // ========== POST ROUTES ==========
