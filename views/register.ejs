@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Ella Rises</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Register Container -->
+    <div class="auth-container">
+        <div class="auth-form-section">
+            <div class="auth-form-wrapper">
+                <h1 class="auth-title">Join Ella Rises</h1>
+                <p class="auth-subtitle">Create an account to get started</p>
+
+                <!-- Error Message Display -->
+                <% if (typeof error_message !== 'undefined' && error_message && error_message.length > 0) { %>
+                    <div class="error-message">
+                        <%= error_message %>
+                    </div>
+                <% } %>
+
+                <!-- Register Form -->
+                <form action="/register" method="POST" class="auth-form">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            placeholder="your.email@example.com"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            placeholder="Create a strong password"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm Password</label>
+                        <input 
+                            type="password" 
+                            id="confirm-password" 
+                            name="confirm_password" 
+                            placeholder="Re-enter your password"
+                            required
+                        >
+                    </div>
+
+                    <!-- Account Type Selection -->
+                    <div class="form-group">
+                        <label class="account-type-label">Account Type</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input 
+                                    type="radio" 
+                                    name="account_type" 
+                                    value="participant" 
+                                    checked
+                                    onchange="toggleManagerKey()"
+                                >
+                                <span>Participant</span>
+                            </label>
+                            <label class="radio-option">
+                                <input 
+                                    type="radio" 
+                                    name="account_type" 
+                                    value="manager"
+                                    onchange="toggleManagerKey()"
+                                >
+                                <span>Manager</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Manager Authentication Key (Hidden by default) -->
+                    <div class="form-group manager-key-group" id="manager-key-group" style="display: none;">
+                        <label for="manager-key">Manager Authentication Key</label>
+                        <input 
+                            type="text" 
+                            id="manager-key" 
+                            name="manager_key" 
+                            placeholder="Enter manager authentication key"
+                        >
+                        <small class="form-hint">Required for manager account registration</small>
+                    </div>
+
+                    <button type="submit" class="auth-submit-btn">Create Account</button>
+                </form>
+
+                <!-- Sign In Link -->
+                <p class="auth-footer-text">
+                    Already have an account? <a href="/login" class="auth-link">Sign in here!</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="auth-image-section">
+            <img src="https://via.placeholder.com/800x1000/fad7d1/ffffff?text=Ella+Rises+Community" alt="Ella Rises Community">
+        </div>
+    </div>
+
+    <!-- JavaScript for Manager Key Toggle -->
+    <script>
+        function toggleManagerKey() {
+            const managerRadio = document.querySelector('input[name="account_type"][value="manager"]');
+            const managerKeyGroup = document.getElementById('manager-key-group');
+            const managerKeyInput = document.getElementById('manager-key');
+            
+            if (managerRadio.checked) {
+                managerKeyGroup.style.display = 'block';
+                managerKeyInput.required = true;
+            } else {
+                managerKeyGroup.style.display = 'none';
+                managerKeyInput.required = false;
+            }
+        }
+    </script>
+</body>
+</html>
+
