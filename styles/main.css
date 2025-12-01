@@ -840,3 +840,320 @@ h1, h2, h3 {
     }
 }
 
+/* ========== ABOUT PAGE ========== */
+
+/* About Hero Section */
+.about-hero {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    padding: 5rem 2rem;
+    text-align: center;
+}
+
+.about-hero-content h1 {
+    font-size: 3.5rem;
+    color: var(--color-white);
+    margin-bottom: 1.5rem;
+}
+
+.about-lead {
+    font-size: 1.3rem;
+    color: var(--color-white);
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.8;
+}
+
+/* Mission & Vision Section */
+.mission-vision {
+    max-width: 1200px;
+    margin: 4rem auto;
+    padding: 2rem;
+}
+
+.mission-vision-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+}
+
+.mission-box,
+.vision-box {
+    background-color: var(--color-white);
+    padding: 3rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.mission-box h2,
+.vision-box h2 {
+    font-size: 2rem;
+    color: var(--color-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.mission-box p,
+.vision-box p {
+    color: var(--color-text-light);
+    line-height: 1.8;
+    font-size: 1.05rem;
+}
+
+/* Programs Detailed Section */
+.programs-detailed {
+    background-color: var(--color-soft-white);
+    padding: 5rem 2rem;
+}
+
+.programs-detailed-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.program-detailed-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+    margin-bottom: 4rem;
+    background-color: var(--color-white);
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.program-detailed-card.reverse {
+    grid-template-columns: 1fr 1fr;
+}
+
+.program-detailed-card.reverse .program-detailed-image {
+    order: 2;
+}
+
+.program-detailed-card.reverse .program-detailed-content {
+    order: 1;
+}
+
+.program-detailed-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 15px;
+}
+
+.program-icon-large {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.program-detailed-content h3 {
+    font-size: 2rem;
+    color: var(--color-text);
+    margin-bottom: 1rem;
+}
+
+.program-detailed-content p {
+    color: var(--color-text-light);
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+}
+
+.program-benefits {
+    list-style: none;
+    padding: 0;
+}
+
+.program-benefits li {
+    color: var(--color-text-light);
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.program-benefits li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--color-secondary);
+    font-weight: bold;
+}
+
+/* Contact Section */
+.contact-section {
+    background-color: var(--color-white);
+    padding: 5rem 2rem;
+}
+
+.contact-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.contact-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.contact-header h2 {
+    font-size: 2.5rem;
+    color: var(--color-text);
+    margin-bottom: 1rem;
+}
+
+.contact-header p {
+    font-size: 1.1rem;
+    color: var(--color-text-light);
+}
+
+.contact-content {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 4rem;
+}
+
+/* Contact Info Side */
+.contact-info h3 {
+    font-size: 1.5rem;
+    color: var(--color-text);
+    margin-bottom: 2rem;
+}
+
+.contact-detail {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.contact-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.contact-detail strong {
+    display: block;
+    color: var(--color-text);
+    margin-bottom: 0.25rem;
+}
+
+.contact-detail p {
+    color: var(--color-text-light);
+    margin: 0;
+}
+
+/* Contact Form */
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.contact-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.contact-form label {
+    font-weight: 500;
+    color: var(--color-text);
+    font-size: 0.95rem;
+}
+
+.contact-form input[type="email"],
+.contact-form input[type="text"],
+.contact-form textarea {
+    padding: 0.9rem 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: var(--font-primary);
+    transition: all 0.3s ease;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+    outline: none;
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 0 3px rgba(153, 183, 198, 0.1);
+}
+
+.contact-form textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.contact-submit-btn {
+    padding: 1rem 2rem;
+    background-color: var(--color-secondary);
+    color: var(--color-white);
+    border: none;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    font-family: var(--font-primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.contact-submit-btn:hover {
+    background-color: #7a9fb0;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(153, 183, 198, 0.4);
+}
+
+.contact-submit-btn:active {
+    transform: translateY(0);
+    background-color: #6a8fa0;
+}
+
+/* About Page Responsive Design */
+@media (max-width: 968px) {
+    .about-hero-content h1 {
+        font-size: 2.5rem;
+    }
+
+    .mission-vision-container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .program-detailed-card,
+    .program-detailed-card.reverse {
+        grid-template-columns: 1fr;
+    }
+
+    .program-detailed-card.reverse .program-detailed-image,
+    .program-detailed-card.reverse .program-detailed-content {
+        order: initial;
+    }
+
+    .contact-content {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .about-hero {
+        padding: 3rem 1.5rem;
+    }
+
+    .about-hero-content h1 {
+        font-size: 2rem;
+    }
+
+    .about-lead {
+        font-size: 1.1rem;
+    }
+
+    .mission-box,
+    .vision-box {
+        padding: 2rem;
+    }
+
+    .program-detailed-card {
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+}
+
