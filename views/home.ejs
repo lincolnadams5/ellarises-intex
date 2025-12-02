@@ -16,15 +16,31 @@
             <div class="nav-logo">
                 <h1>Ella Rises</h1>
             </div>
-            <ul class="nav-menu">
-                <li><a href="#">Home</a></li>
-                <li><a href="/event-info">Events</a></li>
-                <li><a href="/about">About</a></li>
-            </ul>
-            <div class="nav-auth">
-                <a href="/login" class="btn-signin">Sign In</a>
-                <a href="/register" class="btn-signup">Sign Up</a>
-            </div>
+            <% if (isLoggedIn) { %>
+                <ul class="nav-menu">
+                    <li><a href="#">Home</a></li>
+                    <li><a href="/event-info">Events</a></li>
+                    <li><a href="/about">About</a></li>
+                    <li><a href="/donations">Donations</a></li>
+                    <li><a href="/milestones">Milestones</a></li>
+                    <li><a href="/surveys">Surveys</a></li>
+                </ul>
+                <div class="nav-auth">
+                    <form action="/logout" method="POST">
+                        <button class="btn-signin">Log Out</button>
+                    </form>
+                </div>
+            <% } else { %>
+                <ul class="nav-menu">
+                    <li><a href="#">Home</a></li>
+                    <li><a href="/event-info">Events</a></li>
+                    <li><a href="/about">About</a></li>
+                </ul>
+                <div class="nav-auth">
+                    <a href="/login" class="btn-signin">Sign In</a>
+                    <a href="/register" class="btn-signup">Sign Up</a>
+                </div>
+            <% }; %>
         </div>
     </nav>
 
