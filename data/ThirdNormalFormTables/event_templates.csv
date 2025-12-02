@@ -1,0 +1,16 @@
+event_template_id,event_name,event_type,event_description,event_recurrence_pattern,event_default_capacity
+1,Mentor Office Hours,Leadership,One-on-one mentoring & career advising.,Weekly,100
+2,Robotics Lab Saturday,STEM,Build & test robots with mentors.,Weekly,100
+3,Girls in STEAM Mentoring,Leadership,Group mentoring on pathways into STEAM careers.,Weekly,100
+4,Monthly Coding Club,STEM,Guided coding sessions and peer projects.,Monthly,100
+5,Intro to Painting Class,Arts,"Foundations of painting, color theory, and practice.",Weekly,100
+6,Data Science Study Group,STEM,"Intro analytics, Python challenges, and mini-projects.",Weekly,100
+7,Leadership Circle Meetup,Leadership,"Mentorship, goal-setting, and soft skills workshops.",Monthly,100
+8,Web Dev Bootcamp Night,STEM,HTML/CSS/JS sprints and portfolio building.,Weekly,100
+9,Ella Rises Annual Leadership Conference,Annual Conference,Flagship leadership & inspiration conference for girls in STEAM.,Annual,100
+10,Monthly Art Studio Workshop,Arts,Studio time with rotating media and guest artists.,Monthly,100
+11,STEAM Summit & Expo,Annual Conference,"Hands-on exhibits, talks, and project showcases across STEAM.",Annual,100
+13,AI for Beginners Bootcamp,STEM,Intro to AI concepts and Python-based tools for young learners.,Monthly,60
+14,Digital Design Workshop,Arts,"Graphic design, UX/UI basics, and creative tech projects.",Weekly,40
+15,Community STEM Hackathon,STEM,"Collaborative, problem-solving challenges in coding and engineering.",Monthly,120
+16,Women in Tech & Art Showcase,Annual Conference,Celebration of female innovation across STEAM industries.,Annual,500

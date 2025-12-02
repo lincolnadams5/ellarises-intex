@@ -1,110 +1,225 @@
--- DROP TABLES IF THEY ALREADY EXIST (optional, for re-runs)
+-- ============================================================
+-- RESET SCHEMA (OPTIONAL)
+-- ============================================================
+
 DROP TABLE IF EXISTS donations CASCADE;
+DROP TABLE IF EXISTS user_milestones CASCADE;
 DROP TABLE IF EXISTS milestones CASCADE;
 DROP TABLE IF EXISTS surveys CASCADE;
 DROP TABLE IF EXISTS registration CASCADE;
-DROP TABLE IF EXISTS event_occurances CASCADE;
+DROP TABLE IF EXISTS event_occurences CASCADE;
 DROP TABLE IF EXISTS event_templates CASCADE;
-DROP TABLE IF EXISTS participants CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
 
-------------------------------------------------------------
--- PARTICIPANTS
-------------------------------------------------------------
-CREATE TABLE participants (
-    ParticipantID INTEGER PRIMARY KEY,
-    ParticipantEmail TEXT NOT NULL,
-    ParticipantFirstName TEXT NOT NULL,
-    ParticipantLastName TEXT NOT NULL,
-    ParticipantDOB DATE,
-    ParticipantRole TEXT,
-    ParticipantPhone TEXT,
-    ParticipantCity TEXT,
-    ParticipantState TEXT,
-    ParticipantZip INTEGER,
-    ParticipantSchool TEXT,
-    ParticipantEmployer TEXT,
-    ParticipantFieldOfInterest TEXT,
-    UNIQUE (ParticipantEmail)
+-- ============================================================
+-- TABLE DEFINITIONS
+-- ============================================================
+
+-- 1. USERS
+CREATE TABLE users (
+    user_id               INTEGER PRIMARY KEY,
+    user_email            TEXT NOT NULL,
+    user_first_name       TEXT NOT NULL,
+    user_last_name        TEXT NOT NULL,
+    user_dob              DATE,
+    user_role             TEXT,
+    user_phone            TEXT,
+    user_city             TEXT,
+    user_state            TEXT,
+    user_zip              INTEGER,
+    user_school           TEXT,
+    user_employer         TEXT,
+    user_field_of_interest TEXT,
+    UNIQUE (user_email)
 );
 
-------------------------------------------------------------
--- EVENT TEMPLATES
-------------------------------------------------------------
+-- 2. EVENT TEMPLATES
 CREATE TABLE event_templates (
-    EventTemplateID INTEGER PRIMARY KEY,
-    EventName TEXT NOT NULL,
-    EventType TEXT,
-    EventDescription TEXT,
-    EventRecurrencePattern TEXT,
-    EventDefaultCapacity INTEGER,
-    UNIQUE (EventName)
+    event_template_id       INTEGER PRIMARY KEY,
+    event_name              TEXT NOT NULL,
+    event_type              TEXT,
+    event_description       TEXT,
+    event_recurrence_pattern TEXT,
+    event_default_capacity  INTEGER,
+    UNIQUE (event_name)
 );
 
-------------------------------------------------------------
--- EVENT OCCURANCES  (spelled as in the CSV)
-------------------------------------------------------------
-CREATE TABLE event_occurances (
-    EventOccurrenceID INTEGER PRIMARY KEY,
-    EventTemplateID INTEGER NOT NULL,
-    EventName TEXT NOT NULL,
-    EventDateTimeStart TIMESTAMP NOT NULL,
-    EventDateTimeEnd TIMESTAMP,
-    EventLocation TEXT,
-    EventCapacity INTEGER,
-    EventRegistrationDeadline TIMESTAMP,
-    FOREIGN KEY (EventTemplateID) REFERENCES event_templates(EventTemplateID)
+-- 3. EVENT OCCURENCES  (name matches your template)
+CREATE TABLE event_occurences (
+    event_occurrence_id         INTEGER PRIMARY KEY,
+    event_template_id           INTEGER NOT NULL,
+    event_name                  TEXT NOT NULL,
+    event_date_time_start       TIMESTAMP NOT NULL,
+    event_date_time_end         TIMESTAMP,
+    event_location              TEXT,
+    event_capacity              INTEGER,
+    event_registration_deadline TIMESTAMP,
+    FOREIGN KEY (event_template_id)
+        REFERENCES event_templates(event_template_id)
 );
 
-------------------------------------------------------------
--- REGISTRATION
-------------------------------------------------------------
+-- 4. REGISTRATION
 CREATE TABLE registration (
-    RegistrationID INTEGER PRIMARY KEY,
-    ParticipantID INTEGER NOT NULL,
-    EventOccurrenceID INTEGER NOT NULL,
-    RegistrationStatus TEXT,
-    RegistrationAttendedFlag BOOLEAN,
-    RegistrationCheckInTime TIMESTAMP,
-    RegistrationCreatedAt TIMESTAMP,
-    FOREIGN KEY (ParticipantID) REFERENCES participants(ParticipantID),
-    FOREIGN KEY (EventOccurrenceID) REFERENCES event_occurances(EventOccurrenceID)
+    registration_id            INTEGER PRIMARY KEY,
+    user_id                    INTEGER NOT NULL,
+    event_occurrence_id        INTEGER NOT NULL,
+    registration_status        TEXT,
+    registration_attended_flag BOOLEAN,
+    registration_check_in_time TIMESTAMP,
+    registration_created_at    TIMESTAMP,
+    FOREIGN KEY (user_id)
+        REFERENCES users(user_id),
+    FOREIGN KEY (event_occurrence_id)
+        REFERENCES event_occurences(event_occurrence_id)
 );
 
-------------------------------------------------------------
--- SURVEYS
-------------------------------------------------------------
+-- 5. SURVEYS
 CREATE TABLE surveys (
-    SurveyID INTEGER PRIMARY KEY,
-    RegistrationID INTEGER NOT NULL,
-    SurveySatisfactionScore NUMERIC,
-    SurveyUsefulnessScore NUMERIC,
-    SurveyInstructorScore NUMERIC,
-    SurveyRecommendationScore NUMERIC,
-    SurveyOverallScore NUMERIC,
-    SurveyNPSBucket TEXT,
-    SurveyComments TEXT,
-    SurveySubmissionDate TIMESTAMP,
-    FOREIGN KEY (RegistrationID) REFERENCES registration(RegistrationID)
+    survey_id              INTEGER PRIMARY KEY,
+    registration_id        INTEGER NOT NULL,
+    satisfaction_score     NUMERIC,
+    usefulness_score       NUMERIC,
+    instructor_score       NUMERIC,
+    recommendation_score   NUMERIC,
+    overall_score          NUMERIC,
+    nps_bucket             TEXT,
+    survey_comments        TEXT,
+    survey_submission_date TIMESTAMP,
+    FOREIGN KEY (registration_id)
+        REFERENCES registration(registration_id)
 );
 
-------------------------------------------------------------
--- MILESTONES
-------------------------------------------------------------
+-- 6. MILESTONES (lookup of milestone titles)
 CREATE TABLE milestones (
-    MilestoneID INTEGER PRIMARY KEY,
-    ParticipantID INTEGER NOT NULL,
-    MilestoneTitle TEXT NOT NULL,
-    MilestoneDate DATE,
-    FOREIGN KEY (ParticipantID) REFERENCES participants(ParticipantID)
+    milestone_id    INTEGER PRIMARY KEY,
+    milestone_title TEXT NOT NULL
 );
 
-------------------------------------------------------------
--- DONATIONS
-------------------------------------------------------------
-CREATE TABLE donations (
-    DonationID INTEGER PRIMARY KEY,
-    ParticipantID INTEGER NOT NULL,
-    DonationDate DATE,
-    DonationAmount NUMERIC,
-    FOREIGN KEY (ParticipantID) REFERENCES participants(ParticipantID)
+-- 7. USER_MILESTONES (junction between users and milestones)
+CREATE TABLE user_milestones (
+    milestone_id   INTEGER NOT NULL,
+    user_id        INTEGER NOT NULL,
+    milestone_date DATE,
+    PRIMARY KEY (milestone_id, user_id, milestone_date),
+    FOREIGN KEY (milestone_id)
+        REFERENCES milestones(milestone_id),
+    FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
 );
+
+-- 8. DONATIONS
+CREATE TABLE donations (
+    donation_id    INTEGER PRIMARY KEY,
+    user_id        INTEGER NOT NULL,
+    donation_date  DATE,
+    donation_amount NUMERIC,
+    FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+);
+
+-- ============================================================
+-- DATA LOAD (COPY FROM CSVs)
+-- ============================================================
+
+-- NOTE: Adjust the paths below to where your CSV files live on the server.
+
+-- 1. USERS
+COPY users (
+    user_id,
+    user_email,
+    user_first_name,
+    user_last_name,
+    user_dob,
+    user_role,
+    user_phone,
+    user_city,
+    user_state,
+    user_zip,
+    user_school,
+    user_employer,
+    user_field_of_interest
+)
+FROM '/absolute/path/Users.csv'
+WITH (FORMAT csv, HEADER true);
+
+-- 2. EVENT TEMPLATES
+COPY event_templates (
+    event_template_id,
+    event_name,
+    event_type,
+    event_description,
+    event_recurrence_pattern,
+    event_default_capacity
+)
+FROM '/absolute/path/event_templates.csv'
+WITH (FORMAT csv, HEADER true);
+
+-- 3. EVENT OCCURENCES
+COPY event_occurences (
+    event_occurrence_id,
+    event_template_id,
+    event_name,
+    event_date_time_start,
+    event_date_time_end,
+    event_location,
+    event_capacity,
+    event_registration_deadline
+)
+FROM '/absolute/path/event_occurences.csv'
+WITH (FORMAT csv, HEADER true);
+
+-- 4. REGISTRATION
+COPY registration (
+    registration_id,
+    user_id,
+    event_occurrence_id,
+    registration_status,
+    registration_attended_flag,
+    registration_check_in_time,
+    registration_created_at
+)
+FROM '/absolute/path/registration.csv'
+WITH (FORMAT csv, HEADER true);
+
+-- 5. SURVEYS
+COPY surveys (
+    survey_id,
+    registration_id,
+    satisfaction_score,
+    usefulness_score,
+    instructor_score,
+    recommendation_score,
+    overall_score,
+    nps_bucket,
+    survey_comments,
+    survey_submission_date
+)
+FROM '/absolute/path/surveys.csv'
+WITH (FORMAT csv, HEADER true);
+
+-- 6. MILESTONES
+COPY milestones (
+    milestone_id,
+    milestone_title
+)
+FROM '/absolute/path/milestones.csv'
+WITH (FORMAT csv, HEADER true);
+
+-- 7. USER_MILESTONES
+COPY user_milestones (
+    milestone_id,
+    user_id,
+    milestone_date
+)
+FROM '/absolute/path/user_milestones.csv'
+WITH (FORMAT csv, HEADER true);
+
+-- 8. DONATIONS
+COPY donations (
+    donation_id,
+    user_id,
+    donation_date,
+    donation_amount
+)
+FROM '/absolute/path/donations.csv'
+WITH (FORMAT csv, HEADER true);
