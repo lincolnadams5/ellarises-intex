@@ -51,7 +51,7 @@ app.use((req, res, next) => {
     }
 
     // Checks if user is admin for the following routes
-    let admin_routes = ['/event-manage', '/milestones-manage', '/surveys-manage', '/manage-donations'];
+    let admin_routes = ['/manage-events', '/manage-milestones', '/manage-surveys', '/manage-donations', '/manage-participants'];
     if (admin_routes.includes(req.path)) {
         if (!req.session.isLoggedIn || req.session.level !== 'admin') {
             return res.render("login", { error_message: "Authentication error" });
