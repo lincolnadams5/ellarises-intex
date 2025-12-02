@@ -16,26 +16,29 @@
             <div class="nav-logo">
                 <h1>Ella Rises</h1>
             </div>
+            <ul class="nav-menu">
+                <li><a href="/event-info">Events</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/donate">Donate</a></li>
+            </ul>
             <% if (isLoggedIn) { %>
-                <ul class="nav-menu">
-                    <li><a href="#">Home</a></li>
-                    <li><a href="/event-info">Events</a></li>
-                    <li><a href="/about">About</a></li>
-                    <li><a href="/donations">Donations</a></li>
-                    <li><a href="/milestones">Milestones</a></li>
-                    <li><a href="/surveys">Surveys</a></li>
-                </ul>
                 <div class="nav-auth">
-                    <form action="/logout" method="POST">
-                        <button class="btn-signin">Log Out</button>
-                    </form>
+                    <div class="user-dropdown">
+                        <button class="user-dropdown-btn">
+                            <%= first_name %> <%= last_name %> ▼
+                        </button>
+                        <div class="user-dropdown-content">
+                            <a href="/view-donations">My Donations</a>
+                            <a href="/view-milestones">Milestone Progress</a>
+                            <a href="/surveys">Surveys</a>
+                            <a href="/account-info">Account Info</a>
+                            <form action="/logout" method="POST" class="dropdown-logout-form">
+                                <button type="submit" class="dropdown-logout-btn">Logout</button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             <% } else { %>
-                <ul class="nav-menu">
-                    <li><a href="#">Home</a></li>
-                    <li><a href="/event-info">Events</a></li>
-                    <li><a href="/about">About</a></li>
-                </ul>
                 <div class="nav-auth">
                     <a href="/login" class="btn-signin">Sign In</a>
                     <a href="/register" class="btn-signup">Sign Up</a>
@@ -270,5 +273,27 @@
             <p>&copy; 2025 Ella Rises. All rights reserved.</p>
         </div>
     </footer>
+
+    <script>
+        // User dropdown functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const userDropdown = document.querySelector('.user-dropdown');
+            const dropdownBtn = document.querySelector('.user-dropdown-btn');
+            
+            if (dropdownBtn) {
+                dropdownBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('active');
+                });
+            }
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (userDropdown && !userDropdown.contains(e.target)) {
+                    userDropdown.classList.remove('active');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
