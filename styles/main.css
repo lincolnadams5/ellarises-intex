@@ -805,6 +805,13 @@ h1, h2, h3 {
     margin-top: 0.25rem;
 }
 
+/* Name Fields Container - Side by Side */
+.name-fields-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
 /* Radio Group for Account Type */
 .account-type-label {
     font-weight: 500;
@@ -940,6 +947,10 @@ h1, h2, h3 {
     .radio-group {
         flex-direction: column;
         gap: 1rem;
+    }
+
+    .name-fields-container {
+        grid-template-columns: 1fr;
     }
 }
 
