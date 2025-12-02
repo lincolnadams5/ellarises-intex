@@ -146,6 +146,8 @@ app.get('/manage-donations', (req, res) => {
 });
 
 // ========== POST ROUTES ==========
+
+// ~~~ Login ~~~
 app.post('/login', (req, res) => {
     let email = req.body.email
     let password = req.body.password
@@ -174,6 +176,7 @@ app.post('/login', (req, res) => {
         });
 });
 
+// ~~~ Logout ~~~
 app.post('/logout', (req, res) => {
     // Destroys the session object
     req.session.destroy((err) => {
@@ -184,6 +187,7 @@ app.post('/logout', (req, res) => {
     });
 });
 
+// ~~~ Register New User ~~~
 app.post('/register', (req, res) => {
     let first_name = req.body.first_name;
     let last_name = req.body.last_name;
