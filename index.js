@@ -145,6 +145,25 @@ app.get('/manage-donations', (req, res) => {
         });
 });
 
+app.get('/manage-participants', (req, res) => {
+    // Get all the information for each participant. 
+    knex('users')
+        .select('*')
+        .orderBy('user_last_name', 'desc')
+        .then(users => {
+            res.render('manage-participants', {
+                users: users,
+                error_message: ""
+            });
+        }).catch(err => {
+            console.log('Error fetching users: ', err);
+            res.render('manage-participants', {
+                users: [],
+                error_message: 'Error fetching users.'
+            });
+        });
+});
+
 // ========== POST ROUTES ==========
 
 // ~~~ Login ~~~

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Participants - Ella Rises</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h1>Ella Rises</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/event-info">Events</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/donate">Donate</a></li>
+            </ul>
+            <% if (isLoggedIn && level === 'admin') { %>
+                <div class="nav-auth">
+                    <div class="user-dropdown">
+                        <button class="user-dropdown-btn">
+                            <%= first_name %> <%= last_name %> ▼
+                        </button>
+                        <div class="user-dropdown-content">
+                            <a href="/manage-donations">Manage Donations</a>
+                            <a href="/manage-milestones">Manage Milestones</a>
+                            <a href="/manage-surveys">Survey Results</a>
+                            <a href="/manage-events">Manage Events</a>
+                            <a href="/manage-participants">Participants</a>
+                            <a href="/account-info">Account Info</a>
+                            <form action="/logout" method="POST" class="dropdown-logout-form">
+                                <button type="submit" class="dropdown-logout-btn">Logout</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <% } else if (isLoggedIn) { %>
+                <div class="nav-auth">
+                    <div class="user-dropdown">
+                        <button class="user-dropdown-btn">
+                            <%= first_name %> <%= last_name %> ▼
+                        </button>
+                        <div class="user-dropdown-content">
+                            <a href="/view-donations">My Donations</a>
+                            <a href="/view-milestones">Milestone Progress</a>
+                            <a href="/surveys">Surveys</a>
+                            <a href="/account-info">Account Info</a>
+                            <form action="/logout" method="POST" class="dropdown-logout-form">
+                                <button type="submit" class="dropdown-logout-btn">Logout</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="nav-auth">
+                    <a href="/login" class="btn-signin">Sign In</a>
+                    <a href="/register" class="btn-signup">Sign Up</a>
+                </div>
+            <% }; %>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="manage-donations-container">
+        <div class="manage-donations-wrapper">
+            <!-- Page Header -->
+            <div class="manage-donations-header">
+                <h1 class="manage-donations-title">Manage Participants</h1>
+                <p class="manage-donations-subtitle">View all registered participants</p>
+            </div>
+
+            <!-- Error Message Display -->
+            <% if (typeof error_message !== 'undefined' && error_message && error_message.length > 0) { %>
+                <div class="error-message">
+                    <%= error_message %>
+                </div>
+            <% } %>
+
+            <!-- Participants Table -->
+            <% if (users && users.length > 0) { %>
+                <div class="donations-table-container">
+                    <table class="donations-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% users.forEach(function(user) { %>
+                                <tr>
+                                    <td><%= user.user_id %></td>
+                                    <td><%= user.user_first_name %></td>
+                                    <td><%= user.user_last_name %></td>
+                                    <td><%= user.user_email %></td>
+                                    <td>
+                                        <% 
+                                            // Format role: capitalize first letter
+                                            const role = user.user_role || '';
+                                            const formattedRole = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
+                                        %>
+                                        <%= formattedRole %>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <div class="empty-state">
+                    <p class="empty-state-message">No participants found.</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Ella Rises</h3>
+                <p>Empowering young women through culturally rooted educational programs.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/event-info">Event Information</a></li>
+                    <li><a href="/about">About Us</a></li>
+                    <li><a href="/donate">Donate</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Programs</h4>
+                <ul>
+                    <li><a href="#">Mariachi</a></li>
+                    <li><a href="#">Ballet Folklorico</a></li>
+                    <li><a href="#">STEAM Workshops</a></li>
+                    <li><a href="#">Ella Rises Summit</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Get Involved</h4>
+                <ul>
+                    <li><a href="#">Volunteer</a></li>
+                    <li><a href="#">Donate</a></li>
+                    <li><a href="#">Sponsor</a></li>
+                    <li><a href="#">Newsletter</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Ella Rises. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // User dropdown functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const userDropdown = document.querySelector('.user-dropdown');
+            const dropdownBtn = document.querySelector('.user-dropdown-btn');
+            
+            if (dropdownBtn) {
+                dropdownBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('active');
+                });
+            }
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (userDropdown && !userDropdown.contains(e.target)) {
+                    userDropdown.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
