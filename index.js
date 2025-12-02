@@ -51,7 +51,7 @@ app.use((req, res, next) => {
     // Checks if user is admin for the following routes
     let admin_routes = ['/event-manage', '/milestones-manage', '/surveys-manage', '/donations-manage'];
     if (admin_routes.includes(req.path)) {
-        if (req.session.level !== 'admin') {
+        if (!req.session.isLoggedIn || req.session.level !== 'admin') {
             return res.render("login", { error_message: "Authentication error" });
         } else {
             return next();
@@ -128,9 +128,9 @@ app.post('/register', (req, res) => {
     }
 
     // Check if user already exists
-    knex.select('email')
+    knex.select('user_email')
         .from('users')
-        .where('email', email)
+        .where('user_email', email)
         .first()
         .then(existingUser => {
             if (existingUser) {
