@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Donations - Ella Rises</title>
+    <title>Manage Participants - Ella Rises</title>
     <link rel="stylesheet" href="/styles/main.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -71,8 +71,8 @@
         <div class="manage-donations-wrapper">
             <!-- Page Header -->
             <div class="manage-donations-header">
-                <h1 class="manage-donations-title">Manage Donations</h1>
-                <p class="manage-donations-subtitle">View all donation history</p>
+                <h1 class="manage-donations-title">Manage Participants</h1>
+                <p class="manage-donations-subtitle">View all registered participants</p>
             </div>
 
             <!-- Error Message Display -->
@@ -82,36 +82,33 @@
                 </div>
             <% } %>
 
-            <!-- Donations Table -->
-            <% if (userDonations && userDonations.length > 0) { %>
+            <!-- Participants Table -->
+            <% if (users && users.length > 0) { %>
                 <div class="donations-table-container">
                     <table class="donations-table">
                         <thead>
                             <tr>
-                                <th>Name</th>
+                                <th>ID</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
                                 <th>Email</th>
-                                <th>Date</th>
-                                <th>Amount</th>
+                                <th>Role</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <% userDonations.forEach(function(donation) { %>
+                            <% users.forEach(function(user) { %>
                                 <tr>
-                                    <td><%= donation.user_first_name %> <%= donation.user_last_name %></td>
-                                    <td><%= donation.user_email %></td>
+                                    <td><%= user.user_id %></td>
+                                    <td><%= user.user_first_name %></td>
+                                    <td><%= user.user_last_name %></td>
+                                    <td><%= user.user_email %></td>
                                     <td>
                                         <% 
-                                            const date = new Date(donation.donation_date);
-                                            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                                            const formattedDate = months[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+                                            // Format role: capitalize first letter
+                                            const role = user.user_role || '';
+                                            const formattedRole = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
                                         %>
-                                        <%= formattedDate %>
-                                    </td>
-                                    <td>
-                                        <% 
-                                            const amount = parseFloat(donation.donation_amount).toFixed(2);
-                                        %>
-                                        $<%= amount %>
+                                        <%= formattedRole %>
                                     </td>
                                 </tr>
                             <% }); %>
@@ -120,7 +117,7 @@
                 </div>
             <% } else { %>
                 <div class="empty-state">
-                    <p class="empty-state-message">No donations found.</p>
+                    <p class="empty-state-message">No participants found.</p>
                 </div>
             <% } %>
         </div>

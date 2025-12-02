@@ -21,7 +21,26 @@
                 <li><a href="/about">About</a></li>
                 <li><a href="/donate">Donate</a></li>
             </ul>
-            <% if (isLoggedIn) { %>
+            <% if (isLoggedIn && level === 'admin') { %>
+                <div class="nav-auth">
+                    <div class="user-dropdown">
+                        <button class="user-dropdown-btn">
+                            <%= first_name %> <%= last_name %> ▼
+                        </button>
+                        <div class="user-dropdown-content">
+                            <a href="/manage-donations">Manage Donations</a>
+                            <a href="/manage-milestones">Manage Milestones</a>
+                            <a href="/manage-surveys">Survey Results</a>
+                            <a href="/manage-events">Manage Events</a>
+                            <a href="/manage-participants">Participants</a>
+                            <a href="/account-info">Account Info</a>
+                            <form action="/logout" method="POST" class="dropdown-logout-form">
+                                <button type="submit" class="dropdown-logout-btn">Logout</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <% } else if (isLoggedIn) { %>
                 <div class="nav-auth">
                     <div class="user-dropdown">
                         <button class="user-dropdown-btn">

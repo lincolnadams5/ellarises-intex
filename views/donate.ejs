@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donate - Ella Rises</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h1>Ella Rises</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/">Home</a></li>
+                <li><a href="/event-info">Events</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/donate">Donate</a></li>
+            </ul>
+            <% if (isLoggedIn) { %>
+                <div class="nav-auth">
+                    <div class="user-dropdown">
+                        <button class="user-dropdown-btn">
+                            <%= first_name %> <%= last_name %> ▼
+                        </button>
+                        <div class="user-dropdown-content">
+                            <a href="/view-donations">My Donations</a>
+                            <a href="/view-milestones">Milestone Progress</a>
+                            <a href="/surveys">Surveys</a>
+                            <a href="/account-info">Account Info</a>
+                            <form action="/logout" method="POST" class="dropdown-logout-form">
+                                <button type="submit" class="dropdown-logout-btn">Logout</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="nav-auth">
+                    <a href="/login" class="btn-signin">Sign In</a>
+                    <a href="/register" class="btn-signup">Sign Up</a>
+                </div>
+            <% }; %>
+        </div>
+    </nav>
+
+    <!-- Donate Container -->
+    <div class="donate-container">
+        <div class="donate-wrapper">
+            <!-- Header -->
+            <div class="donate-header">
+                <h1 class="donate-title">Support Ella Rises</h1>
+                <p class="donate-subtitle">Your contribution helps empower young women through culturally rooted educational programs</p>
+            </div>
+
+            <!-- Error Message Display -->
+            <% if (typeof error_message !== 'undefined' && error_message && error_message.length > 0) { %>
+                <div class="error-message">
+                    <%= error_message %>
+                </div>
+            <% } %>
+
+            <!-- Donate Form -->
+            <form action="/donate" method="POST" class="donate-form">
+                <div class="donate-form-grid">
+                    <!-- Left Column: Form Inputs -->
+                    <div class="donate-form-left">
+                        <!-- Account Information Section (if not logged in) -->
+                        <% if (!isLoggedIn) { %>
+                            <div class="form-section">
+                                <h2 class="form-section-title">Account Information</h2>
+                                <p class="form-section-subtitle">Create an account to track your donation</p>
+                                
+                                <div class="name-fields-container">
+                                    <div class="form-group">
+                                        <label for="first_name">First Name</label>
+                                        <input
+                                            type="text"
+                                            id="first_name"
+                                            name="first_name"
+                                            placeholder="First Name"
+                                            required
+                                        >
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="last_name">Last Name</label>
+                                        <input
+                                            type="text"
+                                            id="last_name"
+                                            name="last_name"
+                                            placeholder="Last Name"
+                                            required
+                                        >
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="email">Email Address</label>
+                                    <input 
+                                        type="email" 
+                                        id="email" 
+                                        name="email" 
+                                        placeholder="your.email@example.com"
+                                        required
+                                    >
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="password">Password</label>
+                                    <input 
+                                        type="password" 
+                                        id="password" 
+                                        name="password" 
+                                        placeholder="Create a password"
+                                        required
+                                    >
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="confirm_password">Confirm Password</label>
+                                    <input 
+                                        type="password" 
+                                        id="confirm_password" 
+                                        name="confirm_password" 
+                                        placeholder="Re-enter your password"
+                                        required
+                                    >
+                                </div>
+
+                                <div class="sign-in-prompt">
+                                    <p>Already have an account? <a href="/login" class="auth-link">Sign in here</a></p>
+                                </div>
+                            </div>
+                        <% } %>
+
+                        <!-- Payment Information Section -->
+                        <div class="form-section">
+                            <h2 class="form-section-title">Payment Information</h2>
+                            
+                            <div class="form-group">
+                                <label for="card_name">Name on Card</label>
+                                <input
+                                    type="text"
+                                    id="card_name"
+                                    name="card_name"
+                                    placeholder="John Doe"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="card_number">Card Number</label>
+                                <input
+                                    type="text"
+                                    id="card_number"
+                                    name="card_number"
+                                    placeholder="1234 5678 9012 3456"
+                                    maxlength="19"
+                                    required
+                                >
+                            </div>
+
+                            <div class="card-details-container">
+                                <div class="form-group">
+                                    <label for="card_expiry">Expiry Date</label>
+                                    <input
+                                        type="text"
+                                        id="card_expiry"
+                                        name="card_expiry"
+                                        placeholder="MM/YY"
+                                        maxlength="5"
+                                        required
+                                    >
+                                </div>
+                                <div class="form-group">
+                                    <label for="card_cvv">CVV</label>
+                                    <input
+                                        type="text"
+                                        id="card_cvv"
+                                        name="card_cvv"
+                                        placeholder="123"
+                                        maxlength="4"
+                                        required
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="billing_address">Billing Address</label>
+                                <input
+                                    type="text"
+                                    id="billing_address"
+                                    name="billing_address"
+                                    placeholder="Street Address"
+                                    required
+                                >
+                            </div>
+
+                            <div class="billing-details-container">
+                                <div class="form-group">
+                                    <label for="billing_city">City</label>
+                                    <input
+                                        type="text"
+                                        id="billing_city"
+                                        name="billing_city"
+                                        placeholder="City"
+                                        required
+                                    >
+                                </div>
+                                <div class="form-group">
+                                    <label for="billing_state">State</label>
+                                    <input
+                                        type="text"
+                                        id="billing_state"
+                                        name="billing_state"
+                                        placeholder="State"
+                                        maxlength="2"
+                                        required
+                                    >
+                                </div>
+                                <div class="form-group">
+                                    <label for="billing_zip">ZIP Code</label>
+                                    <input
+                                        type="text"
+                                        id="billing_zip"
+                                        name="billing_zip"
+                                        placeholder="12345"
+                                        maxlength="5"
+                                        required
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Donation Amount & Submit -->
+                    <div class="donate-form-right">
+                        <div class="donation-summary">
+                            <h2 class="donation-summary-title">Donation Amount</h2>
+                            
+                            <!-- Preset Amounts -->
+                            <div class="donation-amounts">
+                                <button type="button" class="donation-amount-btn" data-amount="25">
+                                    $25
+                                </button>
+                                <button type="button" class="donation-amount-btn" data-amount="50">
+                                    $50
+                                </button>
+                                <button type="button" class="donation-amount-btn" data-amount="100">
+                                    $100
+                                </button>
+                                <button type="button" class="donation-amount-btn" data-amount="250">
+                                    $250
+                                </button>
+                                <button type="button" class="donation-amount-btn" data-amount="500">
+                                    $500
+                                </button>
+                            </div>
+
+                            <!-- Custom Amount -->
+                            <div class="form-group">
+                                <label for="custom_amount">Custom Amount</label>
+                                <div class="custom-amount-input">
+                                    <span class="currency-symbol">$</span>
+                                    <input
+                                        type="number"
+                                        id="custom_amount"
+                                        name="donation_amount"
+                                        placeholder="0.00"
+                                        min="1"
+                                        step="0.01"
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- Selected Amount Display -->
+                            <div class="selected-amount-display">
+                                <div class="amount-label">Your Donation</div>
+                                <div class="amount-value" id="selected-amount">$0.00</div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit" class="donate-submit-btn">
+                                Complete Donation
+                            </button>
+
+                            <!-- Security Note -->
+                            <p class="security-note">
+                                🔒 Your payment information is secure and encrypted
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Ella Rises</h3>
+                <p>Empowering young women through culturally rooted educational programs.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/event-info">Event Information</a></li>
+                    <li><a href="/about">About Us</a></li>
+                    <li><a href="/donate">Donate</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Programs</h4>
+                <ul>
+                    <li><a href="#">Mariachi</a></li>
+                    <li><a href="#">Ballet Folklorico</a></li>
+                    <li><a href="#">STEAM Workshops</a></li>
+                    <li><a href="#">Ella Rises Summit</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Get Involved</h4>
+                <ul>
+                    <li><a href="#">Volunteer</a></li>
+                    <li><a href="#">Donate</a></li>
+                    <li><a href="#">Sponsor</a></li>
+                    <li><a href="#">Newsletter</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Ella Rises. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // User dropdown functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const userDropdown = document.querySelector('.user-dropdown');
+            const dropdownBtn = document.querySelector('.user-dropdown-btn');
+            
+            if (dropdownBtn) {
+                dropdownBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('active');
+                });
+            }
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (userDropdown && !userDropdown.contains(e.target)) {
+                    userDropdown.classList.remove('active');
+                }
+            });
+        });
+        // Donation amount selection
+        document.addEventListener('DOMContentLoaded', function() {
+            const amountButtons = document.querySelectorAll('.donation-amount-btn');
+            const customAmountInput = document.getElementById('custom_amount');
+            const selectedAmountDisplay = document.getElementById('selected-amount');
+            const donationAmountInput = document.querySelector('input[name="donation_amount"]');
+
+            // Handle preset amount buttons
+            amountButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    amountButtons.forEach(b => b.classList.remove('active'));
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    // Clear custom amount input
+                    customAmountInput.value = '';
+                    // Set donation amount
+                    const amount = this.getAttribute('data-amount');
+                    donationAmountInput.value = amount;
+                    // Update display
+                    selectedAmountDisplay.textContent = '$' + parseFloat(amount).toFixed(2);
+                });
+            });
+
+            // Handle custom amount input
+            customAmountInput.addEventListener('input', function() {
+                // Remove active class from preset buttons
+                amountButtons.forEach(b => b.classList.remove('active'));
+                // Update donation amount
+                const amount = this.value || 0;
+                donationAmountInput.value = amount;
+                // Update display
+                selectedAmountDisplay.textContent = '$' + parseFloat(amount || 0).toFixed(2);
+            });
+
+            // Format card number input
+            const cardNumberInput = document.getElementById('card_number');
+            if (cardNumberInput) {
+                cardNumberInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\s/g, '');
+                    let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+                    if (formattedValue.length <= 19) {
+                        e.target.value = formattedValue;
+                    }
+                });
+            }
+
+            // Format expiry date input
+            const expiryInput = document.getElementById('card_expiry');
+            if (expiryInput) {
+                expiryInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length >= 2) {
+                        value = value.substring(0, 2) + '/' + value.substring(2, 4);
+                    }
+                    e.target.value = value;
+                });
+            }
+        });
+    </script>
+</body>
+</html>

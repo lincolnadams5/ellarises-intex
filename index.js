@@ -51,7 +51,7 @@ app.use((req, res, next) => {
     }
 
     // Checks if user is admin for the following routes
-    let admin_routes = ['/event-manage', '/milestones-manage', '/surveys-manage', '/manage-donations'];
+    let admin_routes = ['/manage-events', '/manage-milestones', '/manage-surveys', '/manage-donations', '/manage-participants'];
     if (admin_routes.includes(req.path)) {
         if (!req.session.isLoggedIn || req.session.level !== 'admin') {
             return res.render("login", { error_message: "Authentication error" });
@@ -145,7 +145,28 @@ app.get('/manage-donations', (req, res) => {
         });
 });
 
+app.get('/manage-participants', (req, res) => {
+    // Get all the information for each participant. 
+    knex('users')
+        .select('*')
+        .orderBy('user_last_name', 'desc')
+        .then(users => {
+            res.render('manage-participants', {
+                users: users,
+                error_message: ""
+            });
+        }).catch(err => {
+            console.log('Error fetching users: ', err);
+            res.render('manage-participants', {
+                users: [],
+                error_message: 'Error fetching users.'
+            });
+        });
+});
+
 // ========== POST ROUTES ==========
+
+// ~~~ Login ~~~
 app.post('/login', (req, res) => {
     let email = req.body.email
     let password = req.body.password
@@ -174,6 +195,7 @@ app.post('/login', (req, res) => {
         });
 });
 
+// ~~~ Logout ~~~
 app.post('/logout', (req, res) => {
     // Destroys the session object
     req.session.destroy((err) => {
@@ -184,6 +206,7 @@ app.post('/logout', (req, res) => {
     });
 });
 
+// ~~~ Register New User ~~~
 app.post('/register', (req, res) => {
     let first_name = req.body.first_name;
     let last_name = req.body.last_name;
