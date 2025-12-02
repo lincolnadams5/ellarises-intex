@@ -45,7 +45,7 @@ app.use((req, res, next) => {
 // ~~~~~ Global Authentication ~~~~~
 app.use((req, res, next) => {
     // Skip authentication for login routes
-    let public_routes = ['/', '/login', '/register', '/about', '/event-info', '/donate'];
+    let public_routes = ['/', '/login', '/register', '/about', '/events', '/donate'];
     if (public_routes.includes(req.path)) {
         return next();
     }
@@ -86,10 +86,10 @@ app.get('/about', (req, res) => {
     res.render('about', { error_message: "" });
 });
 
-app.get('/event-info', (req, res) => {
+app.get('/events', (req, res) => {
     // Get all events that are within the next 6 months -- Do we even have any data for this?
 
-    res.render('event-info', { error_message: "" });
+    res.render('events', { error_message: "" });
 });
 
 // ~~~ Donations ~~~
