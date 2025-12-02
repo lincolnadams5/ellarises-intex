@@ -59,44 +59,6 @@
                         >
                     </div>
 
-                    <!-- Account Type Selection -->
-                    <div class="form-group">
-                        <label class="account-type-label">Account Type</label>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input 
-                                    type="radio" 
-                                    name="account_type" 
-                                    value="participant" 
-                                    checked
-                                    onchange="toggleManagerKey()"
-                                >
-                                <span>Participant</span>
-                            </label>
-                            <label class="radio-option">
-                                <input 
-                                    type="radio" 
-                                    name="account_type" 
-                                    value="manager"
-                                    onchange="toggleManagerKey()"
-                                >
-                                <span>Manager</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Manager Authentication Key (Hidden by default) -->
-                    <div class="form-group manager-key-group" id="manager-key-group" style="display: none;">
-                        <label for="manager-key">Manager Authentication Key</label>
-                        <input 
-                            type="text" 
-                            id="manager-key" 
-                            name="manager_key" 
-                            placeholder="Enter manager authentication key"
-                        >
-                        <small class="form-hint">Required for manager account registration</small>
-                    </div>
-
                     <button type="submit" class="auth-submit-btn">Create Account</button>
                 </form>
 

@@ -12,27 +12,25 @@ app.set("view engine", "ejs");
 
 app.use(express.static(path.join(__dirname))); // Making sure that Express can serve static files (for imported fonts)
 
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 
 app.use(express.urlencoded({extended: true}));
 
-// Database Connection
-const knex = require("knex")({
-    client: "pg",
-    connection: {
-        host: process.env.DB_HOST || 'localhost',
-        user: process.env.DB_USER || 'postgres',
-        password: process.env.DB_PASSWORD || 'password',
-        database: process.env.DB_NAME || 'db_name',
-    }
-});
+// Initializing Knex and connecting to the database
+const knexConfig = require("./knexfile"); 
+const environment = process.env.NODE_ENV || "development";
+const knex = require("knex")(knexConfig[environment]);
 
-// ========== MIDDLEWARE ==========
-app.use(session({ // Important middleware that allows us to use session.isLoggedIn
+// Initialize session
+app.use(
+    session({ 
     secret: process.env.SESSION_SECRET || 'secret',
     resave: false,
     saveUninitialized: false
-  }));
+  })
+);
+
+// ========== MIDDLEWARE ==========
 
 // Makes session variables automatically available on each EJS view without having to pass them individually through each route
 app.use((req, res, next) => {
@@ -50,7 +48,15 @@ app.use((req, res, next) => {
         return next();
     }
 
-    // TODO: Routes that require manager authentication
+    // Checks if user is admin for the following routes
+    let admin_routes = ['/event-manage', '/milestones-manage', '/surveys-manage', '/donations-manage'];
+    if (admin_routes.includes(req.path)) {
+        if (!req.session.isLoggedIn || req.session.level !== 'admin') {
+            return res.render("login", { error_message: "Authentication error" });
+        } else {
+            return next();
+        }
+    }
 
     // Check if user is logged in for all other routes
     if (req.session.isLoggedIn) {
@@ -79,6 +85,8 @@ app.get('/about', (req, res) => {
 });
 
 app.get('/event-info', (req, res) => {
+    // Get all events that are within the next 6 months -- Do we even have any data for this?
+
     res.render('event-info', { error_message: "" });
 });
 
@@ -87,17 +95,17 @@ app.post('/login', (req, res) => {
     let email = req.body.email
     let password = req.body.password
 
-    knex.select('email', 'password', 'level') // Gets user row where email and password match row values
+    knex.select('user_email', 'user_role') // Gets user row where email and password match row values
         .from('users')
-        .where('email', email)
-        .andWhere('password', password)
+        .where('user_email', email)
+        // .andWhere('password', password) NOTE: Omitting this line for now because we don't have a column to store user passwords
         .first() // Gets only first return
         .then(user => {
             if (user) {
                 req.session.isLoggedIn = true; // Sets session login value to true
-                req.session.email = user.email; // Saves email to session storage
-                req.session.level = user.level // Saves user authentication level
-                console.log('User "', user.email, '" successfully logged in.'); // Logs user login in console
+                req.session.email = user.user_email; // Saves email to session storage
+                req.session.level = user.user_role // Saves user authentication level
+                console.log('User "', user.user_email, '" successfully logged in.'); // Logs user login in console
                 res.redirect('/'); // Sends successful login to the home page                
             } else {
                 res.render('login', { error_message: 'Incorrect email or password'}); // Otherwise returns to login page with error message
@@ -112,29 +120,17 @@ app.post('/register', (req, res) => {
     let email = req.body.email;
     let password = req.body.password;
     let confirmPassword = req.body.confirm_password;
-    let accountType = req.body.account_type;
-    let managerKey = req.body.manager_key;
+    let level = 'participant';
 
     // Validate password confirmation
     if (password !== confirmPassword) {
         return res.render('register', { error_message: 'Passwords do not match' });
     }
 
-    // Validate manager key if account type is manager
-    if (accountType === 'manager') {
-        const validManagerKey = process.env.MANAGER_KEY || 'secret-key-123';
-        if (managerKey !== validManagerKey) {
-            return res.render('register', { error_message: 'Invalid manager authentication key' });
-        }
-    }
-
-    // Set user level based on account type
-    let level = accountType === 'manager' ? 'manager' : 'participant';
-
     // Check if user already exists
-    knex.select('email')
+    knex.select('user_email')
         .from('users')
-        .where('email', email)
+        .where('user_email', email)
         .first()
         .then(existingUser => {
             if (existingUser) {
@@ -143,9 +139,9 @@ app.post('/register', (req, res) => {
                 // Insert new user
                 knex('users')
                     .insert({
-                        email: email,
-                        password: password, // TODO: In production, hash this password!
-                        level: level
+                        user_email: email,
+                        // password: password, // NOTE: currently omitting passwords from the requirements because we don't have a column for it in the database
+                        user_role: level
                     })
                     .then(() => {
                         console.log('New user registered:', email, 'Level:', level);
