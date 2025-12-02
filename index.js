@@ -45,7 +45,7 @@ app.use((req, res, next) => {
 // ~~~~~ Global Authentication ~~~~~
 app.use((req, res, next) => {
     // Skip authentication for login routes
-    let public_routes = ['/', '/login', '/register', '/about', '/event-info'];
+    let public_routes = ['/', '/login', '/register', '/about', '/event-info', '/donate'];
     if (public_routes.includes(req.path)) {
         return next();
     }
@@ -185,6 +185,8 @@ app.post('/logout', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
+    let first_name = req.body.first_name;
+    let last_name = req.body.last_name;
     let email = req.body.email;
     let password = req.body.password;
     let confirmPassword = req.body.confirm_password;
@@ -209,12 +211,16 @@ app.post('/register', (req, res) => {
                     .insert({
                         user_email: email,
                         // password: password, // NOTE: currently omitting passwords from the requirements because we don't have a column for it in the database
-                        user_role: level
+                        user_role: level,
+                        user_first_name: first_name,
+                        user_last_name: last_name
                     })
                     .then(() => {
                         console.log('New user registered:', email, 'Level:', level);
                         // Auto-login after registration
                         req.session.isLoggedIn = true;
+                        req.session.first_name = first_name;
+                        req.session.last_name = last_name;
                         req.session.email = email;
                         req.session.level = level;
                         res.redirect('/');
