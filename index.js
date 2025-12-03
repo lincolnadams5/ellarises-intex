@@ -68,6 +68,13 @@ app.use((req, res, next) => {
     }
 });
 
+// ========== HELPER FUNCTIONS ==========
+function getCount (tableName) {
+    return knex(tableName)
+        .count('* as count')
+        .first()
+}
+
 
 // ========== VIEWS ==========
 app.get('/', (req, res) => {
@@ -92,31 +99,45 @@ app.get('/events', (req, res) => {
 });
 
 app.get('/manage-events', (req, res) => {
-    knex('event_templates')
-        .innerJoin('event_occurrences', 'event_templates.event_template_id', '=', 'event_occurrences.event_template_id')
-        .select({
-            event_occurrence_id: 'event_occurrences.event_occurrence_id',
-            event_template_id: 'event_occurrences.event_template_id',
-            event_name: 'event_occurrences.event_name',
-            event_date_time_start: 'event_occurrences.event_date_time_start',
-            event_date_time_end: 'event_occurrences.event_date_time_end',
-            event_location: 'event_occurrences.event_location',
-            event_capacity: 'event_occurrences.event_capacity',
-            event_registration_deadline: 'event_occurrences.event_registration_deadline',
-            event_type: 'event_templates.event_type',
-            event_description: 'event_templates.event_description',
-            event_recurrence_pattern: 'event_templates.event_recurrence_pattern'
-        })
-        .orderBy('event_occurrences.event_date_time_start', 'desc')
-        .then(event => {
+    // Pagination logic
+    const page = parseInt(req.query.page, 10) || 1;
+    const perPage = 20;
+    const offset = (page - 1) * perPage;
+
+    // Query for the current page of events
+    const eventsQuery = knex('event_templates')
+        .select(
+            'event_name',
+            'event_type',
+            'event_description',
+            'event_recurrence_pattern',
+            'event_default_capacity'
+        )
+        .orderBy('event_name')
+        .limit(perPage)
+        .offset(offset)
+
+    const countQuery = getCount('event_templates')
+
+    Promise.all([eventsQuery, countQuery])
+        .then(([events, countResult]) => {
+            const totalCount = parseInt(countResult.count, 10);
+            const totalPages = Math.ceil(totalCount / perPage);
+
             res.render('manage-events', {
-                event: event,
+                event: events,
+                currentPage: page,
+                totalPages,
+                totalCount,
                 error_message: ""
             });
         }).catch(err => {
             console.log('Error fetching event information: ', err);
             res.render('manage-events', {
                 event: [],
+                currentPage: page,
+                totalPages: 0,
+                totalCount: 0,
                 error_message: 'Error fetching event information'
             });
         });
@@ -149,23 +170,32 @@ app.get('/milestone-progress', (req, res) => {
 });
 
 app.get('/manage-milestones', (req, res) => {
-    knex('users')
-        .innerJoin('user_milestones', 'users.user_id', '=', 'user_milestones.user_id')
-        .innerJoin('milestones', 'user_milestones.milestone_id', '=', 'milestones.milestone_id')
-        .select({
-            user_id: 'users.user_id',
-            user_first_name: 'user_first_name',
-            user_last_name: 'user_last_name',
-            milestone_id: 'user_milestones.milestone_id',
-            milestone_date: 'milestone_date',
-            milestone_title: 'milestone_title'
-        })
-        .orderBy('milestone_date', 'desc')
-        .then(milestone => {
+    // Pagination Logic
+    const page = parseInt(req.query.page, 10) || 1;
+    const perPage = 20;
+    const offset = (page - 1) * perPage;
+
+    // Query for the current page of milestones
+    const milestonesQuery = knex('milestones')
+        .select('milestone_title')
+        .orderBy('milestone_title')
+        .limit(perPage)
+        .offset(offset)
+
+    const countQuery = getCount('milestones')
+
+    Promise.all([milestonesQuery, countQuery])
+        .then(([milestones, countResult]) => {
+            const totalCount = parseInt(countResult.count, 10);
+            const totalPages = Math.ceil(totalCount / perPage);
+            
             res.render('manage-milestones', {
-                milestone: milestone,
+                milestone: milestones,
+                currentPage: page,
+                totalPages,
+                totalCount,
                 error_message: ""
-            });
+            })
         }).catch(err => {
             console.log('Error fetching milestone information: ', err);
             res.render('manage-milestones', {
@@ -203,8 +233,16 @@ app.get('/my-donations', (req, res) => {
 });
 
 app.get('/manage-donations', (req, res) => {
-    // Get all the donation information with the user email, and name
-    knex('donations')
+    // Entered the route?
+    // console.log('Managing donations');
+
+    // Pagination logic
+    const page = parseInt(req.query.page, 10) || 1;
+    const perPage = 20;
+    const offset = (page - 1) * perPage;
+
+    // Query for the current page of donations
+    const donationsQuery = knex('donations')
         .innerJoin('users', 'donations.user_id', '=', 'users.user_id') // Join user and donations tables
         .select( // Select necessary information
             'donation_amount',
@@ -213,17 +251,34 @@ app.get('/manage-donations', (req, res) => {
             'user_first_name',
             'user_last_name'
         )
-        .orderBy('donation_date', 'desc') // Order by date initially
-        .then(donation => {
+        .orderByRaw('donation_date DESC NULLS LAST') // Order by date newest to oldest
+        .limit(perPage)
+        .offset(offset); // Offset is the number of rows to skip
+
+    // Query for the total count of donations (for pagination)
+    const countQuery = getCount('donations')
+
+    Promise.all([donationsQuery, countQuery]) // Ensures that both queries are executed before running
+        .then(([donations, countResult]) => {
+            const totalCount = parseInt(countResult.count, 10);
+            const totalPages = Math.ceil(totalCount / perPage);
+
             res.render('manage-donations', {
-                donation: donation,
-                error_message: ""
+                donation: donations,
+                currentPage: page,
+                totalPages,
+                totalCount,
+                error_message: ''
             });
-        }).catch(err => {
+        })
+        .catch(err => {
             console.log('Error fetching donations/users: ', err);
             res.render('manage-donations', {
                 donation: [],
-                error_message: "Error fetching donation/user information."
+                currentPage: page,
+                totalPages: 0,
+                totalCount: 0,
+                error_message: 'Error fetching donation/user information.'
             });
         });
 });
@@ -257,28 +312,51 @@ app.get('/surveys', (req, res) => {
 });
 
 app.get('/manage-surveys', (req, res) => {
-    knex('surveys')
+    // Pagination logic
+    const page = parseInt(req.query.page, 10) || 1;
+    const perPage = 20;
+    const offset = (page - 1) * perPage;
+
+    // Query for the current page of surveys
+    const surveyQuery = knex('surveys')
         .innerJoin('registration', 'surveys.registration_id', '=', 'registration.registration_id') // Inner join "registration" on registration_id
         .innerJoin('users', 'registration.user_id', '=', 'users.user_id') // INNER JOIN "users" ON user_id
         .innerJoin('event_occurrences', 'registration.event_occurrence_id', '=', 'event_occurrences.event_occurrence_id') // INNER JOIN "event_occurrences" on "event_occurrence_id"
-        .select({
-            survey_id: 'survey_id',
-            overall_score: 'overall_score',
-            survey_submission_date: 'survey_submission_date',
-            registration_id: 'registration.registration_id',
-            event_occurrence_id: 'event_occurrences.event_occurrence_id',
-            event_name: 'event_name',
-            event_location: 'event_location',
-            user_id: 'users.user_id',
-            user_first_name: 'user_first_name',
-            user_last_name: 'user_last_name'
-        })
+        .select(
+            'survey_id',
+            'overall_score',
+            'survey_submission_date',
+            'registration.registration_id',
+            'event_occurrences.event_occurrence_id',
+            'event_name',
+            'event_location',
+            'users.user_id',
+            'user_first_name',
+            'user_last_name'
+        )
         .orderBy('survey_submission_date', 'desc')
-        .then(survey => {
+        .limit(perPage)
+        .offset(offset)
+
+    const countQuery = knex('surveys')
+        .innerJoin('registration', 'surveys.registration_id', '=', 'registration.registration_id') // Inner join "registration" on registration_id
+        .innerJoin('users', 'registration.user_id', '=', 'users.user_id') // INNER JOIN "users" ON user_id
+        .innerJoin('event_occurrences', 'registration.event_occurrence_id', '=', 'event_occurrences.event_occurrence_id') // INNER JOIN "event_occurrences" on "event_occurrence_id"
+        .count('* as count')
+        .first()
+    
+    Promise.all([surveyQuery, countQuery])
+        .then(([surveys, countResult]) => {
+            const totalCount = parseInt(countResult.count, 10);
+            const totalPages = Math.ceil(totalCount / perPage)
+
             res.render('manage-surveys', {
-                survey: survey,
+                survey: surveys,
+                currentPage: page,
+                totalPages,
+                totalCount,
                 error_message: ""
-            });
+            })
         }).catch(err => {
             console.log('Error fetching surveys: ', err);
             res.render('manage-surveys', {
@@ -290,15 +368,38 @@ app.get('/manage-surveys', (req, res) => {
 
 // ~~~ Participants (Admin only) ~~~
 app.get('/manage-participants', (req, res) => {
-    // Get all the information for each participant. 
-    knex('users')
-        .select('user_id', 'user_first_name', 'user_last_name', 'user_email', 'user_role')
+    // Pagination Logic
+    const page = parseInt(req.query.page, 10) || 1;
+    const perPage = 20;
+    const offset = (page - 1) * perPage;
+
+    // Gets users for a page for the pagination
+    const usersQuery = knex('users')
+        .select(
+            'user_first_name',
+            'user_last_name',
+            'user_email',
+            'user_role'
+        )
         .orderBy('user_last_name')
-        .then(user => {
+        .orderBy('user_first_name')
+        .limit(perPage)
+        .offset(offset)
+
+    const countQuery = getCount('users')
+
+    Promise.all([usersQuery, countQuery])
+        .then(([users, countResult]) => {
+            const totalCount = parseInt(countResult.count, 10);
+            const totalPages = Math.ceil(totalCount / perPage);
+
             res.render('manage-participants', {
-                user: user,
+                user: users,
+                currentPage: page,
+                totalPages,
+                totalCount,
                 error_message: ""
-            });
+            })
         }).catch(err => {
             console.log('Error fetching users: ', err);
             res.render('manage-participants', {

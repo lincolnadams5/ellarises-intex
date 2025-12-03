@@ -117,6 +117,69 @@
                     <p class="empty-state-message">No survey responses found.</p>
                 </div>
             <% } %>
+            <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+                <div class="manage-donations-pagination">
+                    <% if (currentPage > 1) { %>
+                        <a href="/manage-surveys?page=<%= currentPage - 1 %>" class="pagination-btn">Previous</a>
+                    <% } else { %>
+                        <span class="pagination-btn disabled">Previous</span>
+                    <% } %>
+        
+                    <div class="pagination-pages">
+                        <%
+                            const maxVisible = 5; // number of page buttons in the middle window
+                            let startPage = Math.max(1, currentPage - 2);
+                            let endPage = Math.min(totalPages, currentPage + 2);
+        
+                            if (endPage - startPage + 1 < maxVisible) {
+                                if (startPage === 1) {
+                                    endPage = Math.min(totalPages, startPage + maxVisible - 1);
+                                } else if (endPage === totalPages) {
+                                    startPage = Math.max(1, endPage - maxVisible + 1);
+                                }
+                            }
+                        %>
+        
+                        <% if (startPage > 1) { %>
+                            <!-- First page -->
+                            <a href="/manage-surveys?page=1"
+                               class="pagination-page <%= currentPage === 1 ? 'active' : '' %>">
+                                1
+                            </a>
+        
+                            <% if (startPage > 2) { %>
+                                <span class="pagination-ellipsis">…</span>
+                            <% } %>
+                        <% } %>
+        
+                        <!-- Window of pages around current -->
+                        <% for (let i = startPage; i <= endPage; i++) { %>
+                            <a href="/manage-surveys?page=<%= i %>"
+                               class="pagination-page <%= i === currentPage ? 'active' : '' %>">
+                                <%= i %>
+                            </a>
+                        <% } %>
+        
+                        <% if (endPage < totalPages) { %>
+                            <% if (endPage < totalPages - 1) { %>
+                                <span class="pagination-ellipsis">…</span>
+                            <% } %>
+        
+                            <!-- Last page -->
+                            <a href="/manage-surveys?page=<%= totalPages %>"
+                               class="pagination-page <%= currentPage === totalPages ? 'active' : '' %>">
+                                <%= totalPages %>
+                            </a>
+                        <% } %>
+                    </div>
+        
+                    <% if (currentPage < totalPages) { %>
+                        <a href="/manage-surveys?page=<%= currentPage + 1 %>" class="pagination-btn">Next</a>
+                    <% } else { %>
+                        <span class="pagination-btn disabled">Next</span>
+                    <% } %>
+                </div>
+            <% } %>
         </div>
     </div>
 
