@@ -88,21 +88,19 @@
                     <table class="donations-table">
                         <thead>
                             <tr>
-                                <th>ID</th>
                                 <th>Event Name</th>
-                                <th>Date</th>
-                                <th>Location</th>
-                                <th>Capacity</th>
+                                <th>Event Type</th>
+                                <th>Frequency</th>
+                                <th>Default Capacity</th>
                             </tr>
                         </thead>
                         <tbody>
                             <% event.forEach(function(event) { %>
                                 <tr>
-                                    <td><%= event.event_occurrence_id %></td>
                                     <td><%= event.event_name %></td>
-                                    <td><%= event.event_date_time_start %></td>
-                                    <td><%= event.event_location %></td>
-                                    <td><%= event.event_capacity %></td>
+                                    <td><%= event.event_type %></td>
+                                    <td><%= event.event_recurrence_pattern %></td>
+                                    <td><%= event.event_default_capacity %></td>
                                 </tr>
                             <% }); %>
                         </tbody>
@@ -113,8 +111,72 @@
                     <p class="empty-state-message">No events found.</p>
                 </div>
             <% } %>
+            <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+                <div class="manage-donations-pagination">
+                    <% if (currentPage > 1) { %>
+                        <a href="/manage-events?page=<%= currentPage - 1 %>" class="pagination-btn">Previous</a>
+                    <% } else { %>
+                        <span class="pagination-btn disabled">Previous</span>
+                    <% } %>
+        
+                    <div class="pagination-pages">
+                        <%
+                            const maxVisible = 5; // number of page buttons in the middle window
+                            let startPage = Math.max(1, currentPage - 2);
+                            let endPage = Math.min(totalPages, currentPage + 2);
+        
+                            if (endPage - startPage + 1 < maxVisible) {
+                                if (startPage === 1) {
+                                    endPage = Math.min(totalPages, startPage + maxVisible - 1);
+                                } else if (endPage === totalPages) {
+                                    startPage = Math.max(1, endPage - maxVisible + 1);
+                                }
+                            }
+                        %>
+        
+                        <% if (startPage > 1) { %>
+                            <!-- First page -->
+                            <a href="/manage-events?page=1"
+                               class="pagination-page <%= currentPage === 1 ? 'active' : '' %>">
+                                1
+                            </a>
+        
+                            <% if (startPage > 2) { %>
+                                <span class="pagination-ellipsis">…</span>
+                            <% } %>
+                        <% } %>
+        
+                        <!-- Window of pages around current -->
+                        <% for (let i = startPage; i <= endPage; i++) { %>
+                            <a href="/manage-events?page=<%= i %>"
+                               class="pagination-page <%= i === currentPage ? 'active' : '' %>">
+                                <%= i %>
+                            </a>
+                        <% } %>
+        
+                        <% if (endPage < totalPages) { %>
+                            <% if (endPage < totalPages - 1) { %>
+                                <span class="pagination-ellipsis">…</span>
+                            <% } %>
+        
+                            <!-- Last page -->
+                            <a href="/manage-events?page=<%= totalPages %>"
+                               class="pagination-page <%= currentPage === totalPages ? 'active' : '' %>">
+                                <%= totalPages %>
+                            </a>
+                        <% } %>
+                    </div>
+        
+                    <% if (currentPage < totalPages) { %>
+                        <a href="/manage-events?page=<%= currentPage + 1 %>" class="pagination-btn">Next</a>
+                    <% } else { %>
+                        <span class="pagination-btn disabled">Next</span>
+                    <% } %>
+                </div>
+            <% } %>
         </div>
     </div>
+
 
     <!-- Footer -->
     <footer class="footer">

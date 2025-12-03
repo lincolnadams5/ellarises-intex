@@ -45,7 +45,7 @@ CREATE TABLE event_templates (
 );
 
 -- 3. EVENT OCCURENCES  (name matches your template)
-CREATE TABLE event_occurences (
+CREATE TABLE event_occurrences (
     event_occurrence_id         INTEGER PRIMARY KEY,
     event_template_id           INTEGER NOT NULL,
     event_name                  TEXT NOT NULL,
