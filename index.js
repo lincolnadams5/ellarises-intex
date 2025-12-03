@@ -86,10 +86,40 @@ app.get('/about', (req, res) => {
     res.render('about', { error_message: "" });
 });
 
+// ~~~ Events ~~~
 app.get('/events', (req, res) => {
-    // Get all events that are within the next 6 months -- Do we even have any data for this?
-
     res.render('events', { error_message: "" });
+});
+
+app.get('/manage-events', (req, res) => {
+    knex('event_templates')
+        .innerJoin('event_occurrences', 'event_templates.event_template_id', '=', 'event_occurrences.event_template_id')
+        .select({
+            event_occurrence_id: 'event_occurrences.event_occurrence_id',
+            event_template_id: 'event_occurrences.event_template_id',
+            event_name: 'event_occurrences.event_name',
+            event_date_time_start: 'event_occurrences.event_date_time_start',
+            event_date_time_end: 'event_occurrences.event_date_time_end',
+            event_location: 'event_occurrences.event_location',
+            event_capacity: 'event_occurrences.event_capacity',
+            event_registration_deadline: 'event_occurrences.event_registration_deadline',
+            event_type: 'event_templates.event_type',
+            event_description: 'event_templates.event_description',
+            event_recurrence_pattern: 'event_templates.event_recurrence_pattern'
+        })
+        .orderBy('event_occurrences.event_date_time_start', 'desc')
+        .then(events => {
+            res.render('manage-events', {
+                events: events,
+                error_message: ""
+            });
+        }).catch(err => {
+            console.log('Error fetching event information: ', err);
+            res.render('manage-events', {
+                events: events,
+                error_message: 'Error fetching event information'
+            });
+        });
 });
 
 // ~~~ Donations ~~~
@@ -145,11 +175,12 @@ app.get('/manage-donations', (req, res) => {
         });
 });
 
+// ~~~ Participants (Admin only) ~~~
 app.get('/manage-participants', (req, res) => {
     // Get all the information for each participant. 
     knex('users')
         .select('*')
-        .orderBy('user_last_name', 'desc')
+        .orderBy('user_last_name')
         .then(users => {
             res.render('manage-participants', {
                 users: users,
