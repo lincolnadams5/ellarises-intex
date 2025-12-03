@@ -2133,3 +2133,159 @@ h1, h2, h3 {
     }
 }
 
+/* ========== ACCOUNT INFO PAGE ========== */
+
+/* Account Info Container */
+.account-info-container {
+    background-color: var(--color-soft-white);
+    min-height: calc(100vh - 200px);
+    padding: 3rem 2rem;
+}
+
+.account-info-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Page Header */
+.account-info-header {
+    margin-bottom: 2rem;
+}
+
+.account-info-title {
+    font-size: 2.5rem;
+    color: var(--color-text);
+    margin-bottom: 0.5rem;
+    font-family: var(--font-display);
+}
+
+.account-info-subtitle {
+    font-size: 1.1rem;
+    color: var(--color-text-light);
+}
+
+/* Success Message */
+.success-message {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+/* Account Info Form */
+.account-info-form {
+    background-color: var(--color-white);
+    padding: 3rem;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Form Sections */
+.form-section {
+    margin-bottom: 3rem;
+    padding-bottom: 3rem;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 2rem;
+    padding-bottom: 0;
+}
+
+.form-section-title {
+    font-size: 1.8rem;
+    color: var(--color-text);
+    margin-bottom: 0.5rem;
+    font-family: var(--font-display);
+}
+
+.form-section-subtitle {
+    font-size: 0.95rem;
+    color: var(--color-text-light);
+    margin-bottom: 1.5rem;
+}
+
+/* Read-only Field Styling */
+.readonly-field {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+    color: var(--color-text-light);
+}
+
+/* Account Submit Button */
+.account-submit-btn {
+    width: 100%;
+    padding: 1.2rem 2rem;
+    background-color: var(--color-secondary);
+    color: var(--color-white);
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    font-family: var(--font-primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+}
+
+.account-submit-btn:hover {
+    background-color: #7a9fb0;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(153, 183, 198, 0.4);
+}
+
+.account-submit-btn:active {
+    transform: translateY(0);
+    background-color: #6a8fa0;
+}
+
+/* Account Info Page Responsive Design */
+@media (max-width: 768px) {
+    .account-info-container {
+        padding: 2rem 1rem;
+    }
+
+    .account-info-title {
+        font-size: 2rem;
+    }
+
+    .account-info-subtitle {
+        font-size: 1rem;
+    }
+
+    .account-info-form {
+        padding: 2rem 1.5rem;
+    }
+
+    .form-section-title {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .account-info-container {
+        padding: 1.5rem 1rem;
+    }
+
+    .account-info-title {
+        font-size: 1.75rem;
+    }
+
+    .account-info-form {
+        padding: 1.5rem 1rem;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+    }
+
+    .form-section-title {
+        font-size: 1.3rem;
+    }
+}
+

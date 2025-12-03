@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Milestones - Ella Rises</title>
+    <title>My Donations - Ella Rises</title>
     <link rel="stylesheet" href="/styles/main.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -66,13 +66,13 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
+    <!-- My Donations Container -->
     <div class="manage-donations-container">
         <div class="manage-donations-wrapper">
             <!-- Page Header -->
             <div class="manage-donations-header">
-                <h1 class="manage-donations-title">Manage Milestones</h1>
-                <p class="manage-donations-subtitle">View all milestones</p>
+                <h1 class="manage-donations-title">My Donations</h1>
+                <p class="manage-donations-subtitle">View your donation history</p>
             </div>
 
             <!-- Error Message Display -->
@@ -82,29 +82,33 @@
                 </div>
             <% } %>
 
-            <!-- Milestones Table -->
-            <% if (milestone && milestone.length > 0) { %>
+            <!-- Donations Table -->
+            <% if (donation && donation.length > 0) { %>
                 <div class="donations-table-container">
                     <table class="donations-table">
                         <thead>
                             <tr>
-                                <th>User ID</th>
-                                <th>First Name</th>
-                                <th>Last Name</th>
-                                <th>Milestone ID</th>
-                                <th>Milestone Title</th>
-                                <th>Milestone Date</th>
+                                <th>Date</th>
+                                <th>Amount</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <% milestone.forEach(function(milestone) { %>
+                            <% donation.forEach(function(donation) { %>
                                 <tr>
-                                    <td><%= milestone.milestone_id %></td>
-                                    <td><%= milestone.user_first_name %></td>
-                                    <td><%= milestone.user_last_name %></td>
-                                    <td><%= milestone.milestone_id %></td>
-                                    <td><%= milestone.milestone_title %></td>
-                                    <td><%= milestone.milestone_date %></td>
+                                    <td>
+                                        <% 
+                                            const date = new Date(donation.donation_date);
+                                            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                                            const formattedDate = months[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+                                        %>
+                                        <%= formattedDate %>
+                                    </td>
+                                    <td>
+                                        <% 
+                                            const amount = parseFloat(donation.donation_amount).toFixed(2);
+                                        %>
+                                        $<%= amount %>
+                                    </td>
                                 </tr>
                             <% }); %>
                         </tbody>
@@ -112,7 +116,7 @@
                 </div>
             <% } else { %>
                 <div class="empty-state">
-                    <p class="empty-state-message">No milestones found.</p>
+                    <p class="empty-state-message">No donations found.</p>
                 </div>
             <% } %>
         </div>
@@ -131,7 +135,7 @@
                     <li><a href="/">Home</a></li>
                     <li><a href="/events">Event Information</a></li>
                     <li><a href="/about">About Us</a></li>
-                    <li><a href="/donate">Donate</a></li>
+                    <li><a href="#">Contact</a></li>
                 </ul>
             </div>
             <div class="footer-section">
@@ -147,7 +151,7 @@
                 <h4>Get Involved</h4>
                 <ul>
                     <li><a href="#">Volunteer</a></li>
-                    <li><a href="#">Donate</a></li>
+                    <li><a href="/donate">Donate</a></li>
                     <li><a href="#">Sponsor</a></li>
                     <li><a href="#">Newsletter</a></li>
                 </ul>
