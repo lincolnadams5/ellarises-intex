@@ -123,8 +123,29 @@ app.get('/manage-events', (req, res) => {
 });
 
 // ~~~ MILESTONES ~~~
-app.get('/view-milestones', (req, res) => {
-    // TODO
+app.get('/milestone-progress', (req, res) => {
+    // Get milestones for current user only
+    knex('user_milestones')
+        .innerJoin('milestones', 'user_milestones.milestone_id', '=', 'milestones.milestone_id')
+        .select(
+            'milestones.milestone_id',
+            'milestones.milestone_title',
+            'user_milestones.milestone_date'
+        )
+        .where('user_milestones.user_id', req.session.user_id)
+        .orderBy('user_milestones.milestone_date', 'desc')
+        .then(milestone => {
+            res.render('milestone-progress', {
+                milestone: milestone,
+                error_message: ""
+            });
+        }).catch(err => {
+            console.log('Error fetching milestone information: ', err);
+            res.render('milestone-progress', {
+                milestone: [],
+                error_message: 'Error fetching milestone information'
+            });
+        });
 });
 
 app.get('/manage-milestones', (req, res) => {
@@ -159,22 +180,22 @@ app.get('/donate', (req, res) => {
     res.render('donate', { error_message: "" });
 });
 
-app.get('/view-donations', (req, res) => {
+app.get('/my-donations', (req, res) => {
     knex('donations')
         .select(
             'donation_amount',
             'donation_date'
         )
         .where('user_id', req.session.user_id)
-        .orderBy('donation_date')
+        .orderBy('donation_date', 'desc')
         .then(donation => {
-            res.render('view-donations', {
+            res.render('my-donations', {
                 donation: donation,
                 error_message: ""
             });
         }).catch(err => {
             console.log('Error fetching donation information: ', err);
-            res.render('view-donations', {
+            res.render('my-donations', {
                 donation: [],
                 error_message: 'Error fetching donation information'
             });
@@ -209,7 +230,30 @@ app.get('/manage-donations', (req, res) => {
 
 // ~~~ SURVEYS ~~~
 app.get('/surveys', (req, res) => {
-    // TODO
+    // Get surveys for current user only
+    knex('surveys')
+        .innerJoin('registration', 'surveys.registration_id', '=', 'registration.registration_id')
+        .innerJoin('event_occurrences', 'registration.event_occurrence_id', '=', 'event_occurrences.event_occurrence_id')
+        .select(
+            'surveys.survey_id',
+            'surveys.overall_score',
+            'surveys.survey_submission_date',
+            'event_occurrences.event_name'
+        )
+        .where('registration.user_id', req.session.user_id)
+        .orderBy('surveys.survey_submission_date', 'desc')
+        .then(survey => {
+            res.render('surveys', {
+                survey: survey,
+                error_message: ""
+            });
+        }).catch(err => {
+            console.log('Error fetching survey information: ', err);
+            res.render('surveys', {
+                survey: [],
+                error_message: 'Error fetching survey information'
+            });
+        });
 });
 
 app.get('/manage-surveys', (req, res) => {
