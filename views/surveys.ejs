@@ -13,14 +13,14 @@
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-logo">
-                <h1><a href="/" style="text-decoration: none; color: inherit;">Ella Rises</a></h1>
-            </div>
             <ul class="nav-menu">
                 <li><a href="/events">Events</a></li>
                 <li><a href="/about">About</a></li>
                 <li><a href="/donate">Donate</a></li>
             </ul>
+            <div class="nav-logo">
+                <h1><a href="/" style="text-decoration: none; color: inherit;">ELLA RISES</a></h1>
+            </div>
             <% if (isLoggedIn && level === 'admin') { %>
                 <div class="nav-auth">
                     <div class="user-dropdown">
@@ -176,6 +176,19 @@
             document.addEventListener('click', function(e) {
                 if (userDropdown && !userDropdown.contains(e.target)) {
                     userDropdown.classList.remove('active');
+                }
+            });
+
+            // Navbar show/hide on scroll - only visible at top
+            const navbar = document.querySelector('.navbar');
+            
+            window.addEventListener('scroll', function() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                if (scrollTop < 64) {
+                    navbar.classList.remove('hidden');
+                } else {
+                    navbar.classList.add('hidden');
                 }
             });
         });

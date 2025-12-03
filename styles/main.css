@@ -1166,7 +1166,7 @@ h1, h2, h3 {
 /* About Hero Section */
 .about-hero {
     background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
-    padding: 5rem 2rem;
+    padding: 8rem 2rem 5rem;
     text-align: center;
 }
 
@@ -1483,7 +1483,7 @@ h1, h2, h3 {
 /* Events Hero Section */
 .events-hero {
     background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-primary) 100%);
-    padding: 4rem 2rem;
+    padding: 8rem 2rem 4rem;
     text-align: center;
 }
 
@@ -1503,7 +1503,7 @@ h1, h2, h3 {
 
 /* Events List Section */
 .events-list {
-    background-color: var(--color-soft-white);
+    background-color: var(--color-tertiary-bkgd);
     padding: 4rem 2rem;
 }
 
@@ -1758,9 +1758,9 @@ h1, h2, h3 {
 
 /* Donate Container */
 .donate-container {
-    background-color: var(--color-soft-white);
+    background-color: var(--color-tertiary-bkgd);
     min-height: calc(100vh - 200px);
-    padding: 3rem 2rem;
+    padding: 7rem 2rem 3rem;
 }
 
 .donate-wrapper {
@@ -2071,9 +2071,9 @@ h1, h2, h3 {
 
 /* Manage Donations Container */
 .manage-donations-container {
-    background-color: var(--color-soft-white);
+    background-color: var(--color-tertiary-bkgd);
     min-height: calc(100vh - 200px);
-    padding: 3rem 2rem;
+    padding: 7rem 2rem 3rem;
 }
 
 .manage-donations-wrapper {
@@ -2314,9 +2314,9 @@ h1, h2, h3 {
 
 /* Account Info Container */
 .account-info-container {
-    background-color: var(--color-soft-white);
+    background-color: var(--color-tertiary-bkgd);
     min-height: calc(100vh - 200px);
-    padding: 3rem 2rem;
+    padding: 7rem 2rem 3rem;
 }
 
 .account-info-wrapper {
