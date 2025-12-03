@@ -86,7 +86,7 @@ app.get('/about', (req, res) => {
     res.render('about', { error_message: "" });
 });
 
-// ~~~ Events ~~~
+// ~~~ EVENTS ~~~
 app.get('/events', (req, res) => {
     res.render('events', { error_message: "" });
 });
@@ -116,13 +116,45 @@ app.get('/manage-events', (req, res) => {
         }).catch(err => {
             console.log('Error fetching event information: ', err);
             res.render('manage-events', {
-                events: events,
+                events: [],
                 error_message: 'Error fetching event information'
             });
         });
 });
 
-// ~~~ Donations ~~~
+// ~~~ MILESTONES ~~~
+app.get('/view-milestones', (req, res) => {
+    // TODO
+});
+
+app.get('/manage-milestones', (req, res) => {
+    knex('users')
+        .innerJoin('user_milestones', 'users.user_id', '=', 'user_milestones.user_id')
+        .innerJoin('milestones', 'user_milestones.milestone_id', '=', 'milestones.milestone_id')
+        .select({
+            user_id: 'users.user_id',
+            user_first_name: 'user_first_name',
+            user_last_name: 'user_last_name',
+            milestone_id: 'user_milestones.milestone_id',
+            milestone_date: 'milestone_date',
+            milestone_title: 'milestone_title'
+        })
+        .orderBy('milestone_date', 'desc')
+        .then(milestones => {
+            res.render('manage-milestones', {
+                milestones: milestones,
+                error_message: ""
+            });
+        }).catch(err => {
+            console.log('Error fetching milestone information: ', err);
+            res.render('manage-milestones', {
+                milestones: [],
+                error_message: 'Error fetching milestone information'
+            });
+        });
+});
+
+// ~~~ DONATIONS ~~~
 app.get('/donate', (req, res) => {
     res.render('donate', { error_message: "" });
 });

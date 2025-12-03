@@ -88,19 +88,23 @@
                     <table class="donations-table">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Milestone Name</th>
-                                <th>Description</th>
-                                <th>Points</th>
+                                <th>User ID</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Milestone ID</th>
+                                <th>Milestone Title</th>
+                                <th>Milestone Date</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <% milestones.forEach(function(milestone) { %>
+                            <% milestones.forEach(function(milestones) { %>
                                 <tr>
-                                    <td><%= milestone.milestone_id %></td>
-                                    <td><%= milestone.milestone_name %></td>
-                                    <td><%= milestone.description %></td>
-                                    <td><%= milestone.points %></td>
+                                    <td><%= milestones.milestone_id %></td>
+                                    <td><%= milestones.user_first_name %></td>
+                                    <td><%= milestones.user_last_name %></td>
+                                    <td><%= milestones.milestone_id %></td>
+                                    <td><%= milestones.milestone_title %></td>
+                                    <td><%= milestones.milestone_date %></td>
                                 </tr>
                             <% }); %>
                         </tbody>
