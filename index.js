@@ -248,7 +248,7 @@ app.get('/manage-surveys', (req, res) => {
 app.get('/manage-participants', (req, res) => {
     // Get all the information for each participant. 
     knex('users')
-        .select('*')
+        .select('user_id', 'user_first_name', 'user_last_name', 'user_email', 'user_role')
         .orderBy('user_last_name')
         .then(user => {
             res.render('manage-participants', {
@@ -260,6 +260,53 @@ app.get('/manage-participants', (req, res) => {
             res.render('manage-participants', {
                 user: [],
                 error_message: 'Error fetching users.'
+            });
+        });
+});
+
+// ~~~ Account Info ~~~
+app.get('/account-info', (req, res) => {
+    // Fetch current user's information from database
+    knex('users')
+        .select(
+            'user_first_name', 
+            'user_last_name', 
+            'user_email', 
+            'user_dob', 
+            'user_phone', 
+            'user_city', 
+            'user_state', 
+            'user_zip', 
+            'user_role'
+        )
+        .where('user_id', req.session.user_id)
+        .first()
+        .then(user => {
+            if (user) {
+                res.render('account-info', {
+                    first_name: user.user_first_name,
+                    last_name: user.user_last_name,
+                    email: user.user_email,
+                    birthdate: user.user_dob,
+                    user_phone: user.user_phone,
+                    user_city: user.user_city,
+                    user_state: user.user_state,
+                    user_zip: user.user_zip,
+                    level: user.user_role,
+                    error_message: "",
+                    success_message: ""
+                });
+            } else {
+                res.render('account-info', {
+                    error_message: "User not found",
+                    success_message: ""
+                });
+            }
+        }).catch(err => {
+            console.log('Error fetching user info:', err);
+            res.render('account-info', {
+                error_message: 'Error loading account information',
+                success_message: ""
             });
         });
 });
@@ -350,12 +397,19 @@ app.post('/register', (req, res) => {
                     })
                     .then(() => {
                         console.log('New user registered:', first_name, last_name, 'Email:', email, 'Level:', level);
-                        // Auto-login after registration
+                        // Get the newly created user's ID and auto-login
+                        return knex('users')
+                            .select('user_id')
+                            .where('user_email', email)
+                            .first();
+                    })
+                    .then(user => {
                         req.session.isLoggedIn = true;
                         req.session.first_name = first_name;
                         req.session.last_name = last_name;
                         req.session.email = email;
                         req.session.level = level;
+                        req.session.user_id = user.user_id;
                         res.redirect('/');
                     })
                     .catch(err => {
@@ -368,6 +422,200 @@ app.post('/register', (req, res) => {
             console.log('REGISTRATION ERROR:', err);
             res.render('register', { error_message: 'Server connection error' });
         });
+});
+
+// ~~~ Update Account Info ~~~
+app.post('/account-info', (req, res) => {
+    let first_name = req.body.first_name;
+    let last_name = req.body.last_name;
+    let email = req.body.email;
+    let dob = req.body.birthdate;
+    let phone = req.body.user_phone;
+    let city = req.body.user_city;
+    let state = req.body.user_state;
+    let zipcode = req.body.user_zip;
+    let current_password = req.body.current_password;
+    let new_password = req.body.new_password;
+    let confirm_password = req.body.confirm_password;
+
+    // Build update object for user information
+    let updateData = {
+        user_first_name: first_name,
+        user_last_name: last_name,
+        user_email: email,
+        user_dob: dob,
+        user_phone: phone,
+        user_city: city,
+        user_state: state,
+        user_zip: zipcode
+    };
+
+    // If user wants to change password
+    if (current_password || new_password || confirm_password) {
+        // Validate that all password fields are filled
+        if (!current_password || !new_password || !confirm_password) {
+            return knex('users')
+                .select('user_first_name', 'user_last_name', 'user_email', 'user_dob', 'user_phone', 'user_city', 'user_state', 'user_zip', 'user_role')
+                .where('user_id', req.session.user_id)
+                .first()
+                .then(user => {
+                    res.render('account-info', {
+                        first_name: user.user_first_name,
+                        last_name: user.user_last_name,
+                        email: user.user_email,
+                        birthdate: user.user_dob,
+                        user_phone: user.user_phone,
+                        user_city: user.user_city,
+                        user_state: user.user_state,
+                        user_zip: user.user_zip,
+                        level: user.user_role,
+                        error_message: 'All password fields are required to change password',
+                        success_message: ""
+                    });
+                });
+        }
+
+        // Validate password confirmation
+        if (new_password !== confirm_password) {
+            return knex('users')
+                .select('user_first_name', 'user_last_name', 'user_email', 'user_dob', 'user_phone', 'user_city', 'user_state', 'user_zip', 'user_role')
+                .where('user_id', req.session.user_id)
+                .first()
+                .then(user => {
+                    res.render('account-info', {
+                        first_name: user.user_first_name,
+                        last_name: user.user_last_name,
+                        email: user.user_email,
+                        birthdate: user.user_dob,
+                        user_phone: user.user_phone,
+                        user_city: user.user_city,
+                        user_state: user.user_state,
+                        user_zip: user.user_zip,
+                        level: user.user_role,
+                        error_message: 'New passwords do not match',
+                        success_message: ""
+                    });
+                });
+        }
+
+        // Verify current password
+        knex('users')
+            .select('user_password')
+            .where('user_id', req.session.user_id)
+            .first()
+            .then(user => {
+                if (!user || user.user_password !== current_password) {
+                    return knex('users')
+                        .select('user_first_name', 'user_last_name', 'user_email', 'user_dob', 'user_phone', 'user_city', 'user_state', 'user_zip', 'user_role')
+                        .where('user_id', req.session.user_id)
+                        .first()
+                        .then(user => {
+                            res.render('account-info', {
+                                first_name: user.user_first_name,
+                                last_name: user.user_last_name,
+                                email: user.user_email,
+                                birthdate: user.user_dob,
+                                user_phone: user.user_phone,
+                                user_city: user.user_city,
+                                user_state: user.user_state,
+                                user_zip: user.user_zip,
+                                level: user.user_role,
+                                error_message: 'Current password is incorrect',
+                                success_message: ""
+                            });
+                        });
+                }
+
+                // Add new password to update data
+                updateData.user_password = new_password;
+
+                // Update user information including password
+                return performUpdate(updateData);
+            })
+            .catch(err => {
+                console.log('PASSWORD VERIFICATION ERROR:', err);
+                return knex('users')
+                    .select('user_first_name', 'user_last_name', 'user_email', 'user_dob', 'user_phone', 'user_city', 'user_state', 'user_zip', 'user_role')
+                    .where('user_id', req.session.user_id)
+                    .first()
+                    .then(user => {
+                        res.render('account-info', {
+                            first_name: user.user_first_name,
+                            last_name: user.user_last_name,
+                            email: user.user_email,
+                            birthdate: user.user_dob,
+                            user_phone: user.user_phone,
+                            user_city: user.user_city,
+                            user_state: user.user_state,
+                            user_zip: user.user_zip,
+                            level: user.user_role,
+                            error_message: 'Error verifying password',
+                            success_message: ""
+                        });
+                    });
+            });
+    } else {
+        // No password change, just update user info
+        performUpdate(updateData);
+    }
+
+    // Helper function to perform the update
+    function performUpdate(data) {
+        knex('users')
+            .where('user_id', req.session.user_id)
+            .update(data)
+            .then(() => {
+                // Update session data
+                req.session.first_name = first_name;
+                req.session.last_name = last_name;
+                req.session.email = email;
+
+                console.log('User account updated:', email);
+
+                // Fetch updated user data to render
+                return knex('users')
+                    .select('user_first_name', 'user_last_name', 'user_email', 'user_dob', 'user_phone', 'user_city', 'user_state', 'user_zip', 'user_role')
+                    .where('user_id', req.session.user_id)
+                    .first();
+            })
+            .then(user => {
+                res.render('account-info', {
+                    first_name: user.user_first_name,
+                    last_name: user.user_last_name,
+                    email: user.user_email,
+                    birthdate: user.user_dob,
+                    user_phone: user.user_phone,
+                    user_city: user.user_city,
+                    user_state: user.user_state,
+                    user_zip: user.user_zip,
+                    level: user.user_role,
+                    error_message: "",
+                    success_message: "Your account information has been successfully updated!"
+                });
+            })
+            .catch(err => {
+                console.log('UPDATE ERROR:', err);
+                return knex('users')
+                    .select('user_first_name', 'user_last_name', 'user_email', 'user_dob', 'user_phone', 'user_city', 'user_state', 'user_zip', 'user_role')
+                    .where('user_id', req.session.user_id)
+                    .first()
+                    .then(user => {
+                        res.render('account-info', {
+                            first_name: user.user_first_name,
+                            last_name: user.user_last_name,
+                            email: user.user_email,
+                            birthdate: user.user_dob,
+                            user_phone: user.user_phone,
+                            user_city: user.user_city,
+                            user_state: user.user_state,
+                            user_zip: user.user_zip,
+                            level: user.user_role,
+                            error_message: 'Error updating account information',
+                            success_message: ""
+                        });
+                    });
+            });
+    }
 });
 
 // ========== SERVER LISTENING ==========

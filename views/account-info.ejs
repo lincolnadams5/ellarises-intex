@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Info - Ella Rises</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h1><a href="/" style="text-decoration: none; color: inherit;">Ella Rises</a></h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/events">Events</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/donate">Donate</a></li>
+            </ul>
+            <% if (isLoggedIn && level === 'admin') { %>
+                <div class="nav-auth">
+                    <div class="user-dropdown">
+                        <button class="user-dropdown-btn">
+                            <%= first_name %> <%= last_name %> ▼
+                        </button>
+                        <div class="user-dropdown-content">
+                            <a href="/manage-donations">Manage Donations</a>
+                            <a href="/manage-milestones">Manage Milestones</a>
+                            <a href="/manage-surveys">Survey Results</a>
+                            <a href="/manage-events">Manage Events</a>
+                            <a href="/manage-participants">Participants</a>
+                            <a href="/account-info">Account Info</a>
+                            <form action="/logout" method="POST" class="dropdown-logout-form">
+                                <button type="submit" class="dropdown-logout-btn">Logout</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <% } else if (isLoggedIn) { %>
+                <div class="nav-auth">
+                    <div class="user-dropdown">
+                        <button class="user-dropdown-btn">
+                            <%= first_name %> <%= last_name %> ▼
+                        </button>
+                        <div class="user-dropdown-content">
+                            <a href="/view-donations">My Donations</a>
+                            <a href="/view-milestones">Milestone Progress</a>
+                            <a href="/surveys">Surveys</a>
+                            <a href="/account-info">Account Info</a>
+                            <form action="/logout" method="POST" class="dropdown-logout-form">
+                                <button type="submit" class="dropdown-logout-btn">Logout</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="nav-auth">
+                    <a href="/login" class="btn-signin">Sign In</a>
+                    <a href="/register" class="btn-signup">Sign Up</a>
+                </div>
+            <% }; %>
+        </div>
+    </nav>
+
+    <!-- Account Info Container -->
+    <div class="account-info-container">
+        <div class="account-info-wrapper">
+            <div class="account-info-header">
+                <h1 class="account-info-title">Account Information</h1>
+                <p class="account-info-subtitle">View and update your personal information</p>
+            </div>
+
+            <!-- Error/Success Message Display -->
+            <% if (typeof error_message !== 'undefined' && error_message && error_message.length > 0) { %>
+                <div class="error-message">
+                    <%= error_message %>
+                </div>
+            <% } %>
+            <% if (typeof success_message !== 'undefined' && success_message && success_message.length > 0) { %>
+                <div class="success-message">
+                    <%= success_message %>
+                </div>
+            <% } %>
+
+            <!-- Account Info Form -->
+            <form action="/account-info" method="POST" class="account-info-form">
+                <!-- Personal Information Section -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Personal Information</h2>
+                    
+                    <div class="name-fields-container">
+                        <div class="form-group">
+                            <label for="first_name">First Name</label>
+                            <input
+                                type="text"
+                                id="first_name"
+                                name="first_name"
+                                value="<%= typeof first_name !== 'undefined' ? first_name : '' %>"
+                                placeholder="First Name"
+                                required
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="last_name">Last Name</label>
+                            <input
+                                type="text"
+                                id="last_name"
+                                name="last_name"
+                                value="<%= typeof last_name !== 'undefined' ? last_name : '' %>"
+                                placeholder="Last Name"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email"
+                            value="<%= typeof email !== 'undefined' ? email : '' %>"
+                            placeholder="your.email@example.com"
+                            required
+                        >
+                    </div>
+
+                    <div class="dob-phone-container">
+                        <div class="form-group">
+                            <label for="birthdate">Date of Birth</label>
+                            <input 
+                                type="date" 
+                                id="birthdate" 
+                                name="birthdate"
+                                value="<%= typeof birthdate !== 'undefined' ? birthdate : '' %>"
+                                required
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="user_phone">Phone Number</label>
+                            <input
+                                type="text"
+                                id="user_phone"
+                                name="user_phone"
+                                value="<%= typeof user_phone !== 'undefined' ? user_phone : '' %>"
+                                placeholder="(000) 000-0000"
+                                pattern="\([0-9]{3}\) [0-9]{3}-[0-9]{4}"
+                                title="Please enter phone number in format (000) 000-0000"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="address-fields-container">
+                        <div class="form-group">
+                            <label for="user_city">City</label>
+                            <input
+                                type="text"
+                                id="user_city"
+                                name="user_city"
+                                value="<%= typeof user_city !== 'undefined' ? user_city : '' %>"
+                                placeholder="City"
+                                required
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="user_state">State</label>
+                            <input
+                                type="text"
+                                id="user_state"
+                                name="user_state"
+                                value="<%= typeof user_state !== 'undefined' ? user_state : '' %>"
+                                placeholder="State"
+                                required
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="user_zip">Zipcode</label>
+                            <input
+                                type="text"
+                                id="user_zip"
+                                name="user_zip"
+                                value="<%= typeof user_zip !== 'undefined' ? user_zip : '' %>"
+                                placeholder="000000"
+                                pattern="[0-9]{1,6}"
+                                maxlength="6"
+                                title="Please enter up to 6 digits"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="user_role">Account Type</label>
+                        <input
+                            type="text"
+                            id="user_role"
+                            name="user_role"
+                            value="<%= typeof level !== 'undefined' ? level : '' %>"
+                            readonly
+                            class="readonly-field"
+                        >
+                        <p class="form-hint">Account type cannot be changed</p>
+                    </div>
+                </div>
+
+                <!-- Change Password Section -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Change Password</h2>
+                    <p class="form-section-subtitle">Leave blank if you don't want to change your password</p>
+                    
+                    <div class="form-group">
+                        <label for="current_password">Current Password</label>
+                        <input 
+                            type="password" 
+                            id="current_password" 
+                            name="current_password" 
+                            placeholder="Enter current password"
+                        >
+                    </div>
+
+                    <div class="password-fields-container">
+                        <div class="form-group">
+                            <label for="new_password">New Password</label>
+                            <input 
+                                type="password" 
+                                id="new_password" 
+                                name="new_password" 
+                                placeholder="Enter new password"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirm_password">Confirm New Password</label>
+                            <input 
+                                type="password" 
+                                id="confirm_password" 
+                                name="confirm_password" 
+                                placeholder="Re-enter new password"
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="account-submit-btn">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Ella Rises</h3>
+                <p>Empowering young women through culturally rooted educational programs.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/events">Event Information</a></li>
+                    <li><a href="/about">About Us</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Programs</h4>
+                <ul>
+                    <li><a href="#">Mariachi</a></li>
+                    <li><a href="#">Ballet Folklorico</a></li>
+                    <li><a href="#">STEAM Workshops</a></li>
+                    <li><a href="#">Ella Rises Summit</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Get Involved</h4>
+                <ul>
+                    <li><a href="#">Volunteer</a></li>
+                    <li><a href="/donate">Donate</a></li>
+                    <li><a href="#">Sponsor</a></li>
+                    <li><a href="#">Newsletter</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Ella Rises. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // User dropdown functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const userDropdown = document.querySelector('.user-dropdown');
+            const dropdownBtn = document.querySelector('.user-dropdown-btn');
+            
+            if (dropdownBtn) {
+                dropdownBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('active');
+                });
+            }
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (userDropdown && !userDropdown.contains(e.target)) {
+                    userDropdown.classList.remove('active');
+                }
+            });
+
+            // Phone number auto-formatting
+            const phoneInput = document.getElementById('user_phone');
+            
+            if (phoneInput) {
+                phoneInput.addEventListener('input', function(e) {
+                    // Remove all non-digit characters
+                    let value = e.target.value.replace(/\D/g, '');
+                    
+                    // Limit to 10 digits
+                    if (value.length > 10) {
+                        value = value.slice(0, 10);
+                    }
+                    
+                    // Format based on length
+                    let formattedValue = '';
+                    if (value.length === 0) {
+                        formattedValue = '';
+                    } else if (value.length <= 3) {
+                        formattedValue = '(' + value;
+                    } else if (value.length <= 6) {
+                        formattedValue = '(' + value.slice(0, 3) + ') ' + value.slice(3);
+                    } else {
+                        formattedValue = '(' + value.slice(0, 3) + ') ' + value.slice(3, 6) + '-' + value.slice(6);
+                    }
+                    
+                    e.target.value = formattedValue;
+                });
+            }
+        });
+    </script>
+</body>
+</html>
