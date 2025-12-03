@@ -7,20 +7,20 @@
     <link rel="stylesheet" href="/styles/main.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-logo">
-                <h1><a href="/" style="text-decoration: none; color: inherit;">Ella Rises</a></h1>
-            </div>
             <ul class="nav-menu">
                 <li><a href="/events">Events</a></li>
                 <li><a href="/about">About</a></li>
                 <li><a href="/donate">Donate</a></li>
             </ul>
+            <div class="nav-logo">
+                <h1><a href="/" style="text-decoration: none; color: inherit;">ELLA RISES</a></h1>
+            </div>
             <% if (isLoggedIn && level === 'admin') { %>
                 <div class="nav-auth">
                     <div class="user-dropdown">
@@ -77,36 +77,60 @@
             </div>
         </div>
         <div class="hero-image">
-            <img src="/public/images/homepage1_workshop.jpg" alt="Ella Rises Community">
+            <img src="/public/images/woman_holding_books_illustration_transparent2.png" alt="Woman holding books illustration">
         </div>
     </section>
 
     <!-- Programs Section -->
     <section class="programs">
         <div class="section-header">
-            <h2>Our Programs</h2>
-            <p>Culturally rooted experiences that empower young women</p>
+            <h2>Join Programs</h2>
+            <p>Our signature programs and the Ella Rises Summit serve over 150 women each year.</p>
         </div>
         <div class="program-grid">
-            <div class="program-card">
-                <div class="program-icon">🎻</div>
-                <h3>Mariachi</h3>
-                <p>Connect with cultural heritage through traditional music and performance.</p>
+            <div class="program-flip-card" data-program="mariachi">
+                <div class="program-flip-inner">
+                    <div class="program-flip-front">
+                        <img src="/public/images/mariachi.jpeg" alt="Mariachi Program">
+                    </div>
+                    <div class="program-flip-back">
+                        <h3>Mariachi</h3>
+                        <p>Connect with cultural heritage through traditional music and performance.</p>
+                    </div>
+                </div>
             </div>
-            <div class="program-card">
-                <div class="program-icon">💃</div>
-                <h3>Ballet Folklorico</h3>
-                <p>Celebrate Mexican culture through vibrant dance and storytelling.</p>
+            <div class="program-flip-card" data-program="ballet">
+                <div class="program-flip-inner">
+                    <div class="program-flip-front">
+                        <img src="/public/images/ballet_folklorico1.jpeg" alt="Ballet Folklorico Program">
+                    </div>
+                    <div class="program-flip-back">
+                        <h3>Ballet Folklorico</h3>
+                        <p>Celebrate Mexican culture through vibrant dance and storytelling.</p>
+                    </div>
+                </div>
             </div>
-            <div class="program-card">
-                <div class="program-icon">🔬</div>
-                <h3>STEAM Workshops</h3>
-                <p>Hands-on learning in Science, Technology, Engineering, Art, and Math.</p>
+            <div class="program-flip-card" data-program="steam">
+                <div class="program-flip-inner">
+                    <div class="program-flip-front">
+                        <img src="/public/images/ER STEM Workshop Aug 2022-03.jpg" alt="STEAM Workshops Program">
+                    </div>
+                    <div class="program-flip-back">
+                        <h3>STEAM Workshops</h3>
+                        <p>Hands-on learning in Science, Technology, Engineering, Art, and Math.</p>
+                    </div>
+                </div>
             </div>
-            <div class="program-card">
-                <div class="program-icon">🎓</div>
-                <h3>Ella Rises Summit</h3>
-                <p>Annual gathering focused on higher education and leadership development.</p>
+            <div class="program-flip-card" data-program="summit">
+                <div class="program-flip-inner">
+                    <div class="program-flip-front">
+                        <img src="/public/images/summer_summit2.jpg" alt="Ella Rises Summit Program">
+                    </div>
+                    <div class="program-flip-back">
+                        <h3>Ella Rises Summit</h3>
+                        <p>Annual gathering focused on higher education and leadership development.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -127,78 +151,115 @@
                 <div class="stat-label">Events Hosted</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">100%</div>
-                <div class="stat-label">Community Love</div>
+                <div class="stat-number">+ 20%</div>
+                <div class="stat-label">Self-Confidence Survey</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">+ 20%</div>
+                <div class="stat-label">Leadership Ability Survey</div>
             </div>
         </div>
     </section>
 
     <!-- Photo Gallery -->
     <section class="gallery">
-        <div class="section-header">
-            <h2>Moments That Matter</h2>
-            <p>Capturing the joy and growth in our programs</p>
-        </div>
-        <div class="gallery-grid">
-            <div class="gallery-item">
-                <img src="/public/images/summer_summit2.jpg" alt="Ella Rises Summit">
-            </div>
-            <div class="gallery-item">
-                <img src="/public/images/umfa_mural2.jpg" alt="Community Event">
-            </div>
-            <div class="gallery-item">
-                <img src="/public/images/ER Animation Workshop Feb 2021_029.jpg" alt="Learning Together">
-            </div>
-            <div class="gallery-item">
-                <img src="/public/images/ER STEM Workshop Aug 2022-03.jpg" alt="STEAM Workshop">
-            </div>
-            <div class="gallery-item">
-                <img src="/public/images/mariachi.jpeg" alt="Mariachi Performance">
-            </div>
-            <div class="gallery-item">
-                <img src="/public/images/ballet_folklorico1.jpeg" alt="Ballet Folklorico">
-            </div>
-        </div>
-    </section>
-
-    <!-- Testimonials -->
-    <section class="testimonials">
-        <div class="section-header">
-            <h2>What Our Community Says</h2>
-            <p>Real stories from participants and families</p>
-        </div>
-        <div class="testimonial-grid">
-            <div class="testimonial-card">
-                <div class="testimonial-stars">★★★★★</div>
-                <p class="testimonial-text">"Ella Rises helped me discover my passion for STEM while staying connected to my roots. The mentors here truly care about our success."</p>
-                <div class="testimonial-author">
-                    <div class="author-avatar">M</div>
-                    <div class="author-info">
-                        <div class="author-name">Maria G.</div>
-                        <div class="author-role">Program Participant</div>
-                    </div>
+        <div class="gallery-scroll-container">
+            <!-- Row 1 -->
+            <div class="gallery-row">
+                <div class="gallery-track gallery-track-1">
+                    <div class="gallery-item"><img src="/public/images/summer_summit2.jpg" alt="Ella Rises Summit"></div>
+                    <div class="gallery-item"><img src="/public/images/umfa_mural2.jpg" alt="Community Event"></div>
+                    <div class="gallery-item"><img src="/public/images/ER Animation Workshop Feb 2021_029.jpg" alt="Animation Workshop"></div>
+                    <div class="gallery-item"><img src="/public/images/ER STEM Workshop Aug 2022-03.jpg" alt="STEAM Workshop"></div>
+                    <div class="gallery-item"><img src="/public/images/mariachi.jpeg" alt="Mariachi Performance"></div>
+                    <div class="gallery-item"><img src="/public/images/ballet_folklorico1.jpeg" alt="Ballet Folklorico"></div>
+                    <div class="gallery-item"><img src="/public/images/ER Animation Workshop Feb 2021_043.jpg" alt="Animation Workshop"></div>
+                    <div class="gallery-item"><img src="/public/images/ER Animation Workshop Feb 2021_053.jpg" alt="Animation Workshop"></div>
+                    <div class="gallery-item"><img src="/public/images/ER BYU Tour 2022-042.jpg" alt="BYU Tour"></div>
+                    <div class="gallery-item"><img src="/public/images/ER Día de Muertos Show at NAC 2022-11.jpg" alt="Día de Muertos"></div>
+                    <div class="gallery-item"><img src="/public/images/ER STEM Workshop Aug 2022-09.jpg" alt="STEAM Workshop"></div>
+                    <div class="gallery-item"><img src="/public/images/ER STEM Workshop Aug 2022-31.jpg" alt="STEAM Workshop"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_0746.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_1056.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_6354.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_6363.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_7888.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_8012.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_8439.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_8498.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_8500.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/lab_tour.jpeg" alt="Lab Tour"></div>
+                    <div class="gallery-item"><img src="/public/images/skull_robot.JPG" alt="STEAM Project"></div>
+                    <div class="gallery-item"><img src="/public/images/steam_workshop1.jpg" alt="STEAM Workshop"></div>
+                    <div class="gallery-item"><img src="/public/images/summer_summit.jpg" alt="Summer Summit"></div>
+                    <div class="gallery-item"><img src="/public/images/umfa_mural.jpg" alt="UMFA Mural"></div>
+                    <div class="gallery-item"><img src="/public/images/825D53BB-2464-458F-8163-81095033AE6C.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/82DC4094-9023-4E13-A5CA-59E6816026DB_1_105_c.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/DSC_0472.NEF.jpg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/DSC_0524.NEF.jpg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/DSC_0710.JPG" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/DSC_5359.jpg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/homepage1_workshop.jpg" alt="Workshop"></div>
+                    <!-- Duplicate for seamless loop -->
+                    <div class="gallery-item"><img src="/public/images/summer_summit2.jpg" alt="Ella Rises Summit"></div>
+                    <div class="gallery-item"><img src="/public/images/umfa_mural2.jpg" alt="Community Event"></div>
+                    <div class="gallery-item"><img src="/public/images/ER Animation Workshop Feb 2021_029.jpg" alt="Animation Workshop"></div>
+                    <div class="gallery-item"><img src="/public/images/ER STEM Workshop Aug 2022-03.jpg" alt="STEAM Workshop"></div>
+                    <div class="gallery-item"><img src="/public/images/mariachi.jpeg" alt="Mariachi Performance"></div>
+                    <div class="gallery-item"><img src="/public/images/ballet_folklorico1.jpeg" alt="Ballet Folklorico"></div>
+                    <div class="gallery-item"><img src="/public/images/ER Animation Workshop Feb 2021_043.jpg" alt="Animation Workshop"></div>
+                    <div class="gallery-item"><img src="/public/images/ER Animation Workshop Feb 2021_053.jpg" alt="Animation Workshop"></div>
+                    <div class="gallery-item"><img src="/public/images/ER BYU Tour 2022-042.jpg" alt="BYU Tour"></div>
+                    <div class="gallery-item"><img src="/public/images/ER Día de Muertos Show at NAC 2022-11.jpg" alt="Día de Muertos"></div>
                 </div>
             </div>
-            <div class="testimonial-card">
-                <div class="testimonial-stars">★★★★★</div>
-                <p class="testimonial-text">"The Ballet Folklorico program gave my daughter confidence and a deep appreciation for her heritage. We're so grateful for this organization."</p>
-                <div class="testimonial-author">
-                    <div class="author-avatar">C</div>
-                    <div class="author-info">
-                        <div class="author-name">Carmen R.</div>
-                        <div class="author-role">Parent</div>
-                    </div>
-                </div>
-            </div>
-            <div class="testimonial-card">
-                <div class="testimonial-stars">★★★★★</div>
-                <p class="testimonial-text">"As a volunteer, I've witnessed firsthand how Ella Rises transforms lives. These young women are our future leaders."</p>
-                <div class="testimonial-author">
-                    <div class="author-avatar">S</div>
-                    <div class="author-info">
-                        <div class="author-name">Sofia L.</div>
-                        <div class="author-role">Volunteer Mentor</div>
-                    </div>
+            <!-- Row 2 -->
+            <div class="gallery-row">
+                <div class="gallery-track gallery-track-2">
+                    <div class="gallery-item"><img src="/public/images/ER STEM Workshop Aug 2022-09.jpg" alt="STEAM Workshop"></div>
+                    <div class="gallery-item"><img src="/public/images/ER STEM Workshop Aug 2022-31.jpg" alt="STEAM Workshop"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_0746.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_1056.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_6354.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_6363.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_7888.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_8012.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_8439.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_8498.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_8500.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/lab_tour.jpeg" alt="Lab Tour"></div>
+                    <div class="gallery-item"><img src="/public/images/skull_robot.JPG" alt="STEAM Project"></div>
+                    <div class="gallery-item"><img src="/public/images/steam_workshop1.jpg" alt="STEAM Workshop"></div>
+                    <div class="gallery-item"><img src="/public/images/summer_summit.jpg" alt="Summer Summit"></div>
+                    <div class="gallery-item"><img src="/public/images/umfa_mural.jpg" alt="UMFA Mural"></div>
+                    <div class="gallery-item"><img src="/public/images/825D53BB-2464-458F-8163-81095033AE6C.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/82DC4094-9023-4E13-A5CA-59E6816026DB_1_105_c.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/DSC_0472.NEF.jpg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/DSC_0524.NEF.jpg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/DSC_0710.JPG" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/DSC_5359.jpg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/homepage1_workshop.jpg" alt="Workshop"></div>
+                    <div class="gallery-item"><img src="/public/images/summer_summit2.jpg" alt="Ella Rises Summit"></div>
+                    <div class="gallery-item"><img src="/public/images/umfa_mural2.jpg" alt="Community Event"></div>
+                    <div class="gallery-item"><img src="/public/images/ER Animation Workshop Feb 2021_029.jpg" alt="Animation Workshop"></div>
+                    <div class="gallery-item"><img src="/public/images/ER Animation Workshop Feb 2021_043.jpg" alt="Animation Workshop"></div>
+                    <div class="gallery-item"><img src="/public/images/ER Animation Workshop Feb 2021_053.jpg" alt="Animation Workshop"></div>
+                    <div class="gallery-item"><img src="/public/images/ER BYU Tour 2022-042.jpg" alt="BYU Tour"></div>
+                    <div class="gallery-item"><img src="/public/images/ER Día de Muertos Show at NAC 2022-11.jpg" alt="Día de Muertos"></div>
+                    <div class="gallery-item"><img src="/public/images/ER STEM Workshop Aug 2022-03.jpg" alt="STEAM Workshop"></div>
+                    <div class="gallery-item"><img src="/public/images/mariachi.jpeg" alt="Mariachi Performance"></div>
+                    <div class="gallery-item"><img src="/public/images/ballet_folklorico1.jpeg" alt="Ballet Folklorico"></div>
+                    <!-- Duplicate for seamless loop -->
+                    <div class="gallery-item"><img src="/public/images/ER STEM Workshop Aug 2022-09.jpg" alt="STEAM Workshop"></div>
+                    <div class="gallery-item"><img src="/public/images/ER STEM Workshop Aug 2022-31.jpg" alt="STEAM Workshop"></div>
+                    <div class="gallery-item"><img src="/public/images/ER STEM Workshop Aug 2022-42.jpg" alt="STEAM Workshop"></div>
+                    <div class="gallery-item"><img src="/public/images/ER STEM Workshop Aug 2022-52.jpg" alt="STEAM Workshop"></div>
+                    <div class="gallery-item"><img src="/public/images/ER Summer Summit 2022-068.jpg" alt="Summer Summit"></div>
+                    <div class="gallery-item"><img src="/public/images/ER Summer Summit 2022-165.jpg" alt="Summer Summit"></div>
+                    <div class="gallery-item"><img src="/public/images/ER UMFA Mural_049.jpg" alt="UMFA Mural"></div>
+                    <div class="gallery-item"><img src="/public/images/ER UMFA Mural_072.jpg" alt="UMFA Mural"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_0746.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_1056.jpeg" alt="Event Photo"></div>
                 </div>
             </div>
         </div>
@@ -236,6 +297,45 @@
                 </div>
                 <div class="sponsor-item">
                     <div class="sponsor-logo">Mountain America<br>Credit Union</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials">
+        <div class="testimonial-grid">
+            <div class="testimonial-card">
+                <div class="testimonial-stars">★★★★★</div>
+                <p class="testimonial-text">"Ella Rises helped me discover my passion for STEM while staying connected to my roots. The mentors here truly care about our success."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">M</div>
+                    <div class="author-info">
+                        <div class="author-name">Maria G.</div>
+                        <div class="author-role">Program Participant</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="testimonial-stars">★★★★★</div>
+                <p class="testimonial-text">"The Ballet Folklorico program gave my daughter confidence and a deep appreciation for her heritage. We're so grateful for this organization."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">C</div>
+                    <div class="author-info">
+                        <div class="author-name">Carmen R.</div>
+                        <div class="author-role">Parent</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="testimonial-stars">★★★★★</div>
+                <p class="testimonial-text">"As a volunteer, I've witnessed firsthand how Ella Rises transforms lives. These young women are our future leaders."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">S</div>
+                    <div class="author-info">
+                        <div class="author-name">Sofia L.</div>
+                        <div class="author-role">Volunteer Mentor</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -311,6 +411,38 @@
                 if (userDropdown && !userDropdown.contains(e.target)) {
                     userDropdown.classList.remove('active');
                 }
+            });
+
+            // Navbar show/hide on scroll - only visible at top
+            const navbar = document.querySelector('.navbar');
+            
+            window.addEventListener('scroll', function() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                if (scrollTop < 64) {
+                    // At the top - show navbar
+                    navbar.classList.remove('hidden');
+                } else {
+                    // Scrolled down - hide navbar
+                    navbar.classList.add('hidden');
+                }
+            });
+
+            // Program flip cards functionality
+            const programCards = document.querySelectorAll('.program-flip-card');
+            
+            programCards.forEach(card => {
+                // Flip on click
+                card.addEventListener('click', function() {
+                    this.classList.toggle('flipped');
+                });
+                
+                // Flip back to front when mouse leaves if showing back
+                card.addEventListener('mouseleave', function() {
+                    if (this.classList.contains('flipped')) {
+                        this.classList.remove('flipped');
+                    }
+                });
             });
         });
     </script>

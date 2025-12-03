@@ -7,20 +7,20 @@
     <link rel="stylesheet" href="/styles/main.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-logo">
-                <h1><a href="/" style="text-decoration: none; color: inherit;">Ella Rises</a></h1>
-            </div>
             <ul class="nav-menu">
                 <li><a href="/events">Events</a></li>
                 <li><a href="/about">About</a></li>
                 <li><a href="/donate">Donate</a></li>
             </ul>
+            <div class="nav-logo">
+                <h1><a href="/" style="text-decoration: none; color: inherit;">ELLA RISES</a></h1>
+            </div>
             <% if (isLoggedIn && level === 'admin') { %>
                 <div class="nav-auth">
                     <div class="user-dropdown">
@@ -285,6 +285,40 @@
             <p>&copy; 2025 Ella Rises. All rights reserved.</p>
         </div>
     </footer>
+    <script>
+        // User dropdown functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const userDropdown = document.querySelector('.user-dropdown');
+            const dropdownBtn = document.querySelector('.user-dropdown-btn');
+            
+            if (dropdownBtn) {
+                dropdownBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('active');
+                });
+            }
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (userDropdown && !userDropdown.contains(e.target)) {
+                    userDropdown.classList.remove('active');
+                }
+            });
+
+            // Navbar show/hide on scroll - only visible at top
+            const navbar = document.querySelector('.navbar');
+            
+            window.addEventListener('scroll', function() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                if (scrollTop < 64) {
+                    navbar.classList.remove('hidden');
+                } else {
+                    navbar.classList.add('hidden');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
 
