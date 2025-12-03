@@ -1,3 +1,5 @@
+require('dotenv').config(); // Loads .env for local development
+
 module.exports = {
     development: {
         client: 'pg',

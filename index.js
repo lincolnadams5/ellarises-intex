@@ -664,5 +664,5 @@ app.post('/account-info', (req, res) => {
 
 // ========== SERVER LISTENING ==========
 app.listen(port, () => {
-    console.log(`Node.js app running on http://localhost:${port}`);
+    console.log(`Listening on port ${port}`);
 });
