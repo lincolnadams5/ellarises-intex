@@ -174,7 +174,7 @@ app.post('/login', (req, res) => {
     knex.select('user_email', 'user_role', 'user_first_name', 'user_last_name', 'user_id') // Gets user row where email and password match row values
         .from('users')
         .where('user_email', email)
-        // .andWhere('password', password) NOTE: Omitting this line for now because we don't have a column to store user passwords
+        .andWhere('user_password', password) // NOTE: All passwords are "default", we should add encryption here as well
         .first() // Gets only first return
         .then(user => {
             if (user) {
@@ -213,6 +213,11 @@ app.post('/register', (req, res) => {
     let email = req.body.email;
     let password = req.body.password;
     let confirmPassword = req.body.confirm_password;
+    let dob = req.body.birthdate;
+    let phone = req.body.user_phone;
+    let city = req.body.user_city;
+    let state = req.body.user_state;
+    let zipcode = req.body.user_zip;
     let level = 'participant';
 
     // Validate password confirmation
@@ -233,13 +238,18 @@ app.post('/register', (req, res) => {
                 knex('users')
                     .insert({
                         user_email: email,
-                        // password: password, // NOTE: currently omitting passwords from the requirements because we don't have a column for it in the database
+                        user_password: password, // NOTE: currently omitting passwords from the requirements because we don't have a column for it in the database
                         user_role: level,
                         user_first_name: first_name,
-                        user_last_name: last_name
+                        user_last_name: last_name,
+                        user_dob: dob,
+                        user_phone: phone,
+                        user_state: state,
+                        user_city: city,
+                        user_zip: zipcode
                     })
                     .then(() => {
-                        console.log('New user registered:', email, 'Level:', level);
+                        console.log('New user registered:', first_name, last_name, 'Email:', email, 'Level:', level);
                         // Auto-login after registration
                         req.session.isLoggedIn = true;
                         req.session.first_name = first_name;
