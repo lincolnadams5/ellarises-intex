@@ -83,7 +83,7 @@
             <% } %>
 
             <!-- Milestones Table -->
-            <% if (milestones && milestones.length > 0) { %>
+            <% if (milestone && milestone.length > 0) { %>
                 <div class="donations-table-container">
                     <table class="donations-table">
                         <thead>
@@ -97,14 +97,14 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <% milestones.forEach(function(milestones) { %>
+                            <% milestone.forEach(function(milestone) { %>
                                 <tr>
-                                    <td><%= milestones.milestone_id %></td>
-                                    <td><%= milestones.user_first_name %></td>
-                                    <td><%= milestones.user_last_name %></td>
-                                    <td><%= milestones.milestone_id %></td>
-                                    <td><%= milestones.milestone_title %></td>
-                                    <td><%= milestones.milestone_date %></td>
+                                    <td><%= milestone.milestone_id %></td>
+                                    <td><%= milestone.user_first_name %></td>
+                                    <td><%= milestone.user_last_name %></td>
+                                    <td><%= milestone.milestone_id %></td>
+                                    <td><%= milestone.milestone_title %></td>
+                                    <td><%= milestone.milestone_date %></td>
                                 </tr>
                             <% }); %>
                         </tbody>

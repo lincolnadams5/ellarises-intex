@@ -83,7 +83,7 @@
             <% } %>
 
             <!-- Participants Table -->
-            <% if (users && users.length > 0) { %>
+            <% if (user && user.length > 0) { %>
                 <div class="donations-table-container">
                     <table class="donations-table">
                         <thead>
@@ -96,7 +96,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <% users.forEach(function(user) { %>
+                            <% user.forEach(function(user) { %>
                                 <tr>
                                     <td><%= user.user_id %></td>
                                     <td><%= user.user_first_name %></td>

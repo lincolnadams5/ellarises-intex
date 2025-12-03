@@ -83,7 +83,7 @@
             <% } %>
 
             <!-- Donations Table -->
-            <% if (userDonations && userDonations.length > 0) { %>
+            <% if (donation && donation.length > 0) { %>
                 <div class="donations-table-container">
                     <table class="donations-table">
                         <thead>
@@ -95,7 +95,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <% userDonations.forEach(function(donation) { %>
+                            <% donation.forEach(function(donation) { %>
                                 <tr>
                                     <td><%= donation.user_first_name %> <%= donation.user_last_name %></td>
                                     <td><%= donation.user_email %></td>

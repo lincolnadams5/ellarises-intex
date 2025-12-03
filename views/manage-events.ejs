@@ -83,7 +83,7 @@
             <% } %>
 
             <!-- Events Table -->
-            <% if (events && events.length > 0) { %>
+            <% if (event && event.length > 0) { %>
                 <div class="donations-table-container">
                     <table class="donations-table">
                         <thead>
@@ -96,7 +96,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <% events.forEach(function(event) { %>
+                            <% event.forEach(function(event) { %>
                                 <tr>
                                     <td><%= event.event_occurrence_id %></td>
                                     <td><%= event.event_name %></td>
