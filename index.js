@@ -12,7 +12,7 @@ app.set("view engine", "ejs");
 
 app.use(express.static(path.join(__dirname))); // Making sure that Express can serve static files (for imported fonts)
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3000; // Use AWS port, or 3000 if local
 
 app.use(express.urlencoded({extended: true}));
 
@@ -664,5 +664,5 @@ app.post('/account-info', (req, res) => {
 
 // ========== SERVER LISTENING ==========
 app.listen(port, () => {
-    console.log(`Node.js app running on http://localhost:${port}`);
+    console.log(`Listening on port ${port}`);
 });
