@@ -721,7 +721,7 @@ h1, h2, h3 {
 
 .auth-form-wrapper {
     width: 100%;
-    max-width: 450px;
+    max-width: 600px;
 }
 
 .auth-title {
@@ -740,12 +740,14 @@ h1, h2, h3 {
 .auth-image-section {
     overflow: hidden;
     position: relative;
+    height: 100vh;
 }
 
 .auth-image-section img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
 }
 
 /* Error Message */
@@ -780,7 +782,9 @@ h1, h2, h3 {
 
 .form-group input[type="email"],
 .form-group input[type="password"],
-.form-group input[type="text"] {
+.form-group input[type="text"],
+.form-group input[type="date"] {
+    width: 100%;
     padding: 0.9rem 1rem;
     border: 2px solid #e0e0e0;
     border-radius: 8px;
@@ -799,6 +803,31 @@ h1, h2, h3 {
     color: #aaa;
 }
 
+/* Date input styling to match placeholder color when empty */
+.form-group input[type="date"] {
+    color: #aaa;
+}
+
+.form-group input[type="date"]:valid,
+.form-group input[type="date"]:focus {
+    color: var(--color-text);
+}
+
+/* Date input placeholder/hint styling */
+.form-group input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0.6;
+    cursor: pointer;
+}
+
+.form-group input[type="date"]::-webkit-datetime-edit-text {
+    color: #aaa;
+}
+
+.form-group input[type="date"]:valid::-webkit-datetime-edit-text,
+.form-group input[type="date"]:focus::-webkit-datetime-edit-text {
+    color: var(--color-text);
+}
+
 .form-hint {
     font-size: 0.85rem;
     color: var(--color-text-light);
@@ -809,6 +838,27 @@ h1, h2, h3 {
 .name-fields-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+/* Password Fields Container - Side by Side */
+.password-fields-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+/* DOB and Phone Container - Side by Side */
+.dob-phone-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+/* Address Fields Container - Three Columns for City, State, Zip */
+.address-fields-container {
+    display: grid;
+    grid-template-columns: 2fr 1.5fr 1fr;
     gap: 1rem;
 }
 
@@ -949,7 +999,10 @@ h1, h2, h3 {
         gap: 1rem;
     }
 
-    .name-fields-container {
+    .name-fields-container,
+    .password-fields-container,
+    .dob-phone-container,
+    .address-fields-container {
         grid-template-columns: 1fr;
     }
 }
