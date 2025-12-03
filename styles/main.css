@@ -740,12 +740,14 @@ h1, h2, h3 {
 .auth-image-section {
     overflow: hidden;
     position: relative;
+    height: 100vh;
 }
 
 .auth-image-section img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
 }
 
 /* Error Message */
