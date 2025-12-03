@@ -100,15 +100,20 @@
                                     <td><%= donation.user_first_name %> <%= donation.user_last_name %></td>
                                     <td><%= donation.user_email %></td>
                                     <td>
-                                        <% 
-                                            const date = new Date(donation.donation_date);
-                                            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                                            const formattedDate = months[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+                                        <%
+                                        let formattedDate
+                                            if (donation.donation_date !== null) {
+                                                const date = new Date(donation.donation_date);
+                                                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                                                formattedDate = months[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+                                            } else {
+                                                formattedDate = 'N/A';
+                                            }
                                         %>
                                         <%= formattedDate %>
                                     </td>
                                     <td>
-                                        <% 
+                                        <%
                                             const amount = parseFloat(donation.donation_amount).toFixed(2);
                                         %>
                                         $<%= amount %>
@@ -118,6 +123,70 @@
                         </tbody>
                     </table>
                 </div>
+
+                <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+                    <div class="manage-donations-pagination">
+                        <% if (currentPage > 1) { %>
+                            <a href="/manage-donations?page=<%= currentPage - 1 %>" class="pagination-btn">Previous</a>
+                        <% } else { %>
+                            <span class="pagination-btn disabled">Previous</span>
+                        <% } %>
+
+                        <div class="pagination-pages">
+                            <%
+                                const maxVisible = 5; // number of page buttons in the middle window
+                                let startPage = Math.max(1, currentPage - 2);
+                                let endPage = Math.min(totalPages, currentPage + 2);
+
+                                if (endPage - startPage + 1 < maxVisible) {
+                                    if (startPage === 1) {
+                                        endPage = Math.min(totalPages, startPage + maxVisible - 1);
+                                    } else if (endPage === totalPages) {
+                                        startPage = Math.max(1, endPage - maxVisible + 1);
+                                    }
+                                }
+                            %>
+
+                            <% if (startPage > 1) { %>
+                                <!-- First page -->
+                                <a href="/manage-donations?page=1"
+                                   class="pagination-page <%= currentPage === 1 ? 'active' : '' %>">
+                                    1
+                                </a>
+
+                                <% if (startPage > 2) { %>
+                                    <span class="pagination-ellipsis">…</span>
+                                <% } %>
+                            <% } %>
+
+                            <!-- Window of pages around current -->
+                            <% for (let i = startPage; i <= endPage; i++) { %>
+                                <a href="/manage-donations?page=<%= i %>"
+                                   class="pagination-page <%= i === currentPage ? 'active' : '' %>">
+                                    <%= i %>
+                                </a>
+                            <% } %>
+
+                            <% if (endPage < totalPages) { %>
+                                <% if (endPage < totalPages - 1) { %>
+                                    <span class="pagination-ellipsis">…</span>
+                                <% } %>
+
+                                <!-- Last page -->
+                                <a href="/manage-donations?page=<%= totalPages %>"
+                                   class="pagination-page <%= currentPage === totalPages ? 'active' : '' %>">
+                                    <%= totalPages %>
+                                </a>
+                            <% } %>
+                        </div>
+
+                        <% if (currentPage < totalPages) { %>
+                            <a href="/manage-donations?page=<%= currentPage + 1 %>" class="pagination-btn">Next</a>
+                        <% } else { %>
+                            <span class="pagination-btn disabled">Next</span>
+                        <% } %>
+                    </div>
+                <% } %>
             <% } else { %>
                 <div class="empty-state">
                     <p class="empty-state-message">No donations found.</p>
@@ -171,14 +240,14 @@
         document.addEventListener('DOMContentLoaded', function() {
             const userDropdown = document.querySelector('.user-dropdown');
             const dropdownBtn = document.querySelector('.user-dropdown-btn');
-            
+
             if (dropdownBtn) {
                 dropdownBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
                     userDropdown.classList.toggle('active');
                 });
             }
-            
+
             // Close dropdown when clicking outside
             document.addEventListener('click', function(e) {
                 if (userDropdown && !userDropdown.contains(e.target)) {
