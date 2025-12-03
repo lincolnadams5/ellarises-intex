@@ -83,26 +83,30 @@
             <% } %>
 
             <!-- Surveys Table -->
-            <% if (surveys && surveys.length > 0) { %>
+            <% if (survey && survey.length > 0) { %>
                 <div class="donations-table-container">
                     <table class="donations-table">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>User</th>
-                                <th>Survey Name</th>
-                                <th>Response Date</th>
-                                <th>Status</th>
+                                <th>Survey ID</th>
+                                <th>Submission Date</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Event Name</th>
+                                <th>Event Location</th>
+                                <th>Overall Score</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <% surveys.forEach(function(survey) { %>
+                            <% survey.forEach(function(survey) { %>
                                 <tr>
                                     <td><%= survey.survey_id %></td>
-                                    <td><%= survey.user_email %></td>
-                                    <td><%= survey.survey_name %></td>
-                                    <td><%= survey.response_date %></td>
-                                    <td><%= survey.status %></td>
+                                    <td><%= survey.survey_submission_date %></td>
+                                    <td><%= survey.user_first_name %></td>
+                                    <td><%= survey.user_last_name %></td>
+                                    <td><%= survey.event_name %></td>
+                                    <td><%= survey.event_location %></td>
+                                    <td><%= survey.overall_score %></td>
                                 </tr>
                             <% }); %>
                         </tbody>

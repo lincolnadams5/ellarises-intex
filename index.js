@@ -86,13 +86,75 @@ app.get('/about', (req, res) => {
     res.render('about', { error_message: "" });
 });
 
+// ~~~ EVENTS ~~~
 app.get('/events', (req, res) => {
-    // Get all events that are within the next 6 months -- Do we even have any data for this?
-
     res.render('events', { error_message: "" });
 });
 
-// ~~~ Donations ~~~
+app.get('/manage-events', (req, res) => {
+    knex('event_templates')
+        .innerJoin('event_occurrences', 'event_templates.event_template_id', '=', 'event_occurrences.event_template_id')
+        .select({
+            event_occurrence_id: 'event_occurrences.event_occurrence_id',
+            event_template_id: 'event_occurrences.event_template_id',
+            event_name: 'event_occurrences.event_name',
+            event_date_time_start: 'event_occurrences.event_date_time_start',
+            event_date_time_end: 'event_occurrences.event_date_time_end',
+            event_location: 'event_occurrences.event_location',
+            event_capacity: 'event_occurrences.event_capacity',
+            event_registration_deadline: 'event_occurrences.event_registration_deadline',
+            event_type: 'event_templates.event_type',
+            event_description: 'event_templates.event_description',
+            event_recurrence_pattern: 'event_templates.event_recurrence_pattern'
+        })
+        .orderBy('event_occurrences.event_date_time_start', 'desc')
+        .then(event => {
+            res.render('manage-events', {
+                event: event,
+                error_message: ""
+            });
+        }).catch(err => {
+            console.log('Error fetching event information: ', err);
+            res.render('manage-events', {
+                event: [],
+                error_message: 'Error fetching event information'
+            });
+        });
+});
+
+// ~~~ MILESTONES ~~~
+app.get('/view-milestones', (req, res) => {
+    // TODO
+});
+
+app.get('/manage-milestones', (req, res) => {
+    knex('users')
+        .innerJoin('user_milestones', 'users.user_id', '=', 'user_milestones.user_id')
+        .innerJoin('milestones', 'user_milestones.milestone_id', '=', 'milestones.milestone_id')
+        .select({
+            user_id: 'users.user_id',
+            user_first_name: 'user_first_name',
+            user_last_name: 'user_last_name',
+            milestone_id: 'user_milestones.milestone_id',
+            milestone_date: 'milestone_date',
+            milestone_title: 'milestone_title'
+        })
+        .orderBy('milestone_date', 'desc')
+        .then(milestone => {
+            res.render('manage-milestones', {
+                milestone: milestone,
+                error_message: ""
+            });
+        }).catch(err => {
+            console.log('Error fetching milestone information: ', err);
+            res.render('manage-milestones', {
+                milestone: [],
+                error_message: 'Error fetching milestone information'
+            });
+        });
+});
+
+// ~~~ DONATIONS ~~~
 app.get('/donate', (req, res) => {
     res.render('donate', { error_message: "" });
 });
@@ -104,16 +166,16 @@ app.get('/view-donations', (req, res) => {
             'donation_date'
         )
         .where('user_id', req.session.user_id)
-        .orderBy('donation_date', 'desc')
-        .then(userDonations => {
+        .orderBy('donation_date')
+        .then(donation => {
             res.render('view-donations', {
-                userDonations: userDonations,
+                donation: donation,
                 error_message: ""
             });
         }).catch(err => {
             console.log('Error fetching donation information: ', err);
             res.render('view-donations', {
-                userDonations: [],
+                donation: [],
                 error_message: 'Error fetching donation information'
             });
         });
@@ -122,7 +184,7 @@ app.get('/view-donations', (req, res) => {
 app.get('/manage-donations', (req, res) => {
     // Get all the donation information with the user email, and name
     knex('donations')
-        .join('users', 'donations.user_id', '=', 'users.user_id') // Join user and donations tables
+        .innerJoin('users', 'donations.user_id', '=', 'users.user_id') // Join user and donations tables
         .select( // Select necessary information
             'donation_amount',
             'donation_date',
@@ -131,34 +193,72 @@ app.get('/manage-donations', (req, res) => {
             'user_last_name'
         )
         .orderBy('donation_date', 'desc') // Order by date initially
-        .then(userDonations => {
+        .then(donation => {
             res.render('manage-donations', {
-                userDonations: userDonations,
+                donation: donation,
                 error_message: ""
             });
         }).catch(err => {
             console.log('Error fetching donations/users: ', err);
             res.render('manage-donations', {
-                userDonations: [],
+                donation: [],
                 error_message: "Error fetching donation/user information."
             });
         });
 });
 
+// ~~~ SURVEYS ~~~
+app.get('/surveys', (req, res) => {
+    // TODO
+});
+
+app.get('/manage-surveys', (req, res) => {
+    knex('surveys')
+        .innerJoin('registration', 'surveys.registration_id', '=', 'registration.registration_id') // Inner join "registration" on registration_id
+        .innerJoin('users', 'registration.user_id', '=', 'users.user_id') // INNER JOIN "users" ON user_id
+        .innerJoin('event_occurrences', 'registration.event_occurrence_id', '=', 'event_occurrences.event_occurrence_id') // INNER JOIN "event_occurrences" on "event_occurrence_id"
+        .select({
+            survey_id: 'survey_id',
+            overall_score: 'overall_score',
+            survey_submission_date: 'survey_submission_date',
+            registration_id: 'registration.registration_id',
+            event_occurrence_id: 'event_occurrences.event_occurrence_id',
+            event_name: 'event_name',
+            event_location: 'event_location',
+            user_id: 'users.user_id',
+            user_first_name: 'user_first_name',
+            user_last_name: 'user_last_name'
+        })
+        .orderBy('survey_submission_date', 'desc')
+        .then(survey => {
+            res.render('manage-surveys', {
+                survey: survey,
+                error_message: ""
+            });
+        }).catch(err => {
+            console.log('Error fetching surveys: ', err);
+            res.render('manage-surveys', {
+                survey: [],
+                error_message: 'Error fetching surveys'
+            });
+        });
+});
+
+// ~~~ Participants (Admin only) ~~~
 app.get('/manage-participants', (req, res) => {
     // Get all the information for each participant. 
     knex('users')
         .select('*')
-        .orderBy('user_last_name', 'desc')
-        .then(users => {
+        .orderBy('user_last_name')
+        .then(user => {
             res.render('manage-participants', {
-                users: users,
+                user: user,
                 error_message: ""
             });
         }).catch(err => {
             console.log('Error fetching users: ', err);
             res.render('manage-participants', {
-                users: [],
+                user: [],
                 error_message: 'Error fetching users.'
             });
         });
