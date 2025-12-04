@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Participant - Ella Rises</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <ul class="nav-menu">
+                <li><a href="/events">Events</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/donate">Donate</a></li>
+            </ul>
+            <div class="nav-logo">
+                <h1><a href="/" style="text-decoration: none; color: inherit;">ELLA RISES</a></h1>
+            </div>
+        </div>
+    </nav>
+
+    <div class="manage-donations-container">
+        <div class="manage-donations-wrapper">
+            <div class="manage-donations-header">
+                <h1 class="manage-donations-title"><%= event_name %> Survey</h1>
+                <p class="manage-donations-subtitle"><%= event_date %> at <%= event_location %></p>
+            </div>
+
+            <% if (typeof error_message !== 'undefined' && error_message && error_message.length > 0) { %>
+                <div class="error-message"><%= error_message %></div>
+            <% } %>
+
+            <form action="/add-survey/<%= registration_id %>" method="POST" class="form">
+                <div class="form-group">
+                    <label for="satisfaction_score">How would you rate your overall satisfaction with the event?</label>
+                    <input type="number" id="satisfaction_score" name="satisfaction_score" min="1" max="5" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="usefulness_score">How useful was the event for you?</label>
+                    <input type="number" id="usefulness_score" name="usefulness_score" min="1" max="5" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="instructor_score">How would you rate the instructors?</label>
+                    <input type="number" id="instructor_score" name="instructor_score" min="1" max="5" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="recommendation_score">Would you recommend this event to a friend or colleague?</label>
+                    <select id="recommendation_score" name="recommendation_score" required>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                    <label for="survey_comments">Comments</label>
+                    <textarea id="survey_comments" name="survey_comments" rows="4" required></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Save Survey</button>
+                    <a href="/surveys" class="btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

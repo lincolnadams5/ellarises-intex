@@ -4,6 +4,7 @@ require('dotenv').config(); // Load environment variables from .env file into me
 
 const express = require("express"); 
 const session = require("express-session"); // Needed for the session variable
+const XLSX = require("xlsx"); // For Excel file generation
 let path = require("path");
 let bodyParser = require("body-parser");
 let app = express();
@@ -59,19 +60,23 @@ app.use((req, res, next) => {
         '/manage-surveys',
         '/manage-donations',
         '/manage-donations/new',
+        '/manage-donations/export',
         '/manage-participants',
         '/manage-participants/new'
     ];
-    // Also check admin routes with parameters (like /manage-events/:id/delete or /manage-events/:id/new)
-    if (req.path.startsWith('/manage-events/') && (req.path.endsWith('/delete') || req.path.endsWith('/new'))) {
-        if (!req.session.isLoggedIn || req.session.level !== 'admin') {
+    // Also check admin routes with parameters (like /manage-events/:id/delete, /manage-events/:id/new, or /manage-*/:id/update)
+    if ((req.path.startsWith('/manage-events/') && (req.path.endsWith('/delete') || req.path.endsWith('/new'))) ||
+        (req.path.startsWith('/manage-milestones/') && (req.path.endsWith('/delete') || req.path.endsWith('/update'))) ||
+        (req.path.startsWith('/manage-donations/') && (req.path.endsWith('/delete') || req.path.endsWith('/update'))) ||
+        (req.path.startsWith('/manage-participants/') && (req.path.endsWith('/delete') || req.path.endsWith('/update')))) {
+        if (!req.session.isLoggedIn || !req.session.level || req.session.level.toLowerCase() !== 'admin') {
             return res.render("login", { error_message: "Authentication error" });
         } else {
             return next();
         }
     }
     if (admin_routes.includes(req.path)) {
-        if (!req.session.isLoggedIn || req.session.level !== 'admin') {
+        if (!req.session.isLoggedIn || !req.session.level || req.session.level.toLowerCase() !== 'admin') {
             return res.render("login", { error_message: "Authentication error" });
         } else {
             return next();
@@ -420,6 +425,31 @@ app.post('/manage-milestones/:milestone_id/delete', (req, res) => {
         });
 });
 
+app.post('/manage-milestones/:milestone_id/update', (req, res) => {
+    const milestone_id = parseInt(req.params.milestone_id, 10);
+    const { milestone_title } = req.body;
+
+    knex('milestones')
+        .where('milestone_id', milestone_id)
+        .first()
+        .then(milestone => {
+            if (!milestone) {
+                return res.redirect('/manage-milestones?error=Milestone does not exist');
+            }
+
+            return knex('milestones')
+                .where('milestone_id', milestone_id)
+                .update({ milestone_title })
+                .then(() => {
+                    res.redirect('/manage-milestones');
+                });
+        })
+        .catch(err => {
+            console.log('Error updating milestone: ', err);
+            res.redirect('/manage-milestones?error=Error updating milestone. Please try again');
+        });
+});
+
 // ~~~ ~~~ ~~~ ~~~ ~~~ DONATIONS ~~~ ~~~ ~~~ ~~~ ~~~ 
 app.get('/donate', (req, res) => {
     res.render('donate', { error_message: "" });
@@ -461,6 +491,7 @@ app.get('/manage-donations', (req, res) => {
         .innerJoin('users', 'donations.user_id', '=', 'users.user_id') // Join user and donations tables
         .select( // Select necessary information
             'donations.donation_id',
+            'donations.user_id',
             'donation_amount',
             'donation_date',
             'user_email',
@@ -471,19 +502,53 @@ app.get('/manage-donations', (req, res) => {
         .limit(perPage)
         .offset(offset); // Offset is the number of rows to skip
 
+    // Query for the total amount of donations
+    const totalDonationsQuery = knex('donations')
+        .sum('donation_amount as total_donations')
+        .first();
+
+    // Get start of current year (January 1st)
+    const now = new Date();
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+    const endOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
+    const year = now.getFullYear();
+    const month = now.getMonth()
+
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+    const totalYearlyDonationsQuery = knex('donations')
+        .sum('donation_amount as total_yearly_donations')
+        .where('donation_date', '>=', startOfYear)
+        .andWhere('donation_date', '<=', endOfYear)
+        .first();
+
+    const totalMonthlyDonationsQuery = knex('donations')
+        .sum('donation_amount as total_monthly_donations')
+        .where('donation_date', '>=', startOfMonth)
+        .andWhere('donation_date', '<=', endOfMonth)
+        .first();
+        
     // Query for the total count of donations (for pagination)
     const countQuery = getCount('donations')
 
-    Promise.all([donationsQuery, countQuery]) // Ensures that both queries are executed before running
-        .then(([donations, countResult]) => {
+    Promise.all([donationsQuery, countQuery, totalDonationsQuery, totalYearlyDonationsQuery, totalMonthlyDonationsQuery]) // Ensures that both queries are executed before running
+        .then(([donations, countResult, totalDonationsResult, totalYearlyDonationsResult, totalMonthlyDonationsResult]) => {
             const totalCount = parseInt(countResult.count, 10);
             const totalPages = Math.ceil(totalCount / perPage);
-
+            const totalDonations = totalDonationsResult.total_donations;
+            const totalYearlyDonations = totalYearlyDonationsResult.total_yearly_donations;
+            const totalMonthlyDonations = totalMonthlyDonationsResult.total_monthly_donations;
             res.render('manage-donations', {
                 donation: donations,
                 currentPage: page,
                 totalPages,
                 totalCount,
+                totalDonations,
+                totalYearlyDonations,
+                totalMonthlyDonations,
+                year,
+                month,
                 error_message: ''
             });
         })
@@ -549,6 +614,95 @@ app.post('/manage-donations/:donation_id/delete', (req, res) => {
         });
 });
 
+app.post('/manage-donations/:donation_id/update', (req, res) => {
+    const donation_id = parseInt(req.params.donation_id, 10);
+    const { user_id, donation_amount, donation_date } = req.body;
+
+    knex('donations')
+        .where('donation_id', donation_id)
+        .first()
+        .then(donation => {
+            if (!donation) {
+                return res.redirect('/manage-donations?error=Donation does not exist');
+            }
+
+            return knex('donations')
+                .where('donation_id', donation_id)
+                .update({
+                    user_id,
+                    donation_amount,
+                    donation_date
+                })
+                .then(() => {
+                    res.redirect('/manage-donations');
+                });
+        })
+        .catch(err => {
+            console.log('Error updating donation: ', err);
+            res.redirect('/manage-donations?error=Error updating donation. Please try again');
+        });
+});
+
+app.get('/manage-donations/export', (req, res) => {
+    // Fetch all donations (no pagination for export)
+    knex('donations')
+        .innerJoin('users', 'donations.user_id', '=', 'users.user_id')
+        .select(
+            'donations.donation_id',
+            'donations.user_id',
+            'donation_amount',
+            'donation_date',
+            'user_email',
+            'user_first_name',
+            'user_last_name'
+        )
+        .orderByRaw('donation_date DESC NULLS LAST')
+        .then(donations => {
+            // Format data for Excel
+            const excelData = donations.map(donation => {
+                const date = donation.donation_date 
+                    ? new Date(donation.donation_date).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    })
+                    : 'N/A';
+                
+                return {
+                    'Donation ID': donation.donation_id,
+                    'User ID': donation.user_id,
+                    'First Name': donation.user_first_name,
+                    'Last Name': donation.user_last_name,
+                    'Email': donation.user_email,
+                    'Amount': parseFloat(donation.donation_amount).toFixed(2),
+                    'Date': date
+                };
+            });
+
+            // Create workbook and worksheet
+            const workbook = XLSX.utils.book_new();
+            const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+            // Add worksheet to workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Donations');
+
+            // Generate Excel file buffer
+            const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+            // Set response headers for file download
+            const filename = `donations_export_${new Date().toISOString().split('T')[0]}.xlsx`;
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+            // Send the file
+            res.send(excelBuffer);
+        })
+        .catch(err => {
+            console.log('Error exporting donations: ', err);
+            res.redirect('/manage-donations?error=Error exporting donations. Please try again.');
+        });
+});
+
 // ~~~ ~~~ ~~~ ~~~ ~~~ SURVEYS ~~~ ~~~ ~~~ ~~~ ~~~ 
 app.get('/surveys', (req, res) => {
     // Get surveys for current user only
@@ -577,7 +731,40 @@ app.get('/surveys', (req, res) => {
         });
 });
 
-app.get('/manage-surveys', (req, res) => {
+// ~~~ ~~~ NEW SURVEY ~~~ ~~~
+app.get('/add-survey', (req, res) => { // Get the new survey page
+    res.render('add-survey', {
+        error_message: ""
+    });
+});
+
+app.post('/add-survey/:registration_id', (req, res) => { // Add a new survey
+    const registration_id = parseInt(req.params.registration_id, 10);
+    const { satisfaction_score, usefulness_score, instructor_score, recommendation_score, survey_comments } = req.body;
+
+    // Get the current date and time
+    const survey_submission_date = new Date();
+    // Calculate the overall score
+    const overall_score = (satisfaction_score + usefulness_score + instructor_score + recommendation_score) / 4;
+
+    // Determine the NPS bucket
+    const nps_bucket = recommendation_score >= 4 ? 'Promoter' : recommendation_score < 3 ? 'Detractor' : 'Passive';
+
+    knex('surveys')
+        .insert({ registration_id, overall_score, survey_submission_date, satisfaction_score, usefulness_score, instructor_score, recommendation_score, nps_bucket, survey_comments })
+        .then(() => {
+            res.redirect('/surveys');
+        })
+        .catch(err => {
+            console.log('Error creating survey: ', err);
+            res.render('add-survey', {
+                error_message: 'An error occurred while creating the survey.'
+            });
+        });
+});
+
+// ~~~ ~~~ MANAGE SURVEYS ~~~ ~~~
+app.get('/manage-surveys', (req, res) => { // Get the manage surveys page
     // Pagination logic
     const page = parseInt(req.query.page, 10) || 1;
     const perPage = 20;
@@ -759,6 +946,36 @@ app.post('/manage-participants/:user_id/delete', (req, res) => {
         .catch(err => {
             console.log('Error deleting user: ', err);
             res.redirect('/manage-participants?error=Error deleting user. Please try again');
+        });
+});
+
+app.post('/manage-participants/:user_id/update', (req, res) => {
+    const user_id = parseInt(req.params.user_id, 10);
+    const { user_first_name, user_last_name, user_email, user_role } = req.body;
+
+    knex('users')
+        .where('user_id', user_id)
+        .first()
+        .then(user => {
+            if (!user) {
+                return res.redirect('/manage-participants?error=User does not exist');
+            }
+
+            return knex('users')
+                .where('user_id', user_id)
+                .update({
+                    user_first_name,
+                    user_last_name,
+                    user_email,
+                    user_role
+                })
+                .then(() => {
+                    res.redirect('/manage-participants');
+                });
+        })
+        .catch(err => {
+            console.log('Error updating user: ', err);
+            res.redirect('/manage-participants?error=Error updating user. Please try again');
         });
 });
 
