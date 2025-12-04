@@ -15,6 +15,7 @@
     --color-white: #ffffff;
     --color-soft-white: #fafafa;
     --color-text: #2d2d2d;
+    --color-text-hover: #76838a;
     --color-text-light: #666666;
     --font-primary: 'Montserrat', sans-serif;
     --font-display: 'DM Serif Display', serif;
@@ -75,7 +76,7 @@ h1, h2, h3 {
 }
 
 .nav-menu a:hover {
-    color: var(--color-secondary);
+    color: var(--color-text-hover);
 }
 
 .nav-auth {
@@ -166,7 +167,7 @@ h1, h2, h3 {
 
 .user-dropdown-content a:hover {
     background-color: var(--color-soft-white);
-    color: var(--color-secondary);
+    color: var(--color-text-hover);
     padding-left: 1.8rem;
 }
 
@@ -191,7 +192,7 @@ h1, h2, h3 {
 
 .dropdown-logout-btn:hover {
     background-color: var(--color-soft-white);
-    color: var(--color-secondary);
+    color: var(--color-text-hover);
     padding-left: 1.8rem;
 }
 
@@ -2813,10 +2814,21 @@ h1, h2, h3 {
     border-radius: 10px;
     margin-top: 0.5rem;
     z-index: 1001;
-    overflow: hidden;
+    overflow: visible;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Invisible bridge to keep dropdown open when moving cursor */
+.nav-dropdown-content::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 0;
+    right: 0;
+    height: 12px;
+    background: transparent;
 }
 
 .nav-dropdown:hover .nav-dropdown-content {
@@ -2836,13 +2848,18 @@ h1, h2, h3 {
     transition: all 0.3s ease;
 }
 
+.nav-dropdown-content a:first-child {
+    border-radius: 10px 10px 0 0;
+}
+
 .nav-dropdown-content a:last-child {
     border-bottom: none;
+    border-radius: 0 0 10px 10px;
 }
 
 .nav-dropdown-content a:hover {
     background-color: var(--color-soft-white);
-    color: var(--color-secondary);
+    color: var(--color-text-hover);
     padding-left: 1.5rem;
 }
 
