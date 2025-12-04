@@ -44,7 +44,7 @@ CREATE TABLE event_templates (
     UNIQUE (event_name)
 );
 
--- 3. EVENT OCCURENCES  (name matches your template)
+-- 3. EVENT OCCURRENCES  (name matches your template)
 CREATE TABLE event_occurrences (
     event_occurrence_id         INTEGER PRIMARY KEY,
     event_template_id           INTEGER NOT NULL,
@@ -155,7 +155,7 @@ FROM '/absolute/path/event_templates.csv'
 WITH (FORMAT csv, HEADER true);
 
 -- 3. EVENT OCCURENCES
-COPY event_occurrences (
+COPY event_occurences (
     event_occurrence_id,
     event_template_id,
     event_name,
@@ -165,7 +165,7 @@ COPY event_occurrences (
     event_capacity,
     event_registration_deadline
 )
-FROM '/absolute/path/event_occurences.csv'
+FROM '/absolute/path/event_occurrences.csv'
 WITH (FORMAT csv, HEADER true);
 
 -- 4. REGISTRATION
