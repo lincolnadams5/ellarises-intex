@@ -6,8 +6,8 @@ module.exports = {
         connection: {
             host: 'localhost',
             user: 'postgres',
-            password: 'BYUPassword',
-            database: 'intex',
+            password: 'admin',
+            database: 'ellarises',
             port: 5432,
         },
         migrations: {
