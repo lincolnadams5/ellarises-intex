@@ -81,7 +81,9 @@
                     <%= error_message %>
                 </div>
             <% } %>
-
+            <a href="/manage-events/new" class="btn-primary">
+                + Create Event
+            </a>
             <!-- Events Table -->
             <% if (event && event.length > 0) { %>
                 <div class="donations-table-container">
@@ -92,6 +94,7 @@
                                 <th>Event Type</th>
                                 <th>Frequency</th>
                                 <th>Default Capacity</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -101,6 +104,16 @@
                                     <td><%= event.event_type %></td>
                                     <td><%= event.event_recurrence_pattern %></td>
                                     <td><%= event.event_default_capacity %></td>
+                                    <td>
+                                        <button
+                                            type="button"
+                                            class="btn-add-instance"
+                                            data-template-id="<%= event.event_template_id %>"
+                                            data-event-name="<%= event.event_name %>"
+                                        >
+                                            + add instance
+                                        </button>
+                                    </td>
                                 </tr>
                             <% }); %>
                         </tbody>
@@ -174,6 +187,45 @@
                     <% } %>
                 </div>
             <% } %>
+            <!-- Add Instance Modal -->
+            <div id="add-instance-modal" class="modal hidden">
+                <div class="modal-content">
+                    <h2>Create Event Instance</h2>
+                    <form id="add-instance-form" method="POST">
+                        <input type="hidden" name="event_name" id="instance_event_name">
+
+                        <div class="form-group">
+                            <label for="event_date_time_start">Start Date &amp; Time</label>
+                            <input type="datetime-local" id="event_date_time_start" name="event_date_time_start" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="event_date_time_end">End Date &amp; Time</label>
+                            <input type="datetime-local" id="event_date_time_end" name="event_date_time_end" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="event_location">Location</label>
+                            <input type="text" id="event_location" name="event_location" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="event_capacity">Capacity</label>
+                            <input type="number" id="event_capacity" name="event_capacity" min="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="event_registration_deadline">Registration Deadline</label>
+                            <input type="datetime-local" id="event_registration_deadline" name="event_registration_deadline">
+                        </div>
+
+                        <div class="modal-actions">
+                            <button type="submit" class="btn-primary">Save Instance</button>
+                            <button type="button" id="cancel-instance" class="btn-secondary">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -219,7 +271,7 @@
     </footer>
 
     <script>
-        // User dropdown functionality
+        // User dropdown functionality and Add Instance modal logic
         document.addEventListener('DOMContentLoaded', function() {
             const userDropdown = document.querySelector('.user-dropdown');
             const dropdownBtn = document.querySelector('.user-dropdown-btn');
@@ -250,6 +302,44 @@
                     navbar.classList.add('hidden');
                 }
             });
+    
+            // Add Instance modal logic
+            const addInstanceButtons = document.querySelectorAll('.btn-add-instance');
+            const modal = document.getElementById('add-instance-modal');
+            const form = document.getElementById('add-instance-form');
+            const eventNameInput = document.getElementById('instance_event_name');
+            const cancelBtn = document.getElementById('cancel-instance');
+    
+            if (modal && form && eventNameInput && addInstanceButtons.length > 0) {
+                addInstanceButtons.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const templateId = this.getAttribute('data-template-id');
+                        const eventName = this.getAttribute('data-event-name');
+    
+                        // Set form action to the correct POST route including template_id
+                        form.action = '/manage-events/' + templateId + '/new';
+    
+                        // Pre-fill hidden event name field
+                        eventNameInput.value = eventName;
+    
+                        // Show modal
+                        modal.classList.remove('hidden');
+                    });
+                });
+    
+                if (cancelBtn) {
+                    cancelBtn.addEventListener('click', function() {
+                        modal.classList.add('hidden');
+                    });
+                }
+    
+                // Optional: close modal when clicking outside content
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        modal.classList.add('hidden');
+                    }
+                });
+            }
         });
     </script>
 </body>

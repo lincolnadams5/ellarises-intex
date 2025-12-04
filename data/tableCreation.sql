@@ -17,7 +17,7 @@ DROP TABLE IF EXISTS users CASCADE;
 
 -- 1. USERS
 CREATE TABLE users (
-    user_id               INTEGER PRIMARY KEY,
+    user_id               SERIAL PRIMARY KEY,
     user_email            TEXT NOT NULL,
     user_first_name       TEXT NOT NULL,
     user_last_name        TEXT NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE users (
 
 -- 2. EVENT TEMPLATES
 CREATE TABLE event_templates (
-    event_template_id       INTEGER PRIMARY KEY,
+    event_template_id       SERIAL PRIMARY KEY,
     event_name              TEXT NOT NULL,
     event_type              TEXT,
     event_description       TEXT,
@@ -60,7 +60,7 @@ CREATE TABLE event_occurrences (
 
 -- 4. REGISTRATION
 CREATE TABLE registration (
-    registration_id            INTEGER PRIMARY KEY,
+    registration_id            SERIAL PRIMARY KEY,
     user_id                    INTEGER NOT NULL,
     event_occurrence_id        INTEGER NOT NULL,
     registration_status        TEXT,
@@ -75,7 +75,7 @@ CREATE TABLE registration (
 
 -- 5. SURVEYS
 CREATE TABLE surveys (
-    survey_id              INTEGER PRIMARY KEY,
+    survey_id              SERIAL PRIMARY KEY,
     registration_id        INTEGER NOT NULL,
     satisfaction_score     NUMERIC,
     usefulness_score       NUMERIC,
@@ -91,13 +91,13 @@ CREATE TABLE surveys (
 
 -- 6. MILESTONES (lookup of milestone titles)
 CREATE TABLE milestones (
-    milestone_id    INTEGER PRIMARY KEY,
+    milestone_id    SERIAL PRIMARY KEY,
     milestone_title TEXT NOT NULL
 );
 
 -- 7. USER_MILESTONES (junction between users and milestones)
 CREATE TABLE user_milestones (
-    milestone_id   INTEGER NOT NULL,
+    milestone_id   SERIAL NOT NULL,
     user_id        INTEGER NOT NULL,
     milestone_date DATE,
     PRIMARY KEY (milestone_id, user_id, milestone_date),
@@ -109,7 +109,7 @@ CREATE TABLE user_milestones (
 
 -- 8. DONATIONS
 CREATE TABLE donations (
-    donation_id    INTEGER PRIMARY KEY,
+    donation_id    SERIAL PRIMARY KEY,
     user_id        INTEGER NOT NULL,
     donation_date  DATE,
     donation_amount NUMERIC,

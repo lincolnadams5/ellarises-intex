@@ -51,7 +51,14 @@ app.use((req, res, next) => {
     }
 
     // Checks if user is admin for the following routes
-    let admin_routes = ['/manage-events', '/manage-milestones', '/manage-surveys', '/manage-donations', '/manage-participants'];
+    let admin_routes = [
+        '/manage-events',
+        '/manage-events/new',
+        '/manage-milestones',
+        '/manage-surveys',
+        '/manage-donations',
+        '/manage-participants'
+    ];
     if (admin_routes.includes(req.path)) {
         if (!req.session.isLoggedIn || req.session.level !== 'admin') {
             return res.render("login", { error_message: "Authentication error" });
@@ -93,7 +100,7 @@ app.get('/about', (req, res) => {
     res.render('about', { error_message: "" });
 });
 
-// ~~~ EVENTS ~~~
+// ~~~ ~~~ ~~~ ~~~ ~~~ EVENTS ~~~ ~~~ ~~~ ~~~ ~~~ 
 app.get('/events', (req, res) => {
     res.render('events', { error_message: "" });
 });
@@ -103,10 +110,14 @@ app.get('/manage-events', (req, res) => {
     const page = parseInt(req.query.page, 10) || 1;
     const perPage = 20;
     const offset = (page - 1) * perPage;
+    
+    // Get error message from query parameter if present
+    const errorMessage = req.query.error || "";
 
     // Query for the current page of events
     const eventsQuery = knex('event_templates')
         .select(
+            'event_template_id',
             'event_name',
             'event_type',
             'event_description',
@@ -129,7 +140,7 @@ app.get('/manage-events', (req, res) => {
                 currentPage: page,
                 totalPages,
                 totalCount,
-                error_message: ""
+                error_message: errorMessage
             });
         }).catch(err => {
             console.log('Error fetching event information: ', err);
@@ -143,7 +154,127 @@ app.get('/manage-events', (req, res) => {
         });
 });
 
-// ~~~ MILESTONES ~~~
+app.get('/manage-events/new', (req, res) => {
+    res.render('add-event-template', {
+        error_message: "",
+        success_message: ""
+    })
+})
+
+app.post('/manage-events/new-template', (req, res) => {
+    const {
+        event_name,
+        event_type,
+        event_description,
+        event_recurrence_pattern,
+        event_default_capacity
+    } = req.body
+
+    knex('event_templates')
+        .insert({
+            event_name,
+            event_type,
+            event_description,
+            event_recurrence_pattern,
+            event_default_capacity: event_default_capacity || null
+        })
+        .then(() => {
+            res.redirect('/manage-events');
+        })
+        .catch(err => {
+            console.log('Error creating events:', err);
+            res.render('add-event-template', {
+                error_message: 'An error occured while creating an event.',
+                success_message: ""
+            })
+        })
+})
+
+app.post('/manage-events/:template_id/new', (req, res) => {
+    const template_id = parseInt(req.params.template_id, 10);
+    const {
+        event_name,
+        event_date_time_start,
+        event_date_time_end,
+        event_location,
+        event_capacity,
+        event_registration_deadline
+    } = req.body;
+
+    // First verify that the event template exists
+    knex('event_templates')
+        .where('event_template_id', template_id)
+        .first()
+        .then(template => {
+            if (!template) {
+                // Template doesn't exist, redirect with error
+                return res.redirect('/manage-events?error=Event template does not exist');
+            }
+
+            // Insert the event occurrence with the template_id
+            return knex('event_occurrences')
+                .insert({
+                    event_template_id: template_id,
+                    event_name,
+                    event_date_time_start,
+                    event_date_time_end,
+                    event_location,
+                    event_capacity: event_capacity || null,
+                    event_registration_deadline: event_registration_deadline || null
+                })
+                .then(() => {
+                    res.redirect('/manage-events');
+                });
+        })
+        .catch(err => {
+            console.log('Error creating occurrence:', err);
+            // Fetch events for error display
+            const page = 1;
+            const perPage = 20;
+            const offset = (page - 1) * perPage;
+            
+            const eventsQuery = knex('event_templates')
+                .select(
+                    'event_template_id',
+                    'event_name',
+                    'event_type',
+                    'event_description',
+                    'event_recurrence_pattern',
+                    'event_default_capacity'
+                )
+                .orderBy('event_name')
+                .limit(perPage)
+                .offset(offset);
+
+            const countQuery = getCount('event_templates');
+
+            Promise.all([eventsQuery, countQuery])
+                .then(([events, countResult]) => {
+                    const totalCount = parseInt(countResult.count, 10);
+                    const totalPages = Math.ceil(totalCount / perPage);
+
+                    res.render('manage-events', {
+                        event: events,
+                        currentPage: page,
+                        totalPages,
+                        totalCount,
+                        error_message: 'Something went wrong creating the event occurrence. Please try again.'
+                    });
+                })
+                .catch(renderErr => {
+                    console.log('Error fetching events for error display:', renderErr);
+                    res.render('manage-events', {
+                        event: [],
+                        currentPage: 1,
+                        totalPages: 0,
+                        totalCount: 0,
+                        error_message: 'Something went wrong creating the event occurrence. Please try again.'
+                    });
+                });
+        });
+})
+
+// ~~~ ~~~ ~~~ ~~~ ~~~ MILESTONES ~~~ ~~~ ~~~ ~~~ ~~~ 
 app.get('/milestone-progress', (req, res) => {
     // Get milestones for current user only
     knex('user_milestones')
@@ -205,7 +336,7 @@ app.get('/manage-milestones', (req, res) => {
         });
 });
 
-// ~~~ DONATIONS ~~~
+// ~~~ ~~~ ~~~ ~~~ ~~~ DONATIONS ~~~ ~~~ ~~~ ~~~ ~~~ 
 app.get('/donate', (req, res) => {
     res.render('donate', { error_message: "" });
 });
@@ -283,7 +414,7 @@ app.get('/manage-donations', (req, res) => {
         });
 });
 
-// ~~~ SURVEYS ~~~
+// ~~~ ~~~ ~~~ ~~~ ~~~ SURVEYS ~~~ ~~~ ~~~ ~~~ ~~~ 
 app.get('/surveys', (req, res) => {
     // Get surveys for current user only
     knex('surveys')
@@ -366,7 +497,7 @@ app.get('/manage-surveys', (req, res) => {
         });
 });
 
-// ~~~ Participants (Admin only) ~~~
+// ~~~ ~~~ ~~~ ~~~ ~~~ Participants (Admin only) ~~~ ~~~ ~~~ ~~~ ~~~ 
 app.get('/manage-participants', (req, res) => {
     // Pagination Logic
     const page = parseInt(req.query.page, 10) || 1;
@@ -409,7 +540,7 @@ app.get('/manage-participants', (req, res) => {
         });
 });
 
-// ~~~ Account Info ~~~
+// ~~~ ~~~ ~~~ ~~~ ~~~ Account Info ~~~ ~~~ ~~~ ~~~ ~~~ 
 app.get('/account-info', (req, res) => {
     // Fetch current user's information from database
     knex('users')
