@@ -154,8 +154,8 @@ COPY event_templates (
 FROM '/absolute/path/event_templates.csv'
 WITH (FORMAT csv, HEADER true);
 
--- 3. EVENT OCCURRENCES
-COPY event_occurrences (
+-- 3. EVENT OCCURENCES
+COPY event_occurences (
     event_occurrence_id,
     event_template_id,
     event_name,

@@ -3113,3 +3113,50 @@ h1, h2, h3 {
     }
 }
 
+/* Event Management Styles */
+.btn-create-event {
+    margin: 2rem 0;
+    display: inline-block;
+}
+
+.delete-form {
+    display: inline-block;
+    margin-left: 10px;
+}
+
+.btn-delete {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-delete:hover {
+    background-color: #c82333;
+}
+
+.event-details-container {
+    padding: 20px 0;
+}
+
+.detail-row {
+    margin-bottom: 15px;
+}
+
+.detail-label {
+    display: inline-block;
+    width: 180px;
+}
+
+.detail-label-top {
+    vertical-align: top;
+}
+
+.detail-description {
+    display: inline-block;
+    max-width: 400px;
+    word-wrap: break-word;
+}
+
