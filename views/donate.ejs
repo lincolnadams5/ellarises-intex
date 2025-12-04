@@ -84,231 +84,225 @@
             <!-- Donate Form -->
             <form action="/donate" method="POST" class="donate-form">
                 <div class="donate-form-grid">
-                    <!-- Left Column: Form Inputs -->
-                    <div class="donate-form-left">
-                        <!-- Account Information Section (if not logged in) -->
-                        <% if (!isLoggedIn) { %>
-                            <div class="form-section">
-                                <h2 class="form-section-title">Account Information</h2>
-                                <p class="form-section-subtitle">Create an account to track your donation</p>
-                                
-                                <div class="name-fields-container">
-                                    <div class="form-group">
-                                        <label for="first_name">First Name</label>
-                                        <input
-                                            type="text"
-                                            id="first_name"
-                                            name="first_name"
-                                            placeholder="First Name"
-                                            required
-                                        >
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="last_name">Last Name</label>
-                                        <input
-                                            type="text"
-                                            id="last_name"
-                                            name="last_name"
-                                            placeholder="Last Name"
-                                            required
-                                        >
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="email">Email Address</label>
-                                    <input 
-                                        type="email" 
-                                        id="email" 
-                                        name="email" 
-                                        placeholder="your.email@example.com"
-                                        required
-                                    >
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="password">Password</label>
-                                    <input 
-                                        type="password" 
-                                        id="password" 
-                                        name="password" 
-                                        placeholder="Create a password"
-                                        required
-                                    >
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="confirm_password">Confirm Password</label>
-                                    <input 
-                                        type="password" 
-                                        id="confirm_password" 
-                                        name="confirm_password" 
-                                        placeholder="Re-enter your password"
-                                        required
-                                    >
-                                </div>
-
-                                <div class="sign-in-prompt">
-                                    <p>Already have an account? <a href="/login" class="auth-link">Sign in here</a></p>
-                                </div>
-                            </div>
-                        <% } %>
-
-                        <!-- Payment Information Section -->
+                    <!-- Account Information Section (if not logged in) -->
+                    <% if (!isLoggedIn) { %>
                         <div class="form-section">
-                            <h2 class="form-section-title">Payment Information</h2>
+                            <h2 class="form-section-title">Account Information</h2>
+                            <p class="form-section-subtitle">Create an account to track your donation</p>
                             
-                            <div class="form-group">
-                                <label for="card_name">Name on Card</label>
-                                <input
-                                    type="text"
-                                    id="card_name"
-                                    name="card_name"
-                                    placeholder="John Doe"
-                                    required
-                                >
-                            </div>
-
-                            <div class="form-group">
-                                <label for="card_number">Card Number</label>
-                                <input
-                                    type="text"
-                                    id="card_number"
-                                    name="card_number"
-                                    placeholder="1234 5678 9012 3456"
-                                    maxlength="19"
-                                    required
-                                >
-                            </div>
-
-                            <div class="card-details-container">
+                            <div class="name-fields-container">
                                 <div class="form-group">
-                                    <label for="card_expiry">Expiry Date</label>
+                                    <label for="first_name">First Name</label>
                                     <input
                                         type="text"
-                                        id="card_expiry"
-                                        name="card_expiry"
-                                        placeholder="MM/YY"
-                                        maxlength="5"
+                                        id="first_name"
+                                        name="first_name"
+                                        placeholder="First Name"
                                         required
                                     >
                                 </div>
                                 <div class="form-group">
-                                    <label for="card_cvv">CVV</label>
+                                    <label for="last_name">Last Name</label>
                                     <input
                                         type="text"
-                                        id="card_cvv"
-                                        name="card_cvv"
-                                        placeholder="123"
-                                        maxlength="4"
+                                        id="last_name"
+                                        name="last_name"
+                                        placeholder="Last Name"
                                         required
                                     >
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label for="billing_address">Billing Address</label>
-                                <input
-                                    type="text"
-                                    id="billing_address"
-                                    name="billing_address"
-                                    placeholder="Street Address"
+                                <label for="email">Email Address</label>
+                                <input 
+                                    type="email" 
+                                    id="email" 
+                                    name="email" 
+                                    placeholder="your.email@example.com"
                                     required
                                 >
                             </div>
 
-                            <div class="billing-details-container">
-                                <div class="form-group">
-                                    <label for="billing_city">City</label>
-                                    <input
-                                        type="text"
-                                        id="billing_city"
-                                        name="billing_city"
-                                        placeholder="City"
-                                        required
-                                    >
-                                </div>
-                                <div class="form-group">
-                                    <label for="billing_state">State</label>
-                                    <input
-                                        type="text"
-                                        id="billing_state"
-                                        name="billing_state"
-                                        placeholder="State"
-                                        maxlength="2"
-                                        required
-                                    >
-                                </div>
-                                <div class="form-group">
-                                    <label for="billing_zip">ZIP Code</label>
-                                    <input
-                                        type="text"
-                                        id="billing_zip"
-                                        name="billing_zip"
-                                        placeholder="12345"
-                                        maxlength="5"
-                                        required
-                                    >
-                                </div>
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <input 
+                                    type="password" 
+                                    id="password" 
+                                    name="password" 
+                                    placeholder="Create a password"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="confirm_password">Confirm Password</label>
+                                <input 
+                                    type="password" 
+                                    id="confirm_password" 
+                                    name="confirm_password" 
+                                    placeholder="Re-enter your password"
+                                    required
+                                >
+                            </div>
+
+                            <div class="sign-in-prompt">
+                                <p>Already have an account? <a href="/login" class="auth-link">Sign in here</a></p>
+                            </div>
+                        </div>
+                    <% } %>
+
+                    <!-- Payment Information Section -->
+                    <div class="form-section">
+                        <h2 class="form-section-title">Payment Information</h2>
+                        
+                        <div class="form-group">
+                            <label for="card_name">Name on Card</label>
+                            <input
+                                type="text"
+                                id="card_name"
+                                name="card_name"
+                                placeholder="John Doe"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="card_number">Card Number</label>
+                            <input
+                                type="text"
+                                id="card_number"
+                                name="card_number"
+                                placeholder="1234 5678 9012 3456"
+                                maxlength="19"
+                                required
+                            >
+                        </div>
+
+                        <div class="card-details-container">
+                            <div class="form-group">
+                                <label for="card_expiry">Expiry Date</label>
+                                <input
+                                    type="text"
+                                    id="card_expiry"
+                                    name="card_expiry"
+                                    placeholder="MM/YY"
+                                    maxlength="5"
+                                    required
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label for="card_cvv">CVV</label>
+                                <input
+                                    type="text"
+                                    id="card_cvv"
+                                    name="card_cvv"
+                                    placeholder="123"
+                                    maxlength="4"
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="billing_address">Billing Address</label>
+                            <input
+                                type="text"
+                                id="billing_address"
+                                name="billing_address"
+                                placeholder="Street Address"
+                                required
+                            >
+                        </div>
+
+                        <div class="billing-details-container">
+                            <div class="form-group">
+                                <label for="billing_city">City</label>
+                                <input
+                                    type="text"
+                                    id="billing_city"
+                                    name="billing_city"
+                                    placeholder="City"
+                                    required
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label for="billing_state">State</label>
+                                <input
+                                    type="text"
+                                    id="billing_state"
+                                    name="billing_state"
+                                    placeholder="State"
+                                    maxlength="2"
+                                    required
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label for="billing_zip">ZIP Code</label>
+                                <input
+                                    type="text"
+                                    id="billing_zip"
+                                    name="billing_zip"
+                                    placeholder="12345"
+                                    maxlength="5"
+                                    required
+                                >
                             </div>
                         </div>
                     </div>
 
-                    <!-- Right Column: Donation Amount & Submit -->
-                    <div class="donate-form-right">
-                        <div class="donation-summary">
-                            <h2 class="donation-summary-title">Donation Amount</h2>
-                            
-                            <!-- Preset Amounts -->
-                            <div class="donation-amounts">
-                                <button type="button" class="donation-amount-btn" data-amount="25">
-                                    $25
-                                </button>
-                                <button type="button" class="donation-amount-btn" data-amount="50">
-                                    $50
-                                </button>
-                                <button type="button" class="donation-amount-btn" data-amount="100">
-                                    $100
-                                </button>
-                                <button type="button" class="donation-amount-btn" data-amount="250">
-                                    $250
-                                </button>
-                                <button type="button" class="donation-amount-btn" data-amount="500">
-                                    $500
-                                </button>
-                            </div>
+                    <!-- Donation Amount Section -->
+                    <div class="donation-summary">
+                        <h2 class="donation-summary-title">Donation Amount</h2>
+                        
+                        <div class="donation-summary-grid">
+                            <!-- Left: Amount Selection -->
+                            <div class="donation-summary-left">
+                                <!-- Preset Amounts -->
+                                <div class="donation-amounts">
+                                    <button type="button" class="donation-amount-btn" data-amount="25">$25</button>
+                                    <button type="button" class="donation-amount-btn" data-amount="50">$50</button>
+                                    <button type="button" class="donation-amount-btn" data-amount="100">$100</button>
+                                    <button type="button" class="donation-amount-btn" data-amount="250">$250</button>
+                                    <button type="button" class="donation-amount-btn" data-amount="500">$500</button>
+                                    <button type="button" class="donation-amount-btn" data-amount="1000">$1000</button>
+                                </div>
 
-                            <!-- Custom Amount -->
-                            <div class="form-group">
-                                <label for="custom_amount">Custom Amount</label>
-                                <div class="custom-amount-input">
-                                    <span class="currency-symbol">$</span>
-                                    <input
-                                        type="number"
-                                        id="custom_amount"
-                                        name="donation_amount"
-                                        placeholder="0.00"
-                                        min="1"
-                                        step="0.01"
-                                    >
+                                <!-- Custom Amount -->
+                                <div class="form-group">
+                                    <label for="custom_amount">Custom Amount</label>
+                                    <div class="custom-amount-input">
+                                        <span class="currency-symbol">$</span>
+                                        <input
+                                            type="number"
+                                            id="custom_amount"
+                                            name="donation_amount"
+                                            placeholder="0.00"
+                                            min="1"
+                                            step="0.01"
+                                        >
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Selected Amount Display -->
-                            <div class="selected-amount-display">
-                                <div class="amount-label">Your Donation</div>
-                                <div class="amount-value" id="selected-amount">$0.00</div>
+                            <!-- Right: Amount Display & Submit -->
+                            <div class="donation-summary-right">
+                                <!-- Selected Amount Display -->
+                                <div class="selected-amount-display">
+                                    <div class="amount-label">Your Donation</div>
+                                    <div class="amount-value" id="selected-amount">$0.00</div>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <button type="submit" class="donate-submit-btn">
+                                    Complete Donation
+                                </button>
+
+                                <!-- Security Note -->
+                                <p class="security-note">
+                                    🔒 Your payment information is secure and encrypted
+                                </p>
                             </div>
-
-                            <!-- Submit Button -->
-                            <button type="submit" class="donate-submit-btn">
-                                Complete Donation
-                            </button>
-
-                            <!-- Security Note -->
-                            <p class="security-note">
-                                🔒 Your payment information is secure and encrypted
-                            </p>
                         </div>
                     </div>
                 </div>
