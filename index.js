@@ -830,7 +830,7 @@ app.post('/login', (req, res) => {
                 req.session.last_name = user.user_last_name // Saves user last name
                 req.session.user_id = user.user_id // Saves user id
                 console.log('User "', user.user_email, '" successfully logged in.'); // Logs user login in console
-                res.redirect('/'); // Sends successful login to the home page                
+                res.redirect('/dashboard'); // Sends successful login to the user dashboard              
             } else {
                 res.render('login', { error_message: 'Incorrect email or password'}); // Otherwise returns to login page with error message
             }
@@ -908,7 +908,7 @@ app.post('/register', (req, res) => {
                         req.session.email = email;
                         req.session.level = level;
                         req.session.user_id = user.user_id;
-                        res.redirect('/');
+                        res.redirect('/dashboard'); // Redirect successful account registration to new landing page
                     })
                     .catch(err => {
                         console.log('REGISTRATION ERROR:', err);
