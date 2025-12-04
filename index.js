@@ -706,36 +706,97 @@ app.get('/manage-donations/export', (req, res) => {
 // ~~~ ~~~ ~~~ ~~~ ~~~ SURVEYS ~~~ ~~~ ~~~ ~~~ ~~~ 
 app.get('/surveys', (req, res) => {
     // Get surveys for current user only
-    knex('surveys')
-        .innerJoin('registration', 'surveys.registration_id', '=', 'registration.registration_id')
-        .innerJoin('event_occurrences', 'registration.event_occurrence_id', '=', 'event_occurrences.event_occurrence_id')
+    knex('registration')
+        .leftJoin('event_occurrences', 'registration.event_occurrence_id', '=', 'event_occurrences.event_occurrence_id')
+        .leftJoin('surveys', 'registration.registration_id', '=', 'surveys.registration_id')
         .select(
+            'registration.registration_id',
+            'registration.event_occurrence_id',
+            'registration.user_id',
+            'registration.registration_status',
+            'registration.registration_attended_flag',
+            'registration.registration_check_in_time',
+            'registration.registration_created_at',
             'surveys.survey_id',
-            'surveys.overall_score',
+            'surveys.satisfaction_score',
+            'surveys.usefulness_score',
+            'surveys.instructor_score',
+            'surveys.recommendation_score',
+            'surveys.nps_bucket',
+            'surveys.survey_comments',
+            'event_occurrences.event_name',
+            'event_occurrences.event_location',
+            'event_occurrences.event_date_time_start',
+            'event_occurrences.event_date_time_end',
             'surveys.survey_submission_date',
-            'event_occurrences.event_name'
+            'surveys.overall_score'
         )
         .where('registration.user_id', req.session.user_id)
-        .orderBy('surveys.survey_submission_date', 'desc')
-        .then(survey => {
+        .orderBy('event_occurrences.event_date_time_end', 'desc') // Order by survey submission date newest to oldest
+        .then(registrations => {
+            if (registrations.length > 0) {
+                res.render('surveys', {
+                    registrations: registrations,
+                    error_message: ""
+                });
+            } else {
+                res.render('surveys', {
+                    registrations: [],
+                    error_message: 'No registrations found'
+                });
+            }
+        })
+        .catch(err => {
+            console.log('Error fetching registrations: ', err);
             res.render('surveys', {
-                survey: survey,
-                error_message: ""
-            });
-        }).catch(err => {
-            console.log('Error fetching survey information: ', err);
-            res.render('surveys', {
-                survey: [],
-                error_message: 'Error fetching survey information'
+                registrations: [],
+                error_message: 'Error fetching registrations'
             });
         });
 });
 
 // ~~~ ~~~ NEW SURVEY ~~~ ~~~
-app.get('/add-survey', (req, res) => { // Get the new survey page
-    res.render('add-survey', {
-        error_message: ""
-    });
+app.get('/add-survey/:registration_id/:event_occurrence_id', (req, res) => { // Get the new survey page
+    const registration_id = parseInt(req.params.registration_id, 10);
+    const event_occurrence_id = parseInt(req.params.event_occurrence_id, 10);
+
+    // First check if survey already exists
+    knex('surveys')
+        .where('registration_id', registration_id)
+        .first()
+        .then(survey => {
+            if (survey) {
+                return res.redirect('/surveys?error=Survey already exists');
+            }
+
+            // Fetch event occurrence data for the survey form
+            return knex('event_occurrences')
+                .where('event_occurrence_id', event_occurrence_id)
+                .first()
+                .then(eventOccurrence => {
+                    if (!eventOccurrence) {
+                        return res.redirect('/surveys?error=Event occurrence not found');
+                    }
+
+                    // Format the event date
+                    const date = new Date(eventOccurrence.event_date_time_start);
+                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    const formattedDate = months[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+
+                    res.render('add-survey', {
+                        registration_id: registration_id,
+                        event_occurrence_id: event_occurrence_id,
+                        event_name: eventOccurrence.event_name,
+                        event_date: formattedDate,
+                        event_location: eventOccurrence.event_location || 'TBD',
+                        error_message: ""
+                    });
+                });
+        })
+        .catch(err => {
+            console.log('Error fetching survey: ', err);
+            res.redirect('/surveys?error=Error loading survey form');
+        });
 });
 
 app.post('/add-survey/:registration_id', (req, res) => { // Add a new survey
@@ -745,10 +806,10 @@ app.post('/add-survey/:registration_id', (req, res) => { // Add a new survey
     // Get the current date and time
     const survey_submission_date = new Date();
     // Calculate the overall score
-    const overall_score = (satisfaction_score + usefulness_score + instructor_score + recommendation_score) / 4;
+    const overall_score = (parseFloat(satisfaction_score) + parseFloat(usefulness_score) + parseFloat(instructor_score) + parseFloat(recommendation_score)) / 4;
 
     // Determine the NPS bucket
-    const nps_bucket = recommendation_score >= 4 ? 'Promoter' : recommendation_score < 3 ? 'Detractor' : 'Passive';
+    const nps_bucket = parseInt(recommendation_score) >= 4 ? 'Promoter' : parseInt(recommendation_score) < 3 ? 'Detractor' : 'Passive';
 
     knex('surveys')
         .insert({ registration_id, overall_score, survey_submission_date, satisfaction_score, usefulness_score, instructor_score, recommendation_score, nps_bucket, survey_comments })
@@ -760,6 +821,36 @@ app.post('/add-survey/:registration_id', (req, res) => { // Add a new survey
             res.render('add-survey', {
                 error_message: 'An error occurred while creating the survey.'
             });
+        });
+});
+
+// ~~~ ~~~ DELETE SURVEY (User) ~~~ ~~~
+app.post('/surveys/:survey_id/delete', (req, res) => {
+    const survey_id = parseInt(req.params.survey_id, 10);
+
+    // First verify that the survey exists and belongs to the current user
+    knex('surveys')
+        .innerJoin('registration', 'surveys.registration_id', '=', 'registration.registration_id')
+        .where('surveys.survey_id', survey_id)
+        .where('registration.user_id', req.session.user_id)
+        .first()
+        .then(survey => {
+            if (!survey) {
+                // Survey doesn't exist or doesn't belong to user
+                return res.redirect('/surveys?error=Survey not found or you do not have permission to delete it');
+            }
+
+            // Delete only the survey (not registration or event_occurrence)
+            return knex('surveys')
+                .where('survey_id', survey_id)
+                .del()
+                .then(() => {
+                    res.redirect('/surveys');
+                });
+        })
+        .catch(err => {
+            console.log('Error deleting survey:', err);
+            res.redirect('/surveys?error=Error deleting survey. Please try again.');
         });
 });
 
