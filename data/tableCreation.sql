@@ -7,7 +7,7 @@ DROP TABLE IF EXISTS user_milestones CASCADE;
 DROP TABLE IF EXISTS milestones CASCADE;
 DROP TABLE IF EXISTS surveys CASCADE;
 DROP TABLE IF EXISTS registration CASCADE;
-DROP TABLE IF EXISTS event_occurences CASCADE;
+DROP TABLE IF EXISTS event_occurrences CASCADE;
 DROP TABLE IF EXISTS event_templates CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
@@ -70,7 +70,7 @@ CREATE TABLE registration (
     FOREIGN KEY (user_id)
         REFERENCES users(user_id),
     FOREIGN KEY (event_occurrence_id)
-        REFERENCES event_occurences(event_occurrence_id)
+        REFERENCES event_occurrences(event_occurrence_id)
 );
 
 -- 5. SURVEYS
@@ -155,7 +155,7 @@ FROM '/absolute/path/event_templates.csv'
 WITH (FORMAT csv, HEADER true);
 
 -- 3. EVENT OCCURENCES
-COPY event_occurences (
+COPY event_occurrences (
     event_occurrence_id,
     event_template_id,
     event_name,
