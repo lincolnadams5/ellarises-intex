@@ -1340,20 +1340,20 @@ h1, h2, h3 {
 
 /* About Hero Section */
 .about-hero {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    background: transparent;
     padding: 8rem 2rem 5rem;
     text-align: center;
 }
 
 .about-hero-content h1 {
     font-size: 3.5rem;
-    color: var(--color-white);
+    color: var(--color-text);
     margin-bottom: 1.5rem;
 }
 
 .about-lead {
     font-size: 1.3rem;
-    color: var(--color-white);
+    color: var(--color-text);
     max-width: 800px;
     margin: 0 auto;
     line-height: 1.8;
@@ -1383,7 +1383,7 @@ h1, h2, h3 {
 .mission-box h2,
 .vision-box h2 {
     font-size: 2rem;
-    color: var(--color-secondary);
+    color: var(--color-text);
     margin-bottom: 1.5rem;
 }
 
@@ -1396,7 +1396,7 @@ h1, h2, h3 {
 
 /* Programs Detailed Section */
 .programs-detailed {
-    background-color: var(--color-soft-white);
+    background-color: transparent;
     padding: 5rem 2rem;
 }
 
@@ -1475,7 +1475,7 @@ h1, h2, h3 {
 
 /* Contact Section */
 .contact-section {
-    background-color: var(--color-white);
+    background-color: transparent;
     padding: 5rem 2rem;
 }
 
@@ -1657,20 +1657,20 @@ h1, h2, h3 {
 
 /* Events Hero Section */
 .events-hero {
-    background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-primary) 100%);
+    background: transparent;
     padding: 8rem 2rem 4rem;
     text-align: center;
 }
 
 .events-hero-content h1 {
     font-size: 3.5rem;
-    color: var(--color-white);
+    color: var(--color-text);
     margin-bottom: 1rem;
 }
 
 .events-lead {
     font-size: 1.3rem;
-    color: var(--color-white);
+    color: var(--color-text);
     max-width: 800px;
     margin: 0 auto;
     line-height: 1.8;
@@ -1678,7 +1678,7 @@ h1, h2, h3 {
 
 /* Events List Section */
 .events-list {
-    background-color: var(--color-tertiary-bkgd);
+    background-color: transparent;
     padding: 4rem 2rem;
 }
 
@@ -1851,7 +1851,7 @@ h1, h2, h3 {
 
 /* Events CTA Section */
 .events-cta {
-    background-color: var(--color-white);
+    background-color: transparent;
     padding: 4rem 2rem;
     text-align: center;
 }
