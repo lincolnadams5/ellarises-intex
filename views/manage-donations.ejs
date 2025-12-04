@@ -11,45 +11,52 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar">
+    <nav class="navbar navbar-static">
         <div class="nav-container">
             <ul class="nav-menu">
-                <li><a href="/events">Events</a></li>
-                <li><a href="/about">About</a></li>
+                <!-- Dashboard Dropdown (only when logged in) -->
+                <% if (isLoggedIn) { %>
+                    <li class="nav-dropdown">
+                        <a href="/dashboard" class="nav-dropdown-trigger">Dashboard</a>
+                        <div class="nav-dropdown-content">
+                            <a href="/milestone-progress">Milestone Progress</a>
+                            <a href="/surveys">Surveys</a>
+                        </div>
+                    </li>
+                <% } %>
+                <!-- Events Dropdown -->
+                <li class="nav-dropdown">
+                    <a href="/events" class="nav-dropdown-trigger">Events</a>
+                    <div class="nav-dropdown-content">
+                        <a href="/events?filter=upcoming">Upcoming Events</a>
+                        <a href="/events?filter=past">Past Events</a>
+                    </div>
+                </li>
+                <!-- About Dropdown -->
+                <li class="nav-dropdown">
+                    <a href="/about" class="nav-dropdown-trigger">About</a>
+                    <div class="nav-dropdown-content">
+                        <a href="/about#mission-vision">Mission & Vision</a>
+                        <a href="/about#programs">Programs</a>
+                        <a href="/about#mariachi">Mariachi</a>
+                        <a href="/about#ballet">Ballet Folklorico</a>
+                        <a href="/about#steam">STEAM Workshops</a>
+                        <a href="/about#summit">Ella Rises Summit</a>
+                        <a href="/about#contact">Contact Us</a>
+                    </div>
+                </li>
                 <li><a href="/donate">Donate</a></li>
             </ul>
             <div class="nav-logo">
                 <h1><a href="/" style="text-decoration: none; color: inherit;">ELLA RISES</a></h1>
             </div>
-            <% if (isLoggedIn && level === 'admin') { %>
+            <% if (isLoggedIn) { %>
                 <div class="nav-auth">
                     <div class="user-dropdown">
                         <button class="user-dropdown-btn">
                             <%= first_name %> <%= last_name %> ▼
                         </button>
                         <div class="user-dropdown-content">
-                            <a href="/manage-donations">Manage Donations</a>
-                            <a href="/manage-milestones">Manage Milestones</a>
-                            <a href="/manage-surveys">Survey Results</a>
-                            <a href="/manage-events">Manage Events</a>
-                            <a href="/manage-participants">Participants</a>
-                            <a href="/account-info">Account Info</a>
-                            <form action="/logout" method="POST" class="dropdown-logout-form">
-                                <button type="submit" class="dropdown-logout-btn">Logout</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            <% } else if (isLoggedIn) { %>
-                <div class="nav-auth">
-                    <div class="user-dropdown">
-                        <button class="user-dropdown-btn">
-                            <%= first_name %> <%= last_name %> ▼
-                        </button>
-                        <div class="user-dropdown-content">
-                            <a href="/my-donations">My Donations</a>
-                            <a href="/milestone-progress">Milestone Progress</a>
-                            <a href="/surveys">Surveys</a>
                             <a href="/account-info">Account Info</a>
                             <form action="/logout" method="POST" class="dropdown-logout-form">
                                 <button type="submit" class="dropdown-logout-btn">Logout</button>
@@ -62,7 +69,7 @@
                     <a href="/login" class="btn-signin">Sign In</a>
                     <a href="/register" class="btn-signup">Sign Up</a>
                 </div>
-            <% }; %>
+            <% } %>
         </div>
     </nav>
 

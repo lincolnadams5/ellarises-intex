@@ -705,6 +705,14 @@ app.get('/manage-participants', (req, res) => {
 
 app.get('/manage-participants/new', (req, res) => {
     res.render('add-participant', {
+      error_message: ""
+    });
+});
+
+// ~~~ ~~~ ~~~ ~~~ ~~~ Dashboard ~~~ ~~~ ~~~ ~~~ ~~~ 
+app.get('/dashboard', (req, res) => {
+    // Render the user dashboard/landing page
+    res.render('user-home', {
         error_message: ""
     });
 });
