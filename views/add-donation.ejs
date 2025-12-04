@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Donation - Ella Rises</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <ul class="nav-menu">
+                <li><a href="/events">Events</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/donate">Donate</a></li>
+            </ul>
+            <div class="nav-logo">
+                <h1><a href="/" style="text-decoration: none; color: inherit;">ELLA RISES</a></h1>
+            </div>
+        </div>
+    </nav>
+
+    <div class="manage-donations-container">
+        <div class="manage-donations-wrapper">
+            <div class="manage-donations-header">
+                <h1 class="manage-donations-title">Add Donation</h1>
+                <p class="manage-donations-subtitle">Create a new donation record</p>
+            </div>
+
+            <% if (typeof error_message !== 'undefined' && error_message && error_message.length > 0) { %>
+                <div class="error-message"><%= error_message %></div>
+            <% } %>
+
+            <form action="/manage-donations/new" method="POST" class="form">
+                <div class="form-group">
+                    <label for="user_id">User ID</label>
+                    <input type="number" id="user_id" name="user_id" min="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="donation_amount">Amount (USD)</label>
+                    <input type="number" id="donation_amount" name="donation_amount" step="0.01" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="donation_date">Donation Date</label>
+                    <input type="date" id="donation_date" name="donation_date" required>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Save Donation</button>
+                    <a href="/manage-donations" class="btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+
+

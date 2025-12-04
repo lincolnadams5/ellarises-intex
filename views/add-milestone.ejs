@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Milestone - Ella Rises</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <ul class="nav-menu">
+                <li><a href="/events">Events</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/donate">Donate</a></li>
+            </ul>
+            <div class="nav-logo">
+                <h1><a href="/" style="text-decoration: none; color: inherit;">ELLA RISES</a></h1>
+            </div>
+        </div>
+    </nav>
+
+    <div class="manage-donations-container">
+        <div class="manage-donations-wrapper">
+            <div class="manage-donations-header">
+                <h1 class="manage-donations-title">Add Milestone</h1>
+                <p class="manage-donations-subtitle">Create a new milestone</p>
+            </div>
+
+            <% if (typeof error_message !== 'undefined' && error_message && error_message.length > 0) { %>
+                <div class="error-message"><%= error_message %></div>
+            <% } %>
+
+            <form action="/manage-milestones/new" method="POST" class="form">
+                <div class="form-group">
+                    <label for="milestone_title">Milestone Title</label>
+                    <input type="text" id="milestone_title" name="milestone_title" required>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Save Milestone</button>
+                    <a href="/manage-milestones" class="btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+
+
