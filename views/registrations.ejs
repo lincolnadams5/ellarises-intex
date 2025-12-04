@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrations - Ella Rises</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-static">
+        <div class="nav-container">
+            <ul class="nav-menu">
+                <!-- Events Dropdown -->
+                <li class="nav-dropdown">
+                    <a href="/events" class="nav-dropdown-trigger">Events</a>
+                    <div class="nav-dropdown-content">
+                        <a href="/events?filter=upcoming">Upcoming Events</a>
+                        <a href="/events?filter=past">Past Events</a>
+                    </div>
+                </li>
+                <!-- About Dropdown -->
+                <li class="nav-dropdown">
+                    <a href="/about" class="nav-dropdown-trigger">About</a>
+                    <div class="nav-dropdown-content">
+                        <a href="/about#mission-vision">Mission & Vision</a>
+                        <a href="/about#programs">Programs</a>
+                        <a href="/about#mariachi">Mariachi</a>
+                        <a href="/about#ballet">Ballet Folklorico</a>
+                        <a href="/about#steam">STEAM Workshops</a>
+                        <a href="/about#summit">Ella Rises Summit</a>
+                        <a href="/about#contact">Contact Us</a>
+                    </div>
+                </li>
+                <li><a href="/donate">Donate</a></li>
+            </ul>
+            <div class="nav-logo">
+                <h1><a href="/" style="text-decoration: none; color: inherit;">ELLA RISES</a></h1>
+            </div>
+            <% if (isLoggedIn) { %>
+                <div class="nav-auth">
+                    <div class="user-dropdown">
+                        <button class="user-dropdown-btn">
+                            <%= first_name %> <%= last_name %> ▼
+                        </button>
+                        <div class="user-dropdown-content">
+                            <a href="/dashboard">User Dashboard</a>
+                            <a href="/account-info">Account Info</a>
+                            <form action="/logout" method="POST" class="dropdown-logout-form">
+                                <button type="submit" class="dropdown-logout-btn">Logout</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="nav-auth">
+                    <a href="/login" class="btn-signin">Sign In</a>
+                    <a href="/register" class="btn-signup">Sign Up</a>
+                </div>
+            <% } %>
+        </div>
+    </nav>
+
+    <!-- Registrations Container -->
+    <div class="manage-donations-container">
+        <div class="manage-donations-wrapper">
+            <!-- Page Header -->
+            <div class="manage-donations-header">
+                <h1 class="manage-donations-title">Your Registrations</h1>
+                <p class="manage-donations-subtitle">View your registered events</p>
+            </div>
+            <!-- Error Message Display -->
+            <% if (typeof error_message !== 'undefined' && error_message && error_message.length > 0) { %>
+                <div class="error-message">
+                    <%= error_message %>
+                </div>
+            <% } %>
+            <!-- Registrations Table -->
+            <% if (registrations && registrations.length > 0) { %>
+                <div class="donations-table-container">
+                    <table class="donations-table">
+                        <thead>
+                            <tr>
+                                <th>Event Name</th>
+                                <th>Event Date</th>
+                                <th>Registration Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% registrations.forEach(function(registration) { %>
+                                <tr>
+                                    <td><%= registration.event_name %></td>
+                                    <td>
+                                        <% 
+                                            const dateStart = new Date(registration.event_date_time_start);
+                                            const dateEnd = new Date(registration.event_date_time_end);
+                                            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                                            // Helper for 12-hour time with am/pm
+                                            function formatTime(dateObj) {
+                                                let hours = dateObj.getHours();
+                                                let minutes = dateObj.getMinutes();
+                                                let ampm = hours >= 12 ? 'PM' : 'AM';
+                                                hours = hours % 12;
+                                                hours = hours ? hours : 12; // the hour '0' should be '12'
+                                                minutes = minutes < 10 ? '0' + minutes : minutes;
+                                                return hours + ':' + minutes + ' ' + ampm;
+                                            }
+                                            const formattedDate = months[dateEnd.getMonth()] + ' ' + dateEnd.getDate() + ', ' + dateEnd.getFullYear();
+                                            const startTime = formatTime(dateStart);
+                                        %>
+                                        <% 
+                                            // Get short timezone string, e.g., "PDT", "MST"
+                                            function getShortTimezone(dateObj) {
+                                                const full = dateObj.toLocaleTimeString('en-us', { timeZoneName: 'short' });
+                                                const match = full.match(/([A-Z]{2,5})$/);
+                                                return match ? match[1] : '';
+                                            }
+                                            const timezone = getShortTimezone(dateEnd);
+                                        %>
+                                        <span style="color: #888;">
+                                            <%= formattedDate %> @ <%= startTime %> <%= timezone %>
+                                        </span>
+                                    </td>
+                                <td>
+                                    <% if (registration.registration_status !== 'cancelled' && registration.registration_status !== 'attended' && registration.registration_status !== 'no-show') { %>
+                                        <div style="display: flex; justify-content: flex-end;">
+                                            <form action="/registrations/<%= registration.registration_id %>/cancel" method="POST" style="display:inline;">
+                                                <button type="submit"
+                                                    class="btn-cancel-registration"
+                                                    style="background-color:#dc3545; color:white; border:none; padding:7px 16px; border-radius:4px; font-size:1em; cursor:pointer; transition:background 0.2s;"
+                                                    onclick="return confirm('Are you sure you want to cancel this registration?');"
+                                                >
+                                                    Cancel Registration
+                                                </button>
+                                            </form>
+                                        </div>
+                                    <% } else if (registration.registration_status === 'cancelled') { %>
+                                        <span style="color: #888;">Cancelled</span>
+                                    <% } else if (registration.registration_status === 'attended') { %>
+                                        <span style="color: #28a745; font-weight: 600;">Attended</span>
+                                    <% } else if (registration.registration_status === 'no-show') { %>
+                                        <span style="color: #888;">No-Show</span>
+                                    <% } else { %>
+                                        <span style="color: #888;">Registered</span>
+                                    <% } %>
+                                </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <div class="empty-state">
+                    <p class="empty-state-message">No registrations found.</p>
+                </div>
+            <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Ella Rises</h3>
+                <p>Empowering young women through culturally rooted educational programs.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/events">Event Information</a></li>
+                    <li><a href="/about">About Us</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Programs</h4>
+                <ul>
+                    <li><a href="#">Mariachi</a></li>
+                    <li><a href="#">Ballet Folklorico</a></li>
+                    <li><a href="#">STEAM Workshops</a></li>
+                    <li><a href="#">Ella Rises Summit</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Get Involved</h4>
+                <ul>
+                    <li><a href="#">Volunteer</a></li>
+                    <li><a href="/donate">Donate</a></li>
+                    <li><a href="#">Sponsor</a></li>
+                    <li><a href="#">Newsletter</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Ella Rises. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
