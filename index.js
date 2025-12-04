@@ -25,10 +25,10 @@ const knex = require("knex")(knexConfig[environment]);
 // Initialize session
 app.use(
     session({ 
-    secret: process.env.SESSION_SECRET || 'secret',
-    resave: false,
-    saveUninitialized: false
-  })
+        secret: process.env.SESSION_SECRET || 'secret',
+        resave: false,
+        saveUninitialized: false
+    })
 );
 
 // ========== MIDDLEWARE ==========
@@ -36,6 +36,7 @@ app.use(
 // Makes session variables automatically available on each EJS view without having to pass them individually through each route
 app.use((req, res, next) => {
     res.locals.isLoggedIn = req.session.isLoggedIn || false;
+    res.locals.user_id = req.session.user_id || '';
     res.locals.email = req.session.email || '';
     res.locals.level = req.session.level || '';
     res.locals.first_name = req.session.first_name || '';
@@ -46,7 +47,7 @@ app.use((req, res, next) => {
 // ~~~~~ Global Authentication ~~~~~
 app.use((req, res, next) => {
     // Skip authentication for login routes
-    let public_routes = ['/', '/login', '/register', '/about', '/events', '/donate', '/analytics'];
+    let public_routes = ['/', '/login', '/register', '/about', '/events', '/donate', '/analytics', '/teapot'];
     if (public_routes.includes(req.path)) {
         return next();
     }
@@ -121,6 +122,10 @@ app.get('/analytics', (req, res) => {
     res.render('analytics-dashboard', { error_message: "" });
 });
 
+app.get('/teapot', (req, res) => {
+    res.status(418).render('teapot');
+});
+
 // ~~~ ~~~ ~~~ ~~~ ~~~ EVENTS ~~~ ~~~ ~~~ ~~~ ~~~ 
 app.get('/events', (req, res) => {
     res.render('events', { error_message: "" });
@@ -166,6 +171,57 @@ app.get('/manage-events', (req, res) => {
         }).catch(err => {
             console.log('Error fetching event information: ', err);
             res.render('manage-events', {
+                event: [],
+                currentPage: page,
+                totalPages: 0,
+                totalCount: 0,
+                error_message: 'Error fetching event information'
+            });
+        });
+});
+
+app.get('/manage-event-occurrences', (req, res) => {
+    // Pagination logic
+    const page = parseInt(req.query.page, 10) || 1;
+    const perPage = 20;
+    const offset = (page - 1) * perPage;
+    
+    // Get error message from query parameter if present
+    const errorMessage = req.query.error || "";
+
+    // Query for the current page of events
+    const eventsQuery = knex('event_occurrences')
+        .select(
+            'event_occurrences.event_occurrence_id',
+            'event_occurrences.event_template_id',
+            'event_occurrences.event_name',
+            'event_occurrences.event_date_time_start',
+            'event_occurrences.event_date_time_end',
+            'event_occurrences.event_location',
+            'event_occurrences.event_capacity',
+            'event_occurrences.event_registration_deadline'
+        )
+        .orderBy('event_occurrences.event_date_time_start')
+        .limit(perPage)
+        .offset(offset)
+
+    const countQuery = getCount('event_occurrences')
+
+    Promise.all([eventsQuery, countQuery])
+        .then(([events, countResult]) => {
+            const totalCount = parseInt(countResult.count, 10);
+            const totalPages = Math.ceil(totalCount / perPage);
+
+            res.render('manage-event-occurrences', {
+                event: events,
+                currentPage: page,
+                totalPages,
+                totalCount,
+                error_message: errorMessage
+            });
+        }).catch(err => {
+            console.log('Error fetching event information: ', err);
+            res.render('manage-event-occurrences', {
                 event: [],
                 currentPage: page,
                 totalPages: 0,
@@ -857,6 +913,76 @@ app.post('/surveys/:survey_id/delete', (req, res) => {
             console.log('Error deleting survey:', err);
             res.redirect('/surveys?error=Error deleting survey. Please try again.');
         });
+});
+
+// ~~~ ~~~ ~~~ ~~~ ~~~ REGISTRATIONS ~~~ ~~~ ~~~ ~~~ ~~~ 
+app.get('/registrations/:user_id', (req, res) => {
+    const user_id = parseInt(req.params.user_id, 10);
+    // Get registrations for current user only
+    knex('registration')
+        .innerJoin('event_occurrences', 'registration.event_occurrence_id', '=', 'event_occurrences.event_occurrence_id')
+        .select(
+            'registration.registration_id',
+            'registration.event_occurrence_id',
+            'registration.user_id',
+            'registration.registration_status',
+            'registration.registration_attended_flag',
+            'registration.registration_check_in_time',
+            'registration.registration_created_at',
+            'event_occurrences.event_name',
+            'event_occurrences.event_location',
+            'event_occurrences.event_date_time_start',
+            'event_occurrences.event_date_time_end'
+        )
+        .where('registration.user_id', user_id)
+        .orderBy('event_occurrences.event_date_time_end', 'desc')
+        .then(registrations => {
+            if (registrations.length > 0) {
+                res.render('registrations', {
+                    registrations: registrations,
+                    error_message: "",
+                    user_id: user_id
+                });
+            } else {
+                res.render('registrations', {
+                    registrations: [],
+                    error_message: "",
+                    user_id: user_id
+                });
+            }
+        }).catch(err => {
+            console.log('Error fetching registrations: ', err);
+            res.render('registrations', {
+                registrations: [],
+                error_message: 'Error fetching registrations',
+                user_id: user_id
+            });
+        });
+});
+
+app.post('/registrations/:registration_id/cancel', (req, res) => {
+    const registration_id = parseInt(req.params.registration_id, 10);
+    knex('registration')
+        .where('registration_id', registration_id)
+        .first()
+        .then(registration => {
+            if (!registration) {
+                return res.redirect('/registrations?error=Registration does not exist');
+            }
+            // Cancel the registration
+            return knex('registration')
+                .where('registration_id', registration_id)
+                .update({
+                    registration_status: 'Cancelled'
+                })
+                .then(() => {
+                    res.redirect(`/registrations/${registration.user_id}`);
+                });
+        })
+        .catch(err => {
+            console.log('Error canceling registration: ', err);
+            res.redirect('/registrations?error=Error canceling registration. Please try again');
+        })
 });
 
 // ~~~ ~~~ MANAGE SURVEYS ~~~ ~~~

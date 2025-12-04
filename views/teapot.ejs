@@ -3,13 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Participant - Ella Rises</title>
+    <title>418 I'm a Teapot - Ella Rises</title>
     <link rel="stylesheet" href="/styles/main.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+    <style>
+        /* Minimal teapot-specific styles using site variables */
+        .teapot-section {
+            min-height: calc(100vh - 200px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .teapot-icon {
+            font-size: 8rem;
+            margin-bottom: 1rem;
+            animation: teapot-wobble 2s ease-in-out infinite;
+        }
+
+        @keyframes teapot-wobble {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+    </style>
 </head>
 <body>
+
     <!-- Navigation -->
     <nav class="navbar navbar-static">
         <div class="nav-container">
@@ -64,58 +89,57 @@
         </div>
     </nav>
 
-    <!-- Breadcrumb -->
-    <div class="breadcrumb">
-        <a href="/surveys">← Back to My Surveys</a>
-    </div>
+    <section class="teapot-section">
+        <div class="teapot-icon">🫖</div>
+        <h1 style="font-size: 4rem; margin-bottom: 0.5rem;">418</h1>
+        <h2 style="margin-bottom: 2rem;">I'm a Teapot</h2>
+        <p style="max-width: 500px; margin-bottom: 2rem; line-height: 1.6; color: var(--color-text-light);">
+            The server refuses to brew coffee because it is, permanently, a teapot. 
+            This error is a reference to the Hyper Text Coffee Pot Control Protocol (HTCPCP/1.0).
+        </p>
+        <a href="/" class="btn-primary">Return Home</a>
+    </section>
 
-    <div class="manage-donations-container">
-        <div class="manage-donations-wrapper">
-            <div class="manage-donations-header">
-                <!-- <h1 class="manage-donations-title"><%= event_name %> Survey</h1>
-                <p class="manage-donations-subtitle"><%= event_date %> at <%= event_location %></p> -->
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Ella Rises</h3>
+                <p>Empowering young women through culturally rooted educational programs.</p>
             </div>
-
-            <% if (typeof error_message !== 'undefined' && error_message && error_message.length > 0) { %>
-                <div class="error-message"><%= error_message %></div>
-            <% } %>
-
-            <form action="/add-survey/<%= registration_id %>" method="POST" class="form">
-                <div class="form-group">
-                    <label for="satisfaction_score">How would you rate your overall satisfaction with the event?</label>
-                    <input type="number" id="satisfaction_score" name="satisfaction_score" min="1" max="5" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="usefulness_score">How useful was the event for you?</label>
-                    <input type="number" id="usefulness_score" name="usefulness_score" min="1" max="5" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="instructor_score">How would you rate the instructors?</label>
-                    <input type="number" id="instructor_score" name="instructor_score" min="1" max="5" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="recommendation_score">Would you recommend this event to a friend or colleague?</label>
-                    <select id="recommendation_score" name="recommendation_score" required>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                    </select>
-                    <label for="survey_comments">Comments</label>
-                    <textarea id="survey_comments" name="survey_comments" rows="4" required></textarea>
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn-primary">Submit Response</button>
-                    <a href="/surveys" class="btn-secondary">Cancel</a>
-                </div>
-            </form>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">Event Information</a></li>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="/teapot">Teapot</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Programs</h4>
+                <ul>
+                    <li><a href="#">Mariachi</a></li>
+                    <li><a href="#">Ballet Folklorico</a></li>
+                    <li><a href="#">STEAM Workshops</a></li>
+                    <li><a href="#">Ella Rises Summit</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Get Involved</h4>
+                <ul>
+                    <li><a href="#">Volunteer</a></li>
+                    <li><a href="#">Donate</a></li>
+                    <li><a href="#">Sponsor</a></li>
+                    <li><a href="#">Newsletter</a></li>
+                </ul>
+            </div>
         </div>
-    </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Ella Rises. All rights reserved.</p>
+        </div>
+    </footer>
 
     <script>
         // User dropdown functionality

@@ -1482,6 +1482,10 @@ h1, h2, h3 {
 .contact-container {
     max-width: 1200px;
     margin: 0 auto;
+    background-color: var(--color-white);
+    padding: 3rem;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .contact-header {
@@ -1627,6 +1631,10 @@ h1, h2, h3 {
         grid-template-columns: 1fr;
         gap: 3rem;
     }
+
+    .contact-container {
+        padding: 2rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1650,6 +1658,10 @@ h1, h2, h3 {
     .program-detailed-card {
         padding: 1.5rem;
         margin-bottom: 2rem;
+    }
+
+    .contact-container {
+        padding: 1.5rem;
     }
 }
 
@@ -1966,9 +1978,9 @@ h1, h2, h3 {
 
 /* Donate Form Grid */
 .donate-form-grid {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
     background-color: var(--color-white);
     padding: 3rem;
     border-radius: 20px;
@@ -2022,13 +2034,7 @@ h1, h2, h3 {
     gap: 1rem;
 }
 
-/* Donate Form Right Column */
-.donate-form-right {
-    position: sticky;
-    top: 100px;
-    align-self: start;
-}
-
+/* Donation Summary Section */
 .donation-summary {
     background-color: var(--color-soft-white);
     padding: 2rem;
@@ -2041,13 +2047,32 @@ h1, h2, h3 {
     color: var(--color-text);
     margin-bottom: 1.5rem;
     font-family: var(--font-display);
-    text-align: center;
+}
+
+/* Donation Summary Grid - Two Column Layout */
+.donation-summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+.donation-summary-left {
+    display: flex;
+    flex-direction: column;
+}
+
+.donation-summary-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
 }
 
 /* Donation Amount Buttons */
 .donation-amounts {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 0.75rem;
     margin-bottom: 1.5rem;
 }
@@ -2112,7 +2137,7 @@ h1, h2, h3 {
 
 /* Selected Amount Display */
 .selected-amount-display {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    background: var(--color-primary);
     padding: 1.5rem;
     border-radius: 10px;
     text-align: center;
@@ -2121,7 +2146,7 @@ h1, h2, h3 {
 
 .amount-label {
     font-size: 0.9rem;
-    color: var(--color-white);
+    color: var(--color-text);
     opacity: 0.9;
     margin-bottom: 0.5rem;
     text-transform: uppercase;
@@ -2131,7 +2156,7 @@ h1, h2, h3 {
 .amount-value {
     font-size: 2.5rem;
     font-weight: 700;
-    color: var(--color-white);
+    color: var(--color-text);
     font-family: var(--font-display);
 }
 
@@ -2172,13 +2197,9 @@ h1, h2, h3 {
 
 /* Donate Page Responsive Design */
 @media (max-width: 968px) {
-    .donate-form-grid {
+    .donation-summary-grid {
         grid-template-columns: 1fr;
-        gap: 2rem;
-    }
-
-    .donate-form-right {
-        position: static;
+        gap: 1.5rem;
     }
 
     .donation-amounts {
@@ -2205,6 +2226,10 @@ h1, h2, h3 {
 
     .donation-amounts {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    .donation-summary-grid {
+        grid-template-columns: 1fr;
     }
 
     .card-details-container {
@@ -3164,5 +3189,76 @@ ANALYTICS DASHBOARD PAGE
         padding: 0.5rem;
         border-radius: 8px;
     }
+}
+
+/* Event Management Styles */
+.btn-create-event {
+    margin: 2rem 0;
+    display: inline-block;
+}
+
+.delete-form {
+    display: inline-block;
+    margin-left: 10px;
+}
+
+.btn-delete {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-delete:hover {
+    background-color: #c82333;
+}
+
+.event-details-container {
+    padding: 20px 0;
+}
+
+.detail-row {
+    margin-bottom: 15px;
+}
+
+.detail-label {
+    display: inline-block;
+    width: 180px;
+}
+
+.detail-label-top {
+    vertical-align: top;
+}
+
+.detail-description {
+    display: inline-block;
+    max-width: 400px;
+    word-wrap: break-word;
+}
+
+/* ========== BREADCRUMB NAVIGATION ========== */
+.breadcrumb {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+}
+
+.breadcrumb a {
+    color: var(--color-text-light);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.breadcrumb a:hover {
+    color: var(--color-text);
+}
+
+.breadcrumb span {
+    color: var(--color-text-light);
+    font-size: 0.95rem;
 }
 

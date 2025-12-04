@@ -65,13 +65,18 @@
         </div>
     </nav>
 
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a href="/dashboard">← Back to Dashboard</a>
+    </div>
+
     <!-- Main Content -->
     <div class="manage-donations-container">
         <div class="manage-donations-wrapper">
             <!-- Page Header -->
             <div class="manage-donations-header">
-                <h1 class="manage-donations-title">Manage Events</h1>
-                <p class="manage-donations-subtitle">View all events</p>
+                <h1 class="manage-donations-title">Manage Event Templates</h1>
+                <p class="manage-donations-subtitle">View all event templates</p>
             </div>
 
             <!-- Error Message Display -->
@@ -80,8 +85,8 @@
                     <%= error_message %>
                 </div>
             <% } %>
-            <a href="/manage-events/new" class="btn-primary">
-                + Create Event
+            <a href="/manage-events/new" class="btn-primary btn-create-event">
+                + Create New Event Template
             </a>
             <!-- Events Table -->
             <% if (event && event.length > 0) { %>
@@ -111,31 +116,14 @@
                                     <td><%= event.event_type %></td>
                                     <td><%= event.event_recurrence_pattern %></td>
                                     <td>
-                                        <button
-                                            type="button"
-                                            onclick="event.stopPropogation();"
-                                            >
-                                            View Instances
-                                        </button>
-                                        <button
-                                            type="button"
-                                            class="btn-add-instance"
-                                            data-template-id="<%= event.event_template_id %>"
-                                            data-event-name="<%= event.event_name %>"
-                                            onclick="event.stopPropagation();"
-                                        >
-                                            + add instance
-                                        </button>
                                         <form 
                                             action="/manage-events/<%= event.event_template_id %>/delete" 
                                             method="POST" 
-                                            style="display: inline-block; margin-left: 10px;"
+                                            class="delete-form"
                                             onsubmit="return confirm('Are you sure you want to delete this event template? This will also delete all related event occurrences.');"
                                             onclick="event.stopPropagation();"
                                         >
-                                            <button type="submit" class="btn-delete" style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
-                                                Delete
-                                            </button>
+                                            <button type="submit" class="btn-delete">Delete</button>
                                         </form>
                                     </td>
                                 </tr>
@@ -215,71 +203,31 @@
             <div id="view-details-modal" class="modal hidden">
                 <div class="modal-content">
                     <h2>Event Template Details</h2>
-                    <div class="event-details-container" style="padding: 20px 0;">
-                        <div class="detail-row" style="margin-bottom: 15px;">
-                            <strong style="display: inline-block; width: 180px;">Event Name:</strong>
+                    <div class="event-details-container">
+                        <div class="detail-row">
+                            <strong class="detail-label">Event Name:</strong>
                             <span id="detail-event-name"></span>
                         </div>
-                        <div class="detail-row" style="margin-bottom: 15px;">
-                            <strong style="display: inline-block; width: 180px;">Event Type:</strong>
+                        <div class="detail-row">
+                            <strong class="detail-label">Event Type:</strong>
                             <span id="detail-event-type"></span>
                         </div>
-                        <div class="detail-row" style="margin-bottom: 15px;">
-                            <strong style="display: inline-block; width: 180px;">Recurrence Pattern:</strong>
+                        <div class="detail-row">
+                            <strong class="detail-label">Recurrence Pattern:</strong>
                             <span id="detail-event-recurrence"></span>
                         </div>
-                        <div class="detail-row" style="margin-bottom: 15px;">
-                            <strong style="display: inline-block; width: 180px;">Default Capacity:</strong>
+                        <div class="detail-row">
+                            <strong class="detail-label">Default Capacity:</strong>
                             <span id="detail-event-capacity"></span>
                         </div>
-                        <div class="detail-row" style="margin-bottom: 15px;">
-                            <strong style="display: inline-block; width: 180px; vertical-align: top;">Description:</strong>
-                            <span id="detail-event-description" style="display: inline-block; max-width: 400px; word-wrap: break-word;"></span>
+                        <div class="detail-row">
+                            <strong class="detail-label detail-label-top">Description:</strong>
+                            <span id="detail-event-description" class="detail-description"></span>
                         </div>
                     </div>
                     <div class="modal-actions">
                         <button type="button" id="close-details" class="btn-secondary">Close</button>
                     </div>
-                </div>
-            </div>
-
-            <!-- Add Instance Modal -->
-            <div id="add-instance-modal" class="modal hidden">
-                <div class="modal-content">
-                    <h2>Create Event Instance</h2>
-                    <form id="add-instance-form" method="POST">
-                        <input type="hidden" name="event_name" id="instance_event_name">
-
-                        <div class="form-group">
-                            <label for="event_date_time_start">Start Date &amp; Time</label>
-                            <input type="datetime-local" id="event_date_time_start" name="event_date_time_start" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="event_date_time_end">End Date &amp; Time</label>
-                            <input type="datetime-local" id="event_date_time_end" name="event_date_time_end" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="event_location">Location</label>
-                            <input type="text" id="event_location" name="event_location" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="event_capacity">Capacity</label>
-                            <input type="number" id="event_capacity" name="event_capacity" min="0">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="event_registration_deadline">Registration Deadline</label>
-                            <input type="datetime-local" id="event_registration_deadline" name="event_registration_deadline">
-                        </div>
-
-                        <div class="modal-actions">
-                            <button type="submit" class="btn-primary">Save Instance</button>
-                            <button type="button" id="cancel-instance" class="btn-secondary">Cancel</button>
-                        </div>
-                    </form>
                 </div>
             </div>
         </div>
@@ -300,6 +248,7 @@
                     <li><a href="/events">Event Information</a></li>
                     <li><a href="/about">About Us</a></li>
                     <li><a href="/about#contact">Contact</a></li>
+                    <li><a href="/teapot">Teapot</a></li>
                 </ul>
             </div>
             <div class="footer-section">
@@ -327,8 +276,8 @@
     </footer>
 
     <script>
-        // User dropdown functionality and Add Instance modal logic
         document.addEventListener('DOMContentLoaded', function() {
+            // User dropdown functionality
             const userDropdown = document.querySelector('.user-dropdown');
             const dropdownBtn = document.querySelector('.user-dropdown-btn');
             
@@ -339,72 +288,22 @@
                 });
             }
             
-            // Close dropdown when clicking outside
             document.addEventListener('click', function(e) {
                 if (userDropdown && !userDropdown.contains(e.target)) {
                     userDropdown.classList.remove('active');
                 }
             });
-    
-            // Add Instance modal logic
-            const addInstanceButtons = document.querySelectorAll('.btn-add-instance');
-            const modal = document.getElementById('add-instance-modal');
-            const form = document.getElementById('add-instance-form');
-            const eventNameInput = document.getElementById('instance_event_name');
-            const cancelBtn = document.getElementById('cancel-instance');
-    
-            if (modal && form && eventNameInput && addInstanceButtons.length > 0) {
-                addInstanceButtons.forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const templateId = this.getAttribute('data-template-id');
-                        const eventName = this.getAttribute('data-event-name');
-    
-                        // Set form action to the correct POST route including template_id
-                        form.action = '/manage-events/' + templateId + '/new';
-    
-                        // Pre-fill hidden event name field
-                        eventNameInput.value = eventName;
-    
-                        // Show modal
-                        modal.classList.remove('hidden');
-                    });
-                });
-    
-                if (cancelBtn) {
-                    cancelBtn.addEventListener('click', function() {
-                        modal.classList.add('hidden');
-                    });
-                }
-    
-                // Optional: close modal when clicking outside content
-                modal.addEventListener('click', function(e) {
-                    if (e.target === modal) {
-                        modal.classList.add('hidden');
-                    }
-                });
-            }
 
             // View Details modal logic
             const detailsModal = document.getElementById('view-details-modal');
             const closeDetailsBtn = document.getElementById('close-details');
 
-            // Function to populate and show the details modal
             function showEventDetails(row) {
-                // Get all data attributes from the row
-                const eventName = row.getAttribute('data-event-name');
-                const eventType = row.getAttribute('data-event-type');
-                const eventDescription = row.getAttribute('data-event-description');
-                const eventRecurrence = row.getAttribute('data-event-recurrence');
-                const eventCapacity = row.getAttribute('data-event-capacity');
-
-                // Populate modal with data
-                document.getElementById('detail-event-name').textContent = eventName;
-                document.getElementById('detail-event-type').textContent = eventType;
-                document.getElementById('detail-event-description').textContent = eventDescription;
-                document.getElementById('detail-event-recurrence').textContent = eventRecurrence;
-                document.getElementById('detail-event-capacity').textContent = eventCapacity;
-
-                // Show modal
+                document.getElementById('detail-event-name').textContent = row.getAttribute('data-event-name');
+                document.getElementById('detail-event-type').textContent = row.getAttribute('data-event-type');
+                document.getElementById('detail-event-description').textContent = row.getAttribute('data-event-description');
+                document.getElementById('detail-event-recurrence').textContent = row.getAttribute('data-event-recurrence');
+                document.getElementById('detail-event-capacity').textContent = row.getAttribute('data-event-capacity');
                 detailsModal.classList.remove('hidden');
             }
 
@@ -413,23 +312,8 @@
             if (detailsModal && eventRows.length > 0) {
                 eventRows.forEach(row => {
                     row.addEventListener('click', function(e) {
-                        // Only trigger if clicking directly on the row, not on buttons/forms
                         if (e.target.closest('button, form') === null) {
                             showEventDetails(this);
-                        }
-                    });
-                });
-            }
-
-            // View Details button logic (still works, but row click is primary)
-            const viewDetailsButtons = document.querySelectorAll('.btn-view-details');
-            if (detailsModal && viewDetailsButtons.length > 0) {
-                viewDetailsButtons.forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        // Get the parent row
-                        const row = this.closest('.event-row');
-                        if (row) {
-                            showEventDetails(row);
                         }
                     });
                 });
@@ -442,14 +326,12 @@
                     });
                 }
 
-                // Close modal when clicking outside content
                 detailsModal.addEventListener('click', function(e) {
                     if (e.target === detailsModal) {
                         detailsModal.classList.add('hidden');
                     }
                 });
             }
-
         });
     </script>
 </body>
