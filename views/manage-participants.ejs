@@ -112,6 +112,14 @@
                                     data-last-name="<%= user.user_last_name %>"
                                     data-email="<%= user.user_email %>"
                                     data-role="<%= user.user_role || 'N/A' %>"
+                                    data-dob="<%= user.user_dob ? new Date(user.user_dob).toISOString().split('T')[0] : '' %>"
+                                    data-phone="<%= user.user_phone || '' %>"
+                                    data-city="<%= user.user_city || '' %>"
+                                    data-state="<%= user.user_state || '' %>"
+                                    data-zip="<%= user.user_zip || '' %>"
+                                    data-school="<%= user.user_school || '' %>"
+                                    data-employer="<%= user.user_employer || '' %>"
+                                    data-field-of-interest="<%= user.user_field_of_interest || '' %>"
                                     style="cursor: pointer;"
                                 >
                                     <td><%= user.user_first_name %></td>
@@ -222,7 +230,7 @@
 
             <!-- View Details Modal -->
             <div id="view-details-modal" class="modal hidden">
-                <div class="modal-content">
+                <div class="modal-content" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
                     <h2>Participant Details</h2>
                     <div class="participant-details-container" style="padding: 20px 0;">
                         <div class="detail-row" style="margin-bottom: 15px;">
@@ -241,6 +249,38 @@
                             <strong style="display: inline-block; width: 180px;">Role:</strong>
                             <span id="detail-role"></span>
                         </div>
+                        <div class="detail-row" style="margin-bottom: 15px;">
+                            <strong style="display: inline-block; width: 180px;">Date of Birth:</strong>
+                            <span id="detail-dob"></span>
+                        </div>
+                        <div class="detail-row" style="margin-bottom: 15px;">
+                            <strong style="display: inline-block; width: 180px;">Phone:</strong>
+                            <span id="detail-phone"></span>
+                        </div>
+                        <div class="detail-row" style="margin-bottom: 15px;">
+                            <strong style="display: inline-block; width: 180px;">City:</strong>
+                            <span id="detail-city"></span>
+                        </div>
+                        <div class="detail-row" style="margin-bottom: 15px;">
+                            <strong style="display: inline-block; width: 180px;">State:</strong>
+                            <span id="detail-state"></span>
+                        </div>
+                        <div class="detail-row" style="margin-bottom: 15px;">
+                            <strong style="display: inline-block; width: 180px;">ZIP Code:</strong>
+                            <span id="detail-zip"></span>
+                        </div>
+                        <div class="detail-row" style="margin-bottom: 15px;">
+                            <strong style="display: inline-block; width: 180px;">School:</strong>
+                            <span id="detail-school"></span>
+                        </div>
+                        <div class="detail-row" style="margin-bottom: 15px;">
+                            <strong style="display: inline-block; width: 180px;">Employer:</strong>
+                            <span id="detail-employer"></span>
+                        </div>
+                        <div class="detail-row" style="margin-bottom: 15px;">
+                            <strong style="display: inline-block; width: 180px;">Field of Interest:</strong>
+                            <span id="detail-field-of-interest"></span>
+                        </div>
                     </div>
                     <div class="modal-actions">
                         <button type="button" id="close-details" class="btn-secondary">Close</button>
@@ -250,7 +290,7 @@
 
             <!-- Edit Participant Modal -->
             <div id="edit-participant-modal" class="modal hidden">
-                <div class="modal-content">
+                <div class="modal-content" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
                     <h2>Edit Participant</h2>
                     <form id="edit-participant-form" method="POST">
                         <div class="form-group">
@@ -268,11 +308,41 @@
                         <div class="form-group">
                             <label for="edit_user_role">Role</label>
                             <select id="edit_user_role" name="user_role" required>
-                                <option value="student">Student</option>
-                                <option value="parent">Parent</option>
-                                <option value="volunteer">Volunteer</option>
+                                <option value="participant">Participant</option>
                                 <option value="admin">Admin</option>
                             </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_user_dob">Date of Birth</label>
+                            <input type="date" id="edit_user_dob" name="user_dob">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_user_phone">Phone</label>
+                            <input type="tel" id="edit_user_phone" name="user_phone" placeholder="(555) 123-4567">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_user_city">City</label>
+                            <input type="text" id="edit_user_city" name="user_city">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_user_state">State</label>
+                            <input type="text" id="edit_user_state" name="user_state" placeholder="UT" maxlength="2">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_user_zip">ZIP Code</label>
+                            <input type="text" id="edit_user_zip" name="user_zip" pattern="[0-9]{5}" placeholder="84000">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_user_school">School</label>
+                            <input type="text" id="edit_user_school" name="user_school">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_user_employer">Employer</label>
+                            <input type="text" id="edit_user_employer" name="user_employer">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_user_field_of_interest">Field of Interest</label>
+                            <input type="text" id="edit_user_field_of_interest" name="user_field_of_interest">
                         </div>
                         <div class="modal-actions">
                             <button type="submit" class="btn-primary">Save Changes</button>
@@ -348,6 +418,28 @@
             const detailsModal = document.getElementById('view-details-modal');
             const closeDetailsBtn = document.getElementById('close-details');
 
+            // Helper function to format date for display
+            function formatDateForDisplay(dateString) {
+                if (!dateString || dateString === '') {
+                    return 'N/A';
+                }
+                
+                try {
+                    const date = new Date(dateString);
+                    if (isNaN(date.getTime())) {
+                        return dateString; // Return as-is if can't parse
+                    }
+                    
+                    // Format as MM/DD/YYYY
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const year = date.getFullYear();
+                    return `${month}/${day}/${year}`;
+                } catch (e) {
+                    return dateString || 'N/A';
+                }
+            }
+
             // Function to populate and show the details modal
             function showParticipantDetails(row) {
                 // Get all data attributes from the row
@@ -355,15 +447,33 @@
                 const lastName = row.getAttribute('data-last-name');
                 const email = row.getAttribute('data-email');
                 const role = row.getAttribute('data-role');
+                const dob = row.getAttribute('data-dob');
+                const phone = row.getAttribute('data-phone');
+                const city = row.getAttribute('data-city');
+                const state = row.getAttribute('data-state');
+                const zip = row.getAttribute('data-zip');
+                const school = row.getAttribute('data-school');
+                const employer = row.getAttribute('data-employer');
+                const fieldOfInterest = row.getAttribute('data-field-of-interest');
 
                 // Format role: capitalize first letter
-                const formattedRole = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
+                const formattedRole = role && role !== 'N/A' 
+                    ? role.charAt(0).toUpperCase() + role.slice(1).toLowerCase()
+                    : 'N/A';
 
                 // Populate modal with data
-                document.getElementById('detail-first-name').textContent = firstName;
-                document.getElementById('detail-last-name').textContent = lastName;
-                document.getElementById('detail-email').textContent = email;
+                document.getElementById('detail-first-name').textContent = firstName || 'N/A';
+                document.getElementById('detail-last-name').textContent = lastName || 'N/A';
+                document.getElementById('detail-email').textContent = email || 'N/A';
                 document.getElementById('detail-role').textContent = formattedRole;
+                document.getElementById('detail-dob').textContent = formatDateForDisplay(dob);
+                document.getElementById('detail-phone').textContent = phone || 'N/A';
+                document.getElementById('detail-city').textContent = city || 'N/A';
+                document.getElementById('detail-state').textContent = state || 'N/A';
+                document.getElementById('detail-zip').textContent = zip || 'N/A';
+                document.getElementById('detail-school').textContent = school || 'N/A';
+                document.getElementById('detail-employer').textContent = employer || 'N/A';
+                document.getElementById('detail-field-of-interest').textContent = fieldOfInterest || 'N/A';
 
                 // Show modal
                 detailsModal.classList.remove('hidden');
@@ -402,6 +512,30 @@
             const editForm = document.getElementById('edit-participant-form');
             const cancelEditBtn = document.getElementById('cancel-edit-participant');
 
+            // Helper function to format date for HTML date input (YYYY-MM-DD)
+            function formatDateForInput(dateString) {
+                if (!dateString || dateString === '') {
+                    return '';
+                }
+                
+                // If it's already in YYYY-MM-DD format, return as is
+                if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+                    return dateString;
+                }
+                
+                // Try to parse the date and format it
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) {
+                    return '';
+                }
+                
+                // Format as YYYY-MM-DD
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+
             // Function to open edit modal and populate with data
             window.openEditParticipantModal = function(button) {
                 const row = button.closest('.participant-row');
@@ -410,15 +544,37 @@
                 const lastName = row.getAttribute('data-last-name');
                 const email = row.getAttribute('data-email');
                 const role = row.getAttribute('data-role');
+                const dob = row.getAttribute('data-dob');
+                const phone = row.getAttribute('data-phone');
+                const city = row.getAttribute('data-city');
+                const state = row.getAttribute('data-state');
+                const zip = row.getAttribute('data-zip');
+                const school = row.getAttribute('data-school');
+                const employer = row.getAttribute('data-employer');
+                const fieldOfInterest = row.getAttribute('data-field-of-interest');
 
                 // Set form action
                 editForm.action = '/manage-participants/' + userId + '/update';
 
                 // Populate form fields
-                document.getElementById('edit_user_first_name').value = firstName;
-                document.getElementById('edit_user_last_name').value = lastName;
-                document.getElementById('edit_user_email').value = email;
-                document.getElementById('edit_user_role').value = role;
+                document.getElementById('edit_user_first_name').value = firstName || '';
+                document.getElementById('edit_user_last_name').value = lastName || '';
+                document.getElementById('edit_user_email').value = email || '';
+                
+                // Normalize role value (handle case, 'N/A', and ensure it matches 'admin' or 'participant')
+                let normalizedRole = (role || '').toLowerCase().trim();
+                if (normalizedRole === 'n/a' || normalizedRole === '' || normalizedRole !== 'admin') {
+                    normalizedRole = 'participant'; // Default to participant if not admin
+                }
+                document.getElementById('edit_user_role').value = normalizedRole;
+                document.getElementById('edit_user_dob').value = formatDateForInput(dob);
+                document.getElementById('edit_user_phone').value = phone || '';
+                document.getElementById('edit_user_city').value = city || '';
+                document.getElementById('edit_user_state').value = state || '';
+                document.getElementById('edit_user_zip').value = zip || '';
+                document.getElementById('edit_user_school').value = school || '';
+                document.getElementById('edit_user_employer').value = employer || '';
+                document.getElementById('edit_user_field_of_interest').value = fieldOfInterest || '';
 
                 // Show modal
                 editModal.classList.remove('hidden');
