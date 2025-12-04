@@ -113,10 +113,18 @@
                                 >
                                     <td><%= milestone.milestone_title %></td>
                                     <td>
+                                        <button 
+                                            type="button"
+                                            class="btn-edit" 
+                                            style="background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px;"
+                                            onclick="event.stopPropagation(); openEditMilestoneModal(this);"
+                                        >
+                                            Edit
+                                        </button>
                                         <form 
                                             action="/manage-milestones/<%= milestone.milestone_id %>/delete" 
                                             method="POST" 
-                                            style="display: inline-block; margin-left: 10px;"
+                                            style="display: inline-block;"
                                             onsubmit="return confirm('Are you sure you want to delete this milestone?');"
                                             onclick="event.stopPropagation();"
                                         >
@@ -212,6 +220,23 @@
                     <div class="modal-actions">
                         <button type="button" id="close-details" class="btn-secondary">Close</button>
                     </div>
+                </div>
+            </div>
+
+            <!-- Edit Milestone Modal -->
+            <div id="edit-milestone-modal" class="modal hidden">
+                <div class="modal-content">
+                    <h2>Edit Milestone</h2>
+                    <form id="edit-milestone-form" method="POST">
+                        <div class="form-group">
+                            <label for="edit_milestone_title">Milestone Title</label>
+                            <input type="text" id="edit_milestone_title" name="milestone_title" required>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="submit" class="btn-primary">Save Changes</button>
+                            <button type="button" id="cancel-edit-milestone" class="btn-secondary">Cancel</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -329,6 +354,42 @@
                 detailsModal.addEventListener('click', function(e) {
                     if (e.target === detailsModal) {
                         detailsModal.classList.add('hidden');
+                    }
+                });
+            }
+
+            // Edit Milestone modal logic
+            const editModal = document.getElementById('edit-milestone-modal');
+            const editForm = document.getElementById('edit-milestone-form');
+            const cancelEditBtn = document.getElementById('cancel-edit-milestone');
+
+            // Function to open edit modal and populate with data
+            window.openEditMilestoneModal = function(button) {
+                const row = button.closest('.milestone-row');
+                const milestoneId = row.getAttribute('data-milestone-id');
+                const milestoneTitle = row.getAttribute('data-milestone-title');
+
+                // Set form action
+                editForm.action = '/manage-milestones/' + milestoneId + '/update';
+
+                // Populate form fields
+                document.getElementById('edit_milestone_title').value = milestoneTitle;
+
+                // Show modal
+                editModal.classList.remove('hidden');
+            };
+
+            if (editModal) {
+                if (cancelEditBtn) {
+                    cancelEditBtn.addEventListener('click', function() {
+                        editModal.classList.add('hidden');
+                    });
+                }
+
+                // Close modal when clicking outside content
+                editModal.addEventListener('click', function(e) {
+                    if (e.target === editModal) {
+                        editModal.classList.add('hidden');
                     }
                 });
             }
