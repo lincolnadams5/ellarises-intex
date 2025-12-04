@@ -174,6 +174,57 @@ app.get('/manage-events', (req, res) => {
         });
 });
 
+app.get('/manage-event-occurrences', (req, res) => {
+    // Pagination logic
+    const page = parseInt(req.query.page, 10) || 1;
+    const perPage = 20;
+    const offset = (page - 1) * perPage;
+    
+    // Get error message from query parameter if present
+    const errorMessage = req.query.error || "";
+
+    // Query for the current page of events
+    const eventsQuery = knex('event_occurrences')
+        .select(
+            'event_occurrences.event_occurrence_id',
+            'event_occurrences.event_template_id',
+            'event_occurrences.event_name',
+            'event_occurrences.event_date_time_start',
+            'event_occurrences.event_date_time_end',
+            'event_occurrences.event_location',
+            'event_occurrences.event_capacity',
+            'event_occurrences.event_registration_deadline'
+        )
+        .orderBy('event_occurrences.event_date_time_start')
+        .limit(perPage)
+        .offset(offset)
+
+    const countQuery = getCount('event_occurrences')
+
+    Promise.all([eventsQuery, countQuery])
+        .then(([events, countResult]) => {
+            const totalCount = parseInt(countResult.count, 10);
+            const totalPages = Math.ceil(totalCount / perPage);
+
+            res.render('manage-event-occurrences', {
+                event: events,
+                currentPage: page,
+                totalPages,
+                totalCount,
+                error_message: errorMessage
+            });
+        }).catch(err => {
+            console.log('Error fetching event information: ', err);
+            res.render('manage-event-occurrences', {
+                event: [],
+                currentPage: page,
+                totalPages: 0,
+                totalCount: 0,
+                error_message: 'Error fetching event information'
+            });
+        });
+});
+
 app.get('/manage-events/new', (req, res) => {
     res.render('add-event-template', {
         error_message: "",

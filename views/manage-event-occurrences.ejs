@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Events - Ella Rises</title>
+    <title>Manage Event Occurrences - Ella Rises</title>
     <link rel="stylesheet" href="/styles/main.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -70,7 +70,8 @@
         <div class="manage-donations-wrapper">
             <!-- Page Header -->
             <div class="manage-donations-header">
-                <h1 class="manage-donations-title">Manage <%=event.event_name%> Occurrences</h1>
+                <h1 class="manage-donations-title">Manage Event Occurrences</h1>
+                <p class="manage-donations-subtitle">View all event occurrences</p>
             </div>
 
             <!-- Error Message Display -->
@@ -79,8 +80,8 @@
                     <%= error_message %>
                 </div>
             <% } %>
-            <a href="/manage-events/new" class="btn-primary">
-                + Create Instance
+            <a href="#" class="btn-primary btn-create-event">
+                + Create New Event Occurrence
             </a>
             <!-- Events Table -->
             <% if (event && event.length > 0) { %>
@@ -88,38 +89,64 @@
                     <table class="donations-table">
                         <thead>
                             <tr>
-                                <th>Occurrence Date</th>
-                                <th>Surveys</th>
+                                <th>Event Name</th>
+                                <th>Event Date</th>
+                                <th>Duration</th>
                                 <th>Location</th>
+                                <th>Capacity</th>
                                 <th></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <% event.forEach(function(event) { %>
+                            <% event.forEach(function(occurrence) { 
+                                // Calculate duration
+                                const start = new Date(occurrence.event_date_time_start);
+                                const end = new Date(occurrence.event_date_time_end);
+                                const durationMs = end - start;
+                                const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
+                                const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+                                let durationStr = '';
+                                if (durationHours > 0) durationStr += durationHours + 'h ';
+                                if (durationMinutes > 0) durationStr += durationMinutes + 'm';
+                                if (!durationStr) durationStr = 'N/A';
+                                
+                                // Format date for display
+                                const dateOptions = { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' };
+                                const formattedStart = start.toLocaleDateString('en-US', dateOptions);
+                                const formattedEnd = end.toLocaleDateString('en-US', dateOptions);
+                                
+                                // Format registration deadline
+                                let formattedDeadline = 'N/A';
+                                if (occurrence.event_registration_deadline) {
+                                    const deadline = new Date(occurrence.event_registration_deadline);
+                                    formattedDeadline = deadline.toLocaleDateString('en-US', dateOptions);
+                                }
+                            %>
                                 <tr 
                                     class="event-row"
-                                    data-template-id="<%= event.event_template_id %>"
-                                    data-event-name="<%= event.event_name %>"
-                                    data-event-type="<%= event.event_type || 'N/A' %>"
-                                    data-event-description="<%= event.event_description || 'No description provided.' %>"
-                                    data-event-recurrence="<%= event.event_recurrence_pattern || 'N/A' %>"
-                                    data-event-capacity="<%= event.event_default_capacity || 'N/A' %>"
+                                    data-occurrence-id="<%= occurrence.event_occurrence_id %>"
+                                    data-event-name="<%= occurrence.event_name %>"
+                                    data-event-start="<%= formattedStart %>"
+                                    data-event-end="<%= formattedEnd %>"
+                                    data-event-location="<%= occurrence.event_location || 'N/A' %>"
+                                    data-event-capacity="<%= occurrence.event_capacity || 'N/A' %>"
+                                    data-event-deadline="<%= formattedDeadline %>"
                                     style="cursor: pointer;"
                                 >
-                                    <td><%= event.event_name %></td>
-                                    <td><%= event.event_type %></td>
-                                    <td><%= event.event_recurrence_pattern %></td>
+                                    <td><%= occurrence.event_name %></td>
+                                    <td><%= formattedStart %></td>
+                                    <td><%= durationStr %></td>
+                                    <td><%= occurrence.event_location || 'N/A' %></td>
+                                    <td><%= occurrence.event_capacity || 'N/A' %></td>
                                     <td>
                                         <form 
-                                            action="/manage-events/<%= event.event_template_id %>/delete" 
+                                            action="/manage-event-occurrences/<%= occurrence.event_occurrence_id %>/delete" 
                                             method="POST" 
-                                            style="display: inline-block; margin-left: 10px;"
-                                            onsubmit="return confirm('Are you sure you want to delete this event occurrence? This will also delete all related surveys for this occurrence.');"
+                                            class="delete-form"
+                                            onsubmit="return confirm('Are you sure you want to delete this event occurrence?');"
                                             onclick="event.stopPropagation();"
                                         >
-                                            <button type="submit" class="btn-delete" style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
-                                                Delete
-                                            </button>
+                                            <button type="submit" class="btn-delete">Delete</button>
                                         </form>
                                     </td>
                                 </tr>
@@ -129,20 +156,20 @@
                 </div>
             <% } else { %>
                 <div class="empty-state">
-                    <p class="empty-state-message">No events found.</p>
+                    <p class="empty-state-message">No event occurrences found.</p>
                 </div>
             <% } %>
             <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
                 <div class="manage-donations-pagination">
                     <% if (currentPage > 1) { %>
-                        <a href="/manage-events?page=<%= currentPage - 1 %>" class="pagination-btn">Previous</a>
+                        <a href="/manage-event-occurrences?page=<%= currentPage - 1 %>" class="pagination-btn">Previous</a>
                     <% } else { %>
                         <span class="pagination-btn disabled">Previous</span>
                     <% } %>
         
                     <div class="pagination-pages">
                         <%
-                            const maxVisible = 5; // number of page buttons in the middle window
+                            const maxVisible = 5;
                             let startPage = Math.max(1, currentPage - 2);
                             let endPage = Math.min(totalPages, currentPage + 2);
         
@@ -156,8 +183,7 @@
                         %>
         
                         <% if (startPage > 1) { %>
-                            <!-- First page -->
-                            <a href="/manage-events?page=1"
+                            <a href="/manage-event-occurrences?page=1"
                                class="pagination-page <%= currentPage === 1 ? 'active' : '' %>">
                                 1
                             </a>
@@ -167,9 +193,8 @@
                             <% } %>
                         <% } %>
         
-                        <!-- Window of pages around current -->
                         <% for (let i = startPage; i <= endPage; i++) { %>
-                            <a href="/manage-events?page=<%= i %>"
+                            <a href="/manage-event-occurrences?page=<%= i %>"
                                class="pagination-page <%= i === currentPage ? 'active' : '' %>">
                                 <%= i %>
                             </a>
@@ -180,8 +205,7 @@
                                 <span class="pagination-ellipsis">…</span>
                             <% } %>
         
-                            <!-- Last page -->
-                            <a href="/manage-events?page=<%= totalPages %>"
+                            <a href="/manage-event-occurrences?page=<%= totalPages %>"
                                class="pagination-page <%= currentPage === totalPages ? 'active' : '' %>">
                                 <%= totalPages %>
                             </a>
@@ -189,36 +213,41 @@
                     </div>
         
                     <% if (currentPage < totalPages) { %>
-                        <a href="/manage-events?page=<%= currentPage + 1 %>" class="pagination-btn">Next</a>
+                        <a href="/manage-event-occurrences?page=<%= currentPage + 1 %>" class="pagination-btn">Next</a>
                     <% } else { %>
                         <span class="pagination-btn disabled">Next</span>
                     <% } %>
                 </div>
             <% } %>
+
             <!-- View Details Modal -->
             <div id="view-details-modal" class="modal hidden">
                 <div class="modal-content">
-                    <h2>Event Template Details</h2>
-                    <div class="event-details-container" style="padding: 20px 0;">
-                        <div class="detail-row" style="margin-bottom: 15px;">
-                            <strong style="display: inline-block; width: 180px;">Event Name:</strong>
+                    <h2>Event Occurrence Details</h2>
+                    <div class="event-details-container">
+                        <div class="detail-row">
+                            <strong class="detail-label">Event Name:</strong>
                             <span id="detail-event-name"></span>
                         </div>
-                        <div class="detail-row" style="margin-bottom: 15px;">
-                            <strong style="display: inline-block; width: 180px;">Event Type:</strong>
-                            <span id="detail-event-type"></span>
+                        <div class="detail-row">
+                            <strong class="detail-label">Start Date/Time:</strong>
+                            <span id="detail-event-start"></span>
                         </div>
-                        <div class="detail-row" style="margin-bottom: 15px;">
-                            <strong style="display: inline-block; width: 180px;">Recurrence Pattern:</strong>
-                            <span id="detail-event-recurrence"></span>
+                        <div class="detail-row">
+                            <strong class="detail-label">End Date/Time:</strong>
+                            <span id="detail-event-end"></span>
                         </div>
-                        <div class="detail-row" style="margin-bottom: 15px;">
-                            <strong style="display: inline-block; width: 180px;">Default Capacity:</strong>
+                        <div class="detail-row">
+                            <strong class="detail-label">Location:</strong>
+                            <span id="detail-event-location"></span>
+                        </div>
+                        <div class="detail-row">
+                            <strong class="detail-label">Capacity:</strong>
                             <span id="detail-event-capacity"></span>
                         </div>
-                        <div class="detail-row" style="margin-bottom: 15px;">
-                            <strong style="display: inline-block; width: 180px; vertical-align: top;">Description:</strong>
-                            <span id="detail-event-description" style="display: inline-block; max-width: 400px; word-wrap: break-word;"></span>
+                        <div class="detail-row">
+                            <strong class="detail-label">Registration Deadline:</strong>
+                            <span id="detail-event-deadline"></span>
                         </div>
                     </div>
                     <div class="modal-actions">
@@ -226,49 +255,8 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Add Instance Modal -->
-            <div id="add-instance-modal" class="modal hidden">
-                <div class="modal-content">
-                    <h2>Create Event Instance</h2>
-                    <form id="add-instance-form" method="POST">
-                        <input type="hidden" name="event_name" id="instance_event_name">
-
-                        <div class="form-group">
-                            <label for="event_date_time_start">Start Date &amp; Time</label>
-                            <input type="datetime-local" id="event_date_time_start" name="event_date_time_start" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="event_date_time_end">End Date &amp; Time</label>
-                            <input type="datetime-local" id="event_date_time_end" name="event_date_time_end" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="event_location">Location</label>
-                            <input type="text" id="event_location" name="event_location" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="event_capacity">Capacity</label>
-                            <input type="number" id="event_capacity" name="event_capacity" min="0">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="event_registration_deadline">Registration Deadline</label>
-                            <input type="datetime-local" id="event_registration_deadline" name="event_registration_deadline">
-                        </div>
-
-                        <div class="modal-actions">
-                            <button type="submit" class="btn-primary">Save Instance</button>
-                            <button type="button" id="cancel-instance" class="btn-secondary">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
         </div>
     </div>
-
 
     <!-- Footer -->
     <footer class="footer">
@@ -284,7 +272,6 @@
                     <li><a href="/events">Event Information</a></li>
                     <li><a href="/about">About Us</a></li>
                     <li><a href="/donate">Donate</a></li>
-                    <li><a href="/teapot">Teapot</a></li>
                 </ul>
             </div>
             <div class="footer-section">
@@ -312,8 +299,8 @@
     </footer>
 
     <script>
-        // User dropdown functionality and Add Instance modal logic
         document.addEventListener('DOMContentLoaded', function() {
+            // User dropdown functionality
             const userDropdown = document.querySelector('.user-dropdown');
             const dropdownBtn = document.querySelector('.user-dropdown-btn');
             
@@ -324,72 +311,23 @@
                 });
             }
             
-            // Close dropdown when clicking outside
             document.addEventListener('click', function(e) {
                 if (userDropdown && !userDropdown.contains(e.target)) {
                     userDropdown.classList.remove('active');
                 }
             });
-    
-            // Add Instance modal logic
-            const addInstanceButtons = document.querySelectorAll('.btn-add-instance');
-            const modal = document.getElementById('add-instance-modal');
-            const form = document.getElementById('add-instance-form');
-            const eventNameInput = document.getElementById('instance_event_name');
-            const cancelBtn = document.getElementById('cancel-instance');
-    
-            if (modal && form && eventNameInput && addInstanceButtons.length > 0) {
-                addInstanceButtons.forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const templateId = this.getAttribute('data-template-id');
-                        const eventName = this.getAttribute('data-event-name');
-    
-                        // Set form action to the correct POST route including template_id
-                        form.action = '/manage-events/' + templateId + '/new';
-    
-                        // Pre-fill hidden event name field
-                        eventNameInput.value = eventName;
-    
-                        // Show modal
-                        modal.classList.remove('hidden');
-                    });
-                });
-    
-                if (cancelBtn) {
-                    cancelBtn.addEventListener('click', function() {
-                        modal.classList.add('hidden');
-                    });
-                }
-    
-                // Optional: close modal when clicking outside content
-                modal.addEventListener('click', function(e) {
-                    if (e.target === modal) {
-                        modal.classList.add('hidden');
-                    }
-                });
-            }
 
             // View Details modal logic
             const detailsModal = document.getElementById('view-details-modal');
             const closeDetailsBtn = document.getElementById('close-details');
 
-            // Function to populate and show the details modal
-            function showEventDetails(row) {
-                // Get all data attributes from the row
-                const eventName = row.getAttribute('data-event-name');
-                const eventType = row.getAttribute('data-event-type');
-                const eventDescription = row.getAttribute('data-event-description');
-                const eventRecurrence = row.getAttribute('data-event-recurrence');
-                const eventCapacity = row.getAttribute('data-event-capacity');
-
-                // Populate modal with data
-                document.getElementById('detail-event-name').textContent = eventName;
-                document.getElementById('detail-event-type').textContent = eventType;
-                document.getElementById('detail-event-description').textContent = eventDescription;
-                document.getElementById('detail-event-recurrence').textContent = eventRecurrence;
-                document.getElementById('detail-event-capacity').textContent = eventCapacity;
-
-                // Show modal
+            function showOccurrenceDetails(row) {
+                document.getElementById('detail-event-name').textContent = row.getAttribute('data-event-name');
+                document.getElementById('detail-event-start').textContent = row.getAttribute('data-event-start');
+                document.getElementById('detail-event-end').textContent = row.getAttribute('data-event-end');
+                document.getElementById('detail-event-location').textContent = row.getAttribute('data-event-location');
+                document.getElementById('detail-event-capacity').textContent = row.getAttribute('data-event-capacity');
+                document.getElementById('detail-event-deadline').textContent = row.getAttribute('data-event-deadline');
                 detailsModal.classList.remove('hidden');
             }
 
@@ -398,23 +336,8 @@
             if (detailsModal && eventRows.length > 0) {
                 eventRows.forEach(row => {
                     row.addEventListener('click', function(e) {
-                        // Only trigger if clicking directly on the row, not on buttons/forms
                         if (e.target.closest('button, form') === null) {
-                            showEventDetails(this);
-                        }
-                    });
-                });
-            }
-
-            // View Details button logic (still works, but row click is primary)
-            const viewDetailsButtons = document.querySelectorAll('.btn-view-details');
-            if (detailsModal && viewDetailsButtons.length > 0) {
-                viewDetailsButtons.forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        // Get the parent row
-                        const row = this.closest('.event-row');
-                        if (row) {
-                            showEventDetails(row);
+                            showOccurrenceDetails(this);
                         }
                     });
                 });
@@ -427,7 +350,6 @@
                     });
                 }
 
-                // Close modal when clicking outside content
                 detailsModal.addEventListener('click', function(e) {
                     if (e.target === detailsModal) {
                         detailsModal.classList.add('hidden');
