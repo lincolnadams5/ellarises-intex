@@ -55,10 +55,21 @@ app.use((req, res, next) => {
         '/manage-events',
         '/manage-events/new',
         '/manage-milestones',
+        '/manage-milestones/new',
         '/manage-surveys',
         '/manage-donations',
-        '/manage-participants'
+        '/manage-donations/new',
+        '/manage-participants',
+        '/manage-participants/new'
     ];
+    // Also check admin routes with parameters (like /manage-events/:id/delete or /manage-events/:id/new)
+    if (req.path.startsWith('/manage-events/') && (req.path.endsWith('/delete') || req.path.endsWith('/new'))) {
+        if (!req.session.isLoggedIn || req.session.level !== 'admin') {
+            return res.render("login", { error_message: "Authentication error" });
+        } else {
+            return next();
+        }
+    }
     if (admin_routes.includes(req.path)) {
         if (!req.session.isLoggedIn || req.session.level !== 'admin') {
             return res.render("login", { error_message: "Authentication error" });
@@ -274,6 +285,33 @@ app.post('/manage-events/:template_id/new', (req, res) => {
         });
 })
 
+app.post('/manage-events/:template_id/delete', (req, res) => {
+    const template_id = parseInt(req.params.template_id, 10);
+
+    // Verify that the event template exists
+    knex('event_templates')
+        .where('event_template_id', template_id)
+        .first()
+        .then(template => {
+            if (!template) {
+                // Template doesn't exist, redirect with error
+                return res.redirect('/manage-events?error=Event template does not exist');
+            }
+
+            // Delete the event template (CASCADE will handle related records)
+            return knex('event_templates')
+                .where('event_template_id', template_id)
+                .del()
+                .then(() => {
+                    res.redirect('/manage-events');
+                });
+        })
+        .catch(err => {
+            console.log('Error deleting event template:', err);
+            res.redirect('/manage-events?error=Error deleting event template. Please try again.');
+        });
+})
+
 // ~~~ ~~~ ~~~ ~~~ ~~~ MILESTONES ~~~ ~~~ ~~~ ~~~ ~~~ 
 app.get('/milestone-progress', (req, res) => {
     // Get milestones for current user only
@@ -308,7 +346,7 @@ app.get('/manage-milestones', (req, res) => {
 
     // Query for the current page of milestones
     const milestonesQuery = knex('milestones')
-        .select('milestone_title')
+        .select('milestone_id', 'milestone_title')
         .orderBy('milestone_title')
         .limit(perPage)
         .offset(offset)
@@ -333,6 +371,52 @@ app.get('/manage-milestones', (req, res) => {
                 milestone: [],
                 error_message: 'Error fetching milestone information'
             });
+        });
+});
+
+app.get('/manage-milestones/new', (req, res) => {
+    res.render('add-milestone', {
+        error_message: ""
+    });
+});
+
+app.post('/manage-milestones/new', (req, res) => {
+    const { milestone_title } = req.body;
+
+    knex('milestones')
+        .insert({ milestone_title })
+        .then(() => {
+            res.redirect('/manage-milestones');
+        })
+        .catch(err => {
+            console.log('Error creating milestone: ', err);
+            res.render('add-milestone', {
+                error_message: 'An error occurred while creating the milestone.'
+            });
+        });
+});
+
+app.post('/manage-milestones/:milestone_id/delete', (req, res) => {
+    const milestone_id = parseInt(req.params.milestone_id, 10);
+
+    knex('milestones')
+        .where('milestone_id', milestone_id)
+        .first()
+        .then(milestone => {
+            if (!milestone) {
+                return res.redirect('/manage-milestones?error=Milestone does not exist');
+            }
+
+            return knex('milestones')
+                .where('milestone_id', milestone_id)
+                .del()
+                .then(() => {
+                    res.redirect('/manage-milestones');
+                });
+        })
+        .catch(err => {
+            console.log('Error deleting milestone: ', err);
+            res.redirect('/manage-milestones?error=Error deleting milestone. Please try again');
         });
 });
 
@@ -376,6 +460,7 @@ app.get('/manage-donations', (req, res) => {
     const donationsQuery = knex('donations')
         .innerJoin('users', 'donations.user_id', '=', 'users.user_id') // Join user and donations tables
         .select( // Select necessary information
+            'donations.donation_id',
             'donation_amount',
             'donation_date',
             'user_email',
@@ -411,6 +496,56 @@ app.get('/manage-donations', (req, res) => {
                 totalCount: 0,
                 error_message: 'Error fetching donation/user information.'
             });
+        });
+});
+
+app.get('/manage-donations/new', (req, res) => {
+    res.render('add-donation', {
+        error_message: ""
+    });
+});
+
+app.post('/manage-donations/new', (req, res) => {
+    const { user_id, donation_amount, donation_date } = req.body;
+
+    knex('donations')
+        .insert({
+            user_id,
+            donation_amount,
+            donation_date
+        })
+        .then(() => {
+            res.redirect('/manage-donations');
+        })
+        .catch(err => {
+            console.log('Error creating donation: ', err);
+            res.render('add-donation', {
+                error_message: 'An error occurred while creating the donation.'
+            });
+        });
+});
+
+app.post('/manage-donations/:donation_id/delete', (req, res) => {
+    const donation_id = parseInt(req.params.donation_id, 10);
+
+    knex('donations')
+        .where('donation_id', donation_id)
+        .first()
+        .then(donation => {
+            if (!donation) {
+                return res.redirect('/manage-donations?error=Donation does not exist');
+            }
+
+            return knex('donations')
+                .where('donation_id', donation_id)
+                .del()
+                .then(() => {
+                    res.redirect('/manage-donations');
+                });
+        })
+        .catch(err => {
+            console.log('Error deleting donation: ', err);
+            res.redirect('/manage-donations?error=Error deleting donation. Please try again');
         });
 });
 
@@ -497,6 +632,33 @@ app.get('/manage-surveys', (req, res) => {
         });
 });
 
+app.post('/manage-surveys/:survey_id/delete', (req, res) => {
+    const survey_id = parseInt(req.params.survey_id, 10);
+
+    // Verify that the survey exists
+    knex('surveys')
+        .where('survey_id', survey_id)
+        .first()
+        .then(survey => {
+            if (!survey) {
+                // Survey doesn't exist
+                return res.redirect('/manage-surveys?error=Survey does not exist');
+            }
+
+            // Delete the survey
+            return knex('surveys')
+                .where('survey_id', survey_id)
+                .del()
+                .then(() => {
+                    res.redirect('/manage-surveys');
+                })
+        })
+        .catch(err => {
+            console.log('Error deleting survey', err);
+            res.redirect('/manage-surveys?error=Error deleting survey. Please try again')
+        })
+});
+
 // ~~~ ~~~ ~~~ ~~~ ~~~ Participants (Admin only) ~~~ ~~~ ~~~ ~~~ ~~~ 
 app.get('/manage-participants', (req, res) => {
     // Pagination Logic
@@ -507,6 +669,7 @@ app.get('/manage-participants', (req, res) => {
     // Gets users for a page for the pagination
     const usersQuery = knex('users')
         .select(
+            'user_id',
             'user_first_name',
             'user_last_name',
             'user_email',
@@ -537,6 +700,57 @@ app.get('/manage-participants', (req, res) => {
                 user: [],
                 error_message: 'Error fetching users.'
             });
+        });
+});
+
+app.get('/manage-participants/new', (req, res) => {
+    res.render('add-participant', {
+        error_message: ""
+    });
+});
+
+app.post('/manage-participants/new', (req, res) => {
+    const { user_first_name, user_last_name, user_email, user_role } = req.body;
+
+    knex('users')
+        .insert({
+            user_first_name,
+            user_last_name,
+            user_email,
+            user_role
+        })
+        .then(() => {
+            res.redirect('/manage-participants');
+        })
+        .catch(err => {
+            console.log('Error creating participant: ', err);
+            res.render('add-participant', {
+                error_message: 'An error occurred while creating the participant.'
+            });
+        });
+});
+
+app.post('/manage-participants/:user_id/delete', (req, res) => {
+    const user_id = parseInt(req.params.user_id, 10);
+
+    knex('users')
+        .where('user_id', user_id)
+        .first()
+        .then(user => {
+            if (!user) {
+                return res.redirect('/manage-participants?error=User does not exist');
+            }
+
+            return knex('users')
+                .where('user_id', user_id)
+                .del()
+                .then(() => {
+                    res.redirect('/manage-participants');
+                });
+        })
+        .catch(err => {
+            console.log('Error deleting user: ', err);
+            res.redirect('/manage-participants?error=Error deleting user. Please try again');
         });
 });
 

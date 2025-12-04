@@ -88,25 +88,45 @@
                     <table class="donations-table">
                         <thead>
                             <tr>
-                                <th>Survey ID</th>
-                                <th>Submission Date</th>
-                                <th>First Name</th>
-                                <th>Last Name</th>
                                 <th>Event Name</th>
+                                <th>Submission Date</th>
+                                <th>Name</th>
                                 <th>Event Location</th>
                                 <th>Overall Score</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
                             <% survey.forEach(function(survey) { %>
-                                <tr>
-                                    <td><%= survey.survey_id %></td>
+                                <tr 
+                                    class="survey-row"
+                                    data-survey-id="<%= survey.survey_id %>"
+                                    data-submission-date="<%= survey.survey_submission_date %>"
+                                    data-first-name="<%= survey.user_first_name %>"
+                                    data-last-name="<%= survey.user_last_name %>"
+                                    data-event-name="<%= survey.event_name || 'N/A' %>"
+                                    data-event-location="<%= survey.event_location || 'N/A' %>"
+                                    data-overall-score="<%= survey.overall_score || 'N/A' %>"
+                                    style="cursor: pointer;"
+                                >
+                                    <td><%= survey.event_name %></td>  
                                     <td><%= survey.survey_submission_date %></td>
-                                    <td><%= survey.user_first_name %></td>
-                                    <td><%= survey.user_last_name %></td>
-                                    <td><%= survey.event_name %></td>
+                                    <td><%= survey.user_last_name %>, <%= survey.user_first_name %></td>
                                     <td><%= survey.event_location %></td>
                                     <td><%= survey.overall_score %></td>
+                                    <td>
+                                        <form 
+                                        action="/manage-surveys/<%= survey.survey_id %>/delete" 
+                                        method="POST" 
+                                        style="display: inline-block; margin-left: 10px;"
+                                        onsubmit="return confirm('Are you sure you want to delete this survey?');"
+                                        onclick="event.stopPropagation();"
+                                    >
+                                        <button type="submit" class="btn-delete" style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                            Delete
+                                        </button>
+                                    </form>
+                                    </td>
                                 </tr>
                             <% }); %>
                         </tbody>
@@ -180,6 +200,42 @@
                     <% } %>
                 </div>
             <% } %>
+
+            <!-- View Details Modal -->
+            <div id="view-details-modal" class="modal hidden">
+                <div class="modal-content">
+                    <h2>Survey Details</h2>
+                    <div class="survey-details-container" style="padding: 20px 0;">
+                        <div class="detail-row" style="margin-bottom: 15px;">
+                            <strong style="display: inline-block; width: 180px;">Survey ID:</strong>
+                            <span id="detail-survey-id"></span>
+                        </div>
+                        <div class="detail-row" style="margin-bottom: 15px;">
+                            <strong style="display: inline-block; width: 180px;">Submission Date:</strong>
+                            <span id="detail-submission-date"></span>
+                        </div>
+                        <div class="detail-row" style="margin-bottom: 15px;">
+                            <strong style="display: inline-block; width: 180px;">Participant Name:</strong>
+                            <span id="detail-participant-name"></span>
+                        </div>
+                        <div class="detail-row" style="margin-bottom: 15px;">
+                            <strong style="display: inline-block; width: 180px;">Event Name:</strong>
+                            <span id="detail-event-name"></span>
+                        </div>
+                        <div class="detail-row" style="margin-bottom: 15px;">
+                            <strong style="display: inline-block; width: 180px;">Event Location:</strong>
+                            <span id="detail-event-location"></span>
+                        </div>
+                        <div class="detail-row" style="margin-bottom: 15px;">
+                            <strong style="display: inline-block; width: 180px;">Overall Score:</strong>
+                            <span id="detail-overall-score"></span>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" id="close-details" class="btn-secondary">Close</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -255,6 +311,61 @@
                     navbar.classList.add('hidden');
                 }
             });
+
+            // View Details modal logic
+            const detailsModal = document.getElementById('view-details-modal');
+            const closeDetailsBtn = document.getElementById('close-details');
+
+            // Function to populate and show the details modal
+            function showSurveyDetails(row) {
+                // Get all data attributes from the row
+                const surveyId = row.getAttribute('data-survey-id');
+                const submissionDate = row.getAttribute('data-submission-date');
+                const firstName = row.getAttribute('data-first-name');
+                const lastName = row.getAttribute('data-last-name');
+                const eventName = row.getAttribute('data-event-name');
+                const eventLocation = row.getAttribute('data-event-location');
+                const overallScore = row.getAttribute('data-overall-score');
+
+                // Populate modal with data
+                document.getElementById('detail-survey-id').textContent = surveyId;
+                document.getElementById('detail-submission-date').textContent = submissionDate;
+                document.getElementById('detail-participant-name').textContent = firstName + ' ' + lastName;
+                document.getElementById('detail-event-name').textContent = eventName;
+                document.getElementById('detail-event-location').textContent = eventLocation;
+                document.getElementById('detail-overall-score').textContent = overallScore;
+
+                // Show modal
+                detailsModal.classList.remove('hidden');
+            }
+
+            // Make table rows clickable
+            const surveyRows = document.querySelectorAll('.survey-row');
+            if (detailsModal && surveyRows.length > 0) {
+                surveyRows.forEach(row => {
+                    row.addEventListener('click', function(e) {
+                        // Only trigger if clicking directly on the row, not on buttons/forms
+                        if (e.target.closest('button, form') === null) {
+                            showSurveyDetails(this);
+                        }
+                    });
+                });
+            }
+
+            if (detailsModal) {
+                if (closeDetailsBtn) {
+                    closeDetailsBtn.addEventListener('click', function() {
+                        detailsModal.classList.add('hidden');
+                    });
+                }
+
+                // Close modal when clicking outside content
+                detailsModal.addEventListener('click', function(e) {
+                    if (e.target === detailsModal) {
+                        detailsModal.classList.add('hidden');
+                    }
+                });
+            }
         });
     </script>
 </body>
