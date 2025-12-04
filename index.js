@@ -540,6 +540,14 @@ app.get('/manage-participants', (req, res) => {
         });
 });
 
+// ~~~ ~~~ ~~~ ~~~ ~~~ Dashboard ~~~ ~~~ ~~~ ~~~ ~~~ 
+app.get('/dashboard', (req, res) => {
+    // Render the user dashboard/landing page
+    res.render('user-home', {
+        error_message: ""
+    });
+});
+
 // ~~~ ~~~ ~~~ ~~~ ~~~ Account Info ~~~ ~~~ ~~~ ~~~ ~~~ 
 app.get('/account-info', (req, res) => {
     // Fetch current user's information from database
