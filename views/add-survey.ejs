@@ -10,18 +10,64 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar">
+    <!-- Navigation -->
+    <nav class="navbar navbar-static">
         <div class="nav-container">
             <ul class="nav-menu">
-                <li><a href="/events">Events</a></li>
-                <li><a href="/about">About</a></li>
+                <!-- Events Dropdown -->
+                <li class="nav-dropdown">
+                    <a href="/events" class="nav-dropdown-trigger">Events</a>
+                    <div class="nav-dropdown-content">
+                        <a href="/events?filter=upcoming">Upcoming Events</a>
+                        <a href="/events?filter=past">Past Events</a>
+                    </div>
+                </li>
+                <!-- About Dropdown -->
+                <li class="nav-dropdown">
+                    <a href="/about" class="nav-dropdown-trigger">About</a>
+                    <div class="nav-dropdown-content">
+                        <a href="/about#mission-vision">Mission & Vision</a>
+                        <a href="/about#programs">Programs</a>
+                        <a href="/about#mariachi">Mariachi</a>
+                        <a href="/about#ballet">Ballet Folklorico</a>
+                        <a href="/about#steam">STEAM Workshops</a>
+                        <a href="/about#summit">Ella Rises Summit</a>
+                        <a href="/about#contact">Contact Us</a>
+                    </div>
+                </li>
                 <li><a href="/donate">Donate</a></li>
             </ul>
             <div class="nav-logo">
                 <h1><a href="/" style="text-decoration: none; color: inherit;">ELLA RISES</a></h1>
             </div>
+            <% if (isLoggedIn) { %>
+                <div class="nav-auth">
+                    <div class="user-dropdown">
+                        <button class="user-dropdown-btn">
+                            <%= first_name %> <%= last_name %> ▼
+                        </button>
+                        <div class="user-dropdown-content">
+                            <a href="/dashboard">User Dashboard</a>
+                            <a href="/account-info">Account Info</a>
+                            <form action="/logout" method="POST" class="dropdown-logout-form">
+                                <button type="submit" class="dropdown-logout-btn">Logout</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="nav-auth">
+                    <a href="/login" class="btn-signin">Sign In</a>
+                    <a href="/register" class="btn-signup">Sign Up</a>
+                </div>
+            <% } %>
         </div>
     </nav>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a href="/surveys">← Back to My Surveys</a>
+    </div>
 
     <div class="manage-donations-container">
         <div class="manage-donations-wrapper">
@@ -70,5 +116,27 @@
             </form>
         </div>
     </div>
+
+    <script>
+        // User dropdown functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const userDropdown = document.querySelector('.user-dropdown');
+            const dropdownBtn = document.querySelector('.user-dropdown-btn');
+            
+            if (dropdownBtn) {
+                dropdownBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('active');
+                });
+            }
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (userDropdown && !userDropdown.contains(e.target)) {
+                    userDropdown.classList.remove('active');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
