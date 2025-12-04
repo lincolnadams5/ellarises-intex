@@ -989,10 +989,61 @@ app.get('/manage-participants/new', (req, res) => {
 
 // ~~~ ~~~ ~~~ ~~~ ~~~ Dashboard ~~~ ~~~ ~~~ ~~~ ~~~ 
 app.get('/dashboard', (req, res) => {
-    // Render the user dashboard/landing page
-    res.render('dashboard', {
-        error_message: ""
-    });
+    // Get the total number of participants
+    const totalParticipantsQuery = knex('users')
+        .count('* as count')
+        .first()
+        .then(count => {
+            return parseInt(count.count, 10);
+        })
+        .catch(err => {
+            console.log('Error fetching total participants: ', err);
+            return 0;
+        });
+
+    // Get the total number of donations
+    const totalDonationsQuery = knex('donations')
+        .sum('donation_amount as total_donations')
+        .first()
+        .then(result => {
+            return result.total_donations || 0;
+        })
+        .catch(err => {
+            console.log('Error fetching total donations: ', err);
+            return 0;
+        });
+
+    // Get the upcoming event
+    const upcomingEventQuery = knex('event_occurrences')
+        .select('event_occurrence_id', 'event_name', 'event_date_time_start', 'event_date_time_end', 'event_location')
+        .where('event_date_time_start', '>=', new Date())
+        .orderBy('event_date_time_start', 'asc')
+        .first()
+        .then(upcomingEvent => {
+            return upcomingEvent || null;
+        })
+        .catch(err => {
+            console.log('Error fetching upcoming event: ', err);
+            return null;
+        });
+
+    Promise.all([totalDonationsQuery, upcomingEventQuery, totalParticipantsQuery])
+        .then(([totalDonations, upcomingEvent, totalParticipants]) => {
+            res.render('dashboard', {
+                error_message: "",
+                totalDonations: totalDonations,
+                upcomingEvent: upcomingEvent,
+                totalParticipants: totalParticipants
+            });
+        }).catch(err => {
+            console.log('Error fetching dashboard information: ', err);
+            res.render('dashboard', {
+                error_message: 'Error fetching dashboard information',
+                totalDonations: null,
+                upcomingEvent: null,
+                totalParticipants: null
+            });
+        });
 });
 
 app.post('/manage-participants/new', (req, res) => {
@@ -1138,7 +1189,14 @@ app.post('/login', (req, res) => {
                 req.session.last_name = user.user_last_name // Saves user last name
                 req.session.user_id = user.user_id // Saves user id
                 console.log('User "', user.user_email, '" successfully logged in.'); // Logs user login in console
-                res.redirect('/dashboard'); // Sends successful login to the user dashboard              
+                // Save session before redirecting to ensure session data is persisted
+                req.session.save((err) => {
+                    if (err) {
+                        console.log('Session save error:', err);
+                        return res.render('login', { error_message: 'Session error. Please try again.'});
+                    }
+                    res.redirect('/dashboard'); // Sends successful login to the user dashboard
+                });
             } else {
                 res.render('login', { error_message: 'Incorrect email or password'}); // Otherwise returns to login page with error message
             }
