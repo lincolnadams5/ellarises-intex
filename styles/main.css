@@ -3185,3 +3185,27 @@ h1, h2, h3 {
     word-wrap: break-word;
 }
 
+/* ========== BREADCRUMB NAVIGATION ========== */
+.breadcrumb {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+}
+
+.breadcrumb a {
+    color: var(--color-text-light);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.breadcrumb a:hover {
+    color: var(--color-text);
+}
+
+.breadcrumb span {
+    color: var(--color-text-light);
+    font-size: 0.95rem;
+}
+
