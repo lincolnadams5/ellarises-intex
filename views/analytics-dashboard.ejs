@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Surveys - Ella Rises</title>
+    <title>Analytics Dashboard - Ella Rises</title>
     <link rel="stylesheet" href="/styles/main.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -65,73 +65,57 @@
         </div>
     </nav>
 
-    <!-- Surveys Container -->
-    <div class="manage-donations-container">
-        <div class="manage-donations-wrapper">
-            <!-- Page Header -->
-            <div class="manage-donations-header">
-                <h1 class="manage-donations-title">My Surveys</h1>
-                <p class="manage-donations-subtitle">View your completed surveys</p>
+    <!-- Analytics Hero Section -->
+    <section class="analytics-hero">
+        <h1>Analytics Dashboard</h1>
+        <p>Explore our impact through data-driven insights</p>
+    </section>
+
+    <!-- Tableau Dashboard Section -->
+    <section class="tableau-container">
+        <div class="tableau-wrapper">
+            <div class='tableauPlaceholder' id='viz1764887097665' style='position: relative'>
+                <noscript>
+                    <a href='#'>
+                        <img alt='Dashboard 2' src='https://public.tableau.com/static/images/In/IntexBook/Dashboard2/1_rss.png' style='border: none' />
+                    </a>
+                </noscript>
+                <object class='tableauViz' style='display:none;'>
+                    <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
+                    <param name='embed_code_version' value='3' />
+                    <param name='site_root' value='' />
+                    <param name='name' value='IntexBook/Dashboard2' />
+                    <param name='tabs' value='no' />
+                    <param name='toolbar' value='yes' />
+                    <param name='static_image' value='https://public.tableau.com/static/images/In/IntexBook/Dashboard2/1.png' />
+                    <param name='animate_transition' value='yes' />
+                    <param name='display_static_image' value='yes' />
+                    <param name='display_spinner' value='yes' />
+                    <param name='display_overlay' value='yes' />
+                    <param name='display_count' value='yes' />
+                    <param name='language' value='en-US' />
+                    <param name='filter' value='publish=yes' />
+                </object>
             </div>
-
-            <!-- Error Message Display -->
-            <% if (typeof error_message !== 'undefined' && error_message && error_message.length > 0) { %>
-                <div class="error-message">
-                    <%= error_message %>
-                </div>
-            <% } %>
-
-            <!-- Surveys Table -->
-            <% if (registrations && registrations.length > 0) { %>
-                <div class="donations-table-container">
-                    <table class="donations-table">
-                        <thead>
-                            <tr>
-                                <th>Event Name</th>
-                                <th>Event Date</th>
-                                <th>Overall Score</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% registrations.forEach(function(registration) { %>
-                                <tr>
-                                    <td><%= registration.event_name %></td>
-                                    <td>
-                                        <% 
-                                            const date = new Date(registration.event_date_time_end);
-                                            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                                            const formattedDate = months[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
-                                        %>
-                                        <%= formattedDate %>
-                                    </td>
-                                    <% if (registration.overall_score) { %>
-                                        <td><%= registration.overall_score %>/5</td>
-                                        <td>
-                                            <form action="/surveys/<%= registration.survey_id %>/delete" method="post" style="display:inline;">
-                                                <button type="submit" class="btn-delete" onclick="return confirm('Are you sure you want to delete this survey?');" style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Delete</button>
-                                            </form>
-                                        </td>
-                                    <% } else { %>
-                                        <td>
-                                            <form action="/add-survey/<%= registration.registration_id %>/<%= registration.event_occurrence_id %>" method="get" style="display:inline;">
-                                                <button type="submit" class="btn-complete-survey">Complete Survey</button>
-                                            </form>
-                                        </td>
-                                        <td></td>
-                                    <% } %>
-                                </tr>
-                            <% }); %>
-                        </tbody>
-                    </table>
-                </div>
-            <% } else { %>
-                <div class="empty-state">
-                    <p class="empty-state-message">No surveys completed yet.</p>
-                </div>
-            <% } %>
+            <script type='text/javascript'>
+                var divElement = document.getElementById('viz1764887097665');
+                var vizElement = divElement.getElementsByTagName('object')[0];
+                if (divElement.offsetWidth > 800) {
+                    vizElement.style.width = '100%';
+                    vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
+                } else if (divElement.offsetWidth > 500) {
+                    vizElement.style.width = '100%';
+                    vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
+                } else {
+                    vizElement.style.width = '100%';
+                    vizElement.style.height = '1627px';
+                }
+                var scriptElement = document.createElement('script');
+                scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+                vizElement.parentNode.insertBefore(scriptElement, vizElement);
+            </script>
         </div>
-    </div>
+    </section>
 
     <!-- Footer -->
     <footer class="footer">
@@ -192,7 +176,6 @@
                     userDropdown.classList.remove('active');
                 }
             });
-
         });
     </script>
 </body>

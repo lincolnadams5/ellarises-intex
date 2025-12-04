@@ -46,7 +46,7 @@ app.use((req, res, next) => {
 // ~~~~~ Global Authentication ~~~~~
 app.use((req, res, next) => {
     // Skip authentication for login routes
-    let public_routes = ['/', '/login', '/register', '/about', '/events', '/donate'];
+    let public_routes = ['/', '/login', '/register', '/about', '/events', '/donate', '/analytics'];
     if (public_routes.includes(req.path)) {
         return next();
     }
@@ -114,6 +114,11 @@ app.get('/register', (req, res) => {
 
 app.get('/about', (req, res) => {
     res.render('about', { error_message: "" });
+});
+
+// ~~~ ~~~ ~~~ ~~~ ~~~ ANALYTICS DASHBOARD ~~~ ~~~ ~~~ ~~~ ~~~ 
+app.get('/analytics', (req, res) => {
+    res.render('analytics-dashboard', { error_message: "" });
 });
 
 // ~~~ ~~~ ~~~ ~~~ ~~~ EVENTS ~~~ ~~~ ~~~ ~~~ ~~~ 

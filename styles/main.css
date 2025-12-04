@@ -3113,3 +3113,56 @@ h1, h2, h3 {
     }
 }
 
+/* ========================================
+ANALYTICS DASHBOARD PAGE
+   ======================================== */
+
+.analytics-hero {
+    background-color: var(--color-tertiary-bkgd);
+    text-align: center;
+    padding: 3rem 2rem 1rem 2rem;
+}
+
+.analytics-hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 3rem;
+    color: var(--color-text);
+    font-weight: 400;
+    letter-spacing: 2px;
+    margin-bottom: 0.5rem;
+}
+
+.analytics-hero p {
+    color: var(--color-text-light);
+    font-size: 1.1rem;
+}
+
+.tableau-container {
+    padding: 2rem;
+    background-color: var(--color-tertiary-bkgd);
+}
+
+.tableau-wrapper {
+    max-width: 95vw;
+    margin: 0 auto;
+    background-color: var(--color-tertiary-bkgd);
+    border-radius: 12px;
+    padding: 1.5rem;
+    overflow: hidden;
+}
+
+@media (max-width: 2000px) {
+    .analytics-hero h1 {
+        font-size: 2rem;
+    }
+
+    .tableau-container {
+        padding: 1rem;
+    }
+
+    .tableau-wrapper {
+        padding: 0.5rem;
+        border-radius: 8px;
+    }
+}
+
