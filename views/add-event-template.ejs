@@ -10,20 +10,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+
     <!-- Navigation -->
     <nav class="navbar navbar-static">
         <div class="nav-container">
             <ul class="nav-menu">
-                <!-- Dashboard Dropdown (only when logged in) -->
-                <% if (isLoggedIn) { %>
-                    <li class="nav-dropdown">
-                        <a href="/dashboard" class="nav-dropdown-trigger">Dashboard</a>
-                        <div class="nav-dropdown-content">
-                            <a href="/milestone-progress">Milestone Progress</a>
-                            <a href="/surveys">Surveys</a>
-                        </div>
-                    </li>
-                <% } %>
                 <!-- Events Dropdown -->
                 <li class="nav-dropdown">
                     <a href="/events" class="nav-dropdown-trigger">Events</a>
@@ -57,6 +48,7 @@
                             <%= first_name %> <%= last_name %> ▼
                         </button>
                         <div class="user-dropdown-content">
+                            <a href="/dashboard">User Dashboard</a>
                             <a href="/account-info">Account Info</a>
                             <form action="/logout" method="POST" class="dropdown-logout-form">
                                 <button type="submit" class="dropdown-logout-btn">Logout</button>
@@ -193,6 +185,7 @@
                     userDropdown.classList.remove('active');
                 }
             });
+
         });
     </script>
 </body>
