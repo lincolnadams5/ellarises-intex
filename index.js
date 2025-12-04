@@ -1082,7 +1082,15 @@ app.get('/manage-participants', (req, res) => {
             'user_first_name',
             'user_last_name',
             'user_email',
-            'user_role'
+            'user_role',
+            'user_dob',
+            'user_phone',
+            'user_city',
+            'user_state',
+            'user_zip',
+            'user_school',
+            'user_employer',
+            'user_field_of_interest'
         )
         .orderBy('user_last_name')
         .orderBy('user_first_name')
@@ -1224,7 +1232,20 @@ app.post('/manage-participants/:user_id/delete', (req, res) => {
 
 app.post('/manage-participants/:user_id/update', (req, res) => {
     const user_id = parseInt(req.params.user_id, 10);
-    const { user_first_name, user_last_name, user_email, user_role } = req.body;
+    const { 
+        user_first_name, 
+        user_last_name, 
+        user_email, 
+        user_role,
+        user_dob,
+        user_phone,
+        user_city,
+        user_state,
+        user_zip,
+        user_school,
+        user_employer,
+        user_field_of_interest
+    } = req.body;
 
     knex('users')
         .where('user_id', user_id)
@@ -1234,14 +1255,24 @@ app.post('/manage-participants/:user_id/update', (req, res) => {
                 return res.redirect('/manage-participants?error=User does not exist');
             }
 
+            // Build update object, only including fields that are provided
+            const updateData = {};
+            if (user_first_name !== undefined) updateData.user_first_name = user_first_name;
+            if (user_last_name !== undefined) updateData.user_last_name = user_last_name;
+            if (user_email !== undefined) updateData.user_email = user_email;
+            if (user_role !== undefined) updateData.user_role = user_role;
+            if (user_dob !== undefined && user_dob !== '') updateData.user_dob = user_dob;
+            if (user_phone !== undefined) updateData.user_phone = user_phone;
+            if (user_city !== undefined) updateData.user_city = user_city;
+            if (user_state !== undefined) updateData.user_state = user_state;
+            if (user_zip !== undefined && user_zip !== '') updateData.user_zip = user_zip;
+            if (user_school !== undefined) updateData.user_school = user_school;
+            if (user_employer !== undefined) updateData.user_employer = user_employer;
+            if (user_field_of_interest !== undefined) updateData.user_field_of_interest = user_field_of_interest;
+
             return knex('users')
                 .where('user_id', user_id)
-                .update({
-                    user_first_name,
-                    user_last_name,
-                    user_email,
-                    user_role
-                })
+                .update(updateData)
                 .then(() => {
                     res.redirect('/manage-participants');
                 });
