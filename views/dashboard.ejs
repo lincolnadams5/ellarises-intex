@@ -87,17 +87,35 @@
                     <!-- Admin KPIs -->
                     <div class="kpi-card">
                         <div class="kpi-icon">💰</div>
-                        <div class="kpi-value"><%= typeof totalDonations !== 'undefined' ? '$' + totalDonations : '—' %></div>
+                        <div class="kpi-value">
+                            <% if (typeof totalDonations !== 'undefined' && totalDonations !== null && !isNaN(totalDonations)) { %>
+                                $<%= Number(totalDonations).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                            <% } else { %>
+                                —
+                            <% } %>
+                        </div>
                         <div class="kpi-label">Total Donations</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-icon">👥</div>
-                        <div class="kpi-value"><%= typeof totalParticipants !== 'undefined' ? totalParticipants : '—' %></div>
+                        <div class="kpi-value">
+                            <% if (typeof totalParticipants !== 'undefined' && totalParticipants !== null && !isNaN(totalParticipants)) { %>
+                                <%= Number(totalParticipants).toLocaleString('en-US') %>
+                            <% } else { %>
+                                —
+                            <% } %>
+                        </div>
                         <div class="kpi-label">Total Participants</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-icon">📅</div>
-                        <div class="kpi-value"><%= typeof upcomingEvents !== 'undefined' ? upcomingEvents : '—' %></div>
+                        <div class="kpi-value">
+                            <% if (typeof upcomingEvents !== 'undefined' && upcomingEvents !== null && !isNaN(upcomingEvents)) { %>
+                                <%= Number(upcomingEvents).toLocaleString('en-US') %>
+                            <% } else { %>
+                                —
+                            <% } %>
+                        </div>
                         <div class="kpi-label">Upcoming Events</div>
                     </div>
                 <% } else { %>
@@ -177,7 +195,7 @@
                         </div>
                         <div class="action-arrow">→</div>
                     </a>
-                    <a href="/surveys-todo" class="action-card">
+                    <a href="/surveys" class="action-card">
                         <div class="action-icon">📝</div>
                         <div class="action-content">
                             <h3>View Surveys</h3>
