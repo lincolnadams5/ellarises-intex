@@ -26,8 +26,8 @@
     <div class="manage-donations-container">
         <div class="manage-donations-wrapper">
             <div class="manage-donations-header">
-                <h1 class="manage-donations-title"><%= event_name %> Survey</h1>
-                <p class="manage-donations-subtitle"><%= event_date %> at <%= event_location %></p>
+                <!-- <h1 class="manage-donations-title"><%= event_name %> Survey</h1>
+                <p class="manage-donations-subtitle"><%= event_date %> at <%= event_location %></p> -->
             </div>
 
             <% if (typeof error_message !== 'undefined' && error_message && error_message.length > 0) { %>
@@ -64,7 +64,7 @@
                 </div>
 
                 <div class="form-actions">
-                    <button type="submit" class="btn-primary">Save Survey</button>
+                    <button type="submit" class="btn-primary">Submit Response</button>
                     <a href="/surveys" class="btn-secondary">Cancel</a>
                 </div>
             </form>
