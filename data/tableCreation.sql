@@ -7,7 +7,7 @@ DROP TABLE IF EXISTS user_milestones CASCADE;
 DROP TABLE IF EXISTS milestones CASCADE;
 DROP TABLE IF EXISTS surveys CASCADE;
 DROP TABLE IF EXISTS registration CASCADE;
-DROP TABLE IF EXISTS event_occurences CASCADE;
+DROP TABLE IF EXISTS event_occurrences CASCADE;
 DROP TABLE IF EXISTS event_templates CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
@@ -44,7 +44,7 @@ CREATE TABLE event_templates (
     UNIQUE (event_name)
 );
 
--- 3. EVENT OCCURENCES  (name matches your template)
+-- 3. EVENT OCCURRENCES  (name matches your template)
 CREATE TABLE event_occurrences (
     event_occurrence_id         INTEGER PRIMARY KEY,
     event_template_id           INTEGER NOT NULL,
@@ -70,7 +70,7 @@ CREATE TABLE registration (
     FOREIGN KEY (user_id)
         REFERENCES users(user_id),
     FOREIGN KEY (event_occurrence_id)
-        REFERENCES event_occurences(event_occurrence_id)
+        REFERENCES event_occurrences(event_occurrence_id)
 );
 
 -- 5. SURVEYS
@@ -154,8 +154,8 @@ COPY event_templates (
 FROM '/absolute/path/event_templates.csv'
 WITH (FORMAT csv, HEADER true);
 
--- 3. EVENT OCCURENCES
-COPY event_occurences (
+-- 3. EVENT OCCURRENCES
+COPY event_occurrences (
     event_occurrence_id,
     event_template_id,
     event_name,
@@ -165,7 +165,7 @@ COPY event_occurences (
     event_capacity,
     event_registration_deadline
 )
-FROM '/absolute/path/event_occurences.csv'
+FROM '/absolute/path/event_occurrences.csv'
 WITH (FORMAT csv, HEADER true);
 
 -- 4. REGISTRATION

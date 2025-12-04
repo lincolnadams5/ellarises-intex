@@ -25,10 +25,10 @@ const knex = require("knex")(knexConfig[environment]);
 // Initialize session
 app.use(
     session({ 
-    secret: process.env.SESSION_SECRET || 'secret',
-    resave: false,
-    saveUninitialized: false
-  })
+        secret: process.env.SESSION_SECRET || 'secret',
+        resave: false,
+        saveUninitialized: false
+    })
 );
 
 // ========== MIDDLEWARE ==========
@@ -46,7 +46,7 @@ app.use((req, res, next) => {
 // ~~~~~ Global Authentication ~~~~~
 app.use((req, res, next) => {
     // Skip authentication for login routes
-    let public_routes = ['/', '/login', '/register', '/about', '/events', '/donate'];
+    let public_routes = ['/', '/login', '/register', '/about', '/events', '/donate', '/teapot'];
     if (public_routes.includes(req.path)) {
         return next();
     }
@@ -114,6 +114,10 @@ app.get('/register', (req, res) => {
 
 app.get('/about', (req, res) => {
     res.render('about', { error_message: "" });
+});
+
+app.get('/teapot', (req, res) => {
+    res.status(418).render('teapot');
 });
 
 // ~~~ ~~~ ~~~ ~~~ ~~~ EVENTS ~~~ ~~~ ~~~ ~~~ ~~~ 

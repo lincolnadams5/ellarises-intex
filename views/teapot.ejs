@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>418 I'm a Teapot - Ella Rises</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+    <style>
+        /* Minimal teapot-specific styles using site variables */
+        .teapot-section {
+            min-height: calc(100vh - 200px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .teapot-icon {
+            font-size: 8rem;
+            margin-bottom: 1rem;
+            animation: teapot-wobble 2s ease-in-out infinite;
+        }
+
+        @keyframes teapot-wobble {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-static">
+        <div class="nav-container">
+            <ul class="nav-menu">
+                <!-- Events Dropdown -->
+                <li class="nav-dropdown">
+                    <a href="/events" class="nav-dropdown-trigger">Events</a>
+                    <div class="nav-dropdown-content">
+                        <a href="/events?filter=upcoming">Upcoming Events</a>
+                        <a href="/events?filter=past">Past Events</a>
+                    </div>
+                </li>
+                <!-- About Dropdown -->
+                <li class="nav-dropdown">
+                    <a href="/about" class="nav-dropdown-trigger">About</a>
+                    <div class="nav-dropdown-content">
+                        <a href="/about#mission-vision">Mission & Vision</a>
+                        <a href="/about#programs">Programs</a>
+                        <a href="/about#mariachi">Mariachi</a>
+                        <a href="/about#ballet">Ballet Folklorico</a>
+                        <a href="/about#steam">STEAM Workshops</a>
+                        <a href="/about#summit">Ella Rises Summit</a>
+                        <a href="/about#contact">Contact Us</a>
+                    </div>
+                </li>
+                <li><a href="/donate">Donate</a></li>
+            </ul>
+            <div class="nav-logo">
+                <h1><a href="/" style="text-decoration: none; color: inherit;">ELLA RISES</a></h1>
+            </div>
+            <% if (isLoggedIn) { %>
+                <div class="nav-auth">
+                    <div class="user-dropdown">
+                        <button class="user-dropdown-btn">
+                            <%= first_name %> <%= last_name %> ▼
+                        </button>
+                        <div class="user-dropdown-content">
+                            <a href="/dashboard">User Dashboard</a>
+                            <a href="/account-info">Account Info</a>
+                            <form action="/logout" method="POST" class="dropdown-logout-form">
+                                <button type="submit" class="dropdown-logout-btn">Logout</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="nav-auth">
+                    <a href="/login" class="btn-signin">Sign In</a>
+                    <a href="/register" class="btn-signup">Sign Up</a>
+                </div>
+            <% } %>
+        </div>
+    </nav>
+
+    <section class="teapot-section">
+        <div class="teapot-icon">🫖</div>
+        <h1 style="font-size: 4rem; margin-bottom: 0.5rem;">418</h1>
+        <h2 style="margin-bottom: 2rem;">I'm a Teapot</h2>
+        <p style="max-width: 500px; margin-bottom: 2rem; line-height: 1.6; color: var(--color-text-light);">
+            The server refuses to brew coffee because it is, permanently, a teapot. 
+            This error is a reference to the Hyper Text Coffee Pot Control Protocol (HTCPCP/1.0).
+        </p>
+        <a href="/" class="btn-primary">Return Home</a>
+    </section>
+
+    <script>
+        // User dropdown functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const userDropdown = document.querySelector('.user-dropdown');
+            const dropdownBtn = document.querySelector('.user-dropdown-btn');
+            
+            if (dropdownBtn) {
+                dropdownBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('active');
+                });
+            }
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (userDropdown && !userDropdown.contains(e.target)) {
+                    userDropdown.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
