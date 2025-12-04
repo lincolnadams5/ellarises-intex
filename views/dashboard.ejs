@@ -9,8 +9,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
 </head>
-<body class="has-sidebar">
-    
+<body>
+
     <!-- Navigation -->
     <nav class="navbar navbar-static">
         <div class="nav-container">
@@ -65,172 +65,149 @@
         </div>
     </nav>
 
-    <!-- Main Layout with Sidebar -->
-    <div class="dashboard-layout">
-        <!-- Sidebar -->
-        <aside class="dashboard-sidebar">
-            <div class="sidebar-header">
-                <h3>Navigation</h3>
-            </div>
-            <nav class="sidebar-nav">
+    <!-- Main Dashboard Content -->
+    <main class="dashboard-container">
+        <!-- Welcome Header -->
+        <div class="dashboard-welcome">
+            <h1>Welcome, <%= first_name %> <%= last_name %></h1>
+            <p>
                 <% if (level === 'admin') { %>
-                    <!-- Admin Sidebar Options -->
-                    <a href="/manage-events" class="sidebar-link">
-                        <span class="sidebar-icon">📅</span>
-                        Manage Events
-                    </a>
-                    <a href="/manage-participants" class="sidebar-link">
-                        <span class="sidebar-icon">👥</span>
-                        Manage Participants
-                    </a>
-                    <a href="/manage-donations" class="sidebar-link">
-                        <span class="sidebar-icon">💰</span>
-                        Manage Donations
-                    </a>
-                    <a href="/manage-milestones" class="sidebar-link">
-                        <span class="sidebar-icon">🏆</span>
-                        Manage Milestones
-                    </a>
-                    <a href="/manage-surveys" class="sidebar-link">
-                        <span class="sidebar-icon">📊</span>
-                        Survey Results
-                    </a>
+                    Here's an overview of Ella Rises activity.
                 <% } else { %>
-                    <!-- Participant Sidebar Options -->
-                    <a href="/events?filter=upcoming" class="sidebar-link">
-                        <span class="sidebar-icon">📅</span>
-                        Upcoming Events
-                    </a>
-                    <a href="/my-reservations" class="sidebar-link">
-                        <span class="sidebar-icon">🎟️</span>
-                        View Active Reservations
-                    </a>
-                    <a href="/milestone-progress" class="sidebar-link">
-                        <span class="sidebar-icon">🏆</span>
-                        Milestone Progress
-                    </a>
-                    <a href="/surveys-todo" class="sidebar-link">
-                        <span class="sidebar-icon">📝</span>
-                        Surveys To-Do
-                    </a>
-                    <a href="/surveys-completed" class="sidebar-link">
-                        <span class="sidebar-icon">✅</span>
-                        Completed Surveys
-                    </a>
+                    Here's your activity summary.
                 <% } %>
-            </nav>
-        </aside>
+            </p>
+        </div>
 
-        <!-- Main Content Area -->
-        <main class="dashboard-main">
-            <!-- Welcome Header -->
-            <div class="dashboard-header">
-                <h1>Welcome, <%= first_name %> <%= last_name %></h1>
-                <p class="dashboard-subtitle">
-                    <% if (level === 'admin') { %>
-                        Here's an overview of Ella Rises activity.
-                    <% } else { %>
-                        Here's your activity summary.
-                    <% } %>
-                </p>
-            </div>
-
-            <!-- Stats Cards -->
-            <div class="dashboard-stats">
+        <!-- KPI Stats Section -->
+        <section class="dashboard-kpi-section">
+            <h2>Overview</h2>
+            <div class="dashboard-kpi-grid">
                 <% if (level === 'admin') { %>
-                    <!-- Admin Stats -->
-                    <div class="stat-card dashboard-stat">
-                        <div class="stat-icon">👥</div>
-                        <div class="stat-info">
-                            <div class="stat-number"><%= typeof totalParticipants !== 'undefined' ? totalParticipants : '—' %></div>
-                            <div class="stat-label">Total Participants</div>
-                        </div>
+                    <!-- Admin KPIs -->
+                    <div class="kpi-card">
+                        <div class="kpi-icon">💰</div>
+                        <div class="kpi-value"><%= typeof totalDonations !== 'undefined' ? '$' + totalDonations : '—' %></div>
+                        <div class="kpi-label">Total Donations</div>
                     </div>
-                    <div class="stat-card dashboard-stat">
-                        <div class="stat-icon">📅</div>
-                        <div class="stat-info">
-                            <div class="stat-number"><%= typeof upcomingEvents !== 'undefined' ? upcomingEvents : '—' %></div>
-                            <div class="stat-label">Upcoming Events</div>
-                        </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon">👥</div>
+                        <div class="kpi-value"><%= typeof totalParticipants !== 'undefined' ? totalParticipants : '—' %></div>
+                        <div class="kpi-label">Total Participants</div>
                     </div>
-                    <div class="stat-card dashboard-stat">
-                        <div class="stat-icon">💰</div>
-                        <div class="stat-info">
-                            <div class="stat-number"><%= typeof totalDonations !== 'undefined' ? '$' + totalDonations : '—' %></div>
-                            <div class="stat-label">Total Donations</div>
-                        </div>
-                    </div>
-                    <div class="stat-card dashboard-stat">
-                        <div class="stat-icon">📊</div>
-                        <div class="stat-info">
-                            <div class="stat-number"><%= typeof pendingSurveys !== 'undefined' ? pendingSurveys : '—' %></div>
-                            <div class="stat-label">Survey Responses</div>
-                        </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon">📅</div>
+                        <div class="kpi-value"><%= typeof upcomingEvents !== 'undefined' ? upcomingEvents : '—' %></div>
+                        <div class="kpi-label">Upcoming Events</div>
                     </div>
                 <% } else { %>
-                    <!-- Participant Stats -->
-                    <div class="stat-card dashboard-stat">
-                        <div class="stat-icon">🎟️</div>
-                        <div class="stat-info">
-                            <div class="stat-number"><%= typeof upcomingReservations !== 'undefined' ? upcomingReservations : '—' %></div>
-                            <div class="stat-label">Upcoming Reservations</div>
-                        </div>
+                    <!-- Participant KPIs -->
+                    <div class="kpi-card">
+                        <div class="kpi-icon">🎟️</div>
+                        <div class="kpi-value"><%= typeof upcomingReservations !== 'undefined' ? upcomingReservations : '—' %></div>
+                        <div class="kpi-label">Active Reservations</div>
                     </div>
-                    <div class="stat-card dashboard-stat">
-                        <div class="stat-icon">🏆</div>
-                        <div class="stat-info">
-                            <div class="stat-number"><%= typeof milestonesCompleted !== 'undefined' ? milestonesCompleted : '—' %></div>
-                            <div class="stat-label">Milestones Completed</div>
-                        </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon">🏆</div>
+                        <div class="kpi-value"><%= typeof milestonesCompleted !== 'undefined' ? milestonesCompleted : '—' %></div>
+                        <div class="kpi-label">Milestones Completed</div>
                     </div>
-                    <div class="stat-card dashboard-stat">
-                        <div class="stat-icon">📝</div>
-                        <div class="stat-info">
-                            <div class="stat-number"><%= typeof surveysPending !== 'undefined' ? surveysPending : '—' %></div>
-                            <div class="stat-label">Surveys Pending</div>
-                        </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon">📝</div>
+                        <div class="kpi-value"><%= typeof surveysPending !== 'undefined' ? surveysPending : '—' %></div>
+                        <div class="kpi-label">Pending Surveys</div>
                     </div>
                 <% } %>
             </div>
+        </section>
 
-            <!-- Quick Actions Section -->
-            <div class="dashboard-section">
-                <h2>Quick Actions</h2>
-                <div class="quick-actions">
-                    <% if (level === 'admin') { %>
-                        <a href="/manage-events/new" class="quick-action-card">
-                            <span class="quick-action-icon">➕</span>
-                            <span class="quick-action-label">Create Event</span>
-                        </a>
-                        <a href="/manage-participants" class="quick-action-card">
-                            <span class="quick-action-icon">👥</span>
-                            <span class="quick-action-label">View Participants</span>
-                        </a>
-                        <a href="/manage-surveys" class="quick-action-card">
-                            <span class="quick-action-icon">📊</span>
-                            <span class="quick-action-label">View Surveys</span>
-                        </a>
-                    <% } else { %>
-                        <a href="/events?filter=upcoming" class="quick-action-card">
-                            <span class="quick-action-icon">📅</span>
-                            <span class="quick-action-label">Browse Events</span>
-                        </a>
-                        <a href="/my-reservations" class="quick-action-card">
-                            <span class="quick-action-icon">🎟️</span>
-                            <span class="quick-action-label">My Reservations</span>
-                        </a>
-                        <a href="/donate" class="quick-action-card">
-                            <span class="quick-action-icon">💝</span>
-                            <span class="quick-action-label">Make a Donation</span>
-                        </a>
-                    <% } %>
-                </div>
+        <!-- Actions Section -->
+        <section class="dashboard-actions-section">
+            <h2>Actions</h2>
+            <div class="dashboard-actions-grid">
+                <% if (level === 'admin') { %>
+                    <!-- Admin Actions -->
+                    <a href="/manage-donations" class="action-card">
+                        <div class="action-icon">💰</div>
+                        <div class="action-content">
+                            <h3>Manage Donations</h3>
+                            <p>View and manage all donations</p>
+                        </div>
+                        <div class="action-arrow">→</div>
+                    </a>
+                    <a href="/manage-events" class="action-card">
+                        <div class="action-icon">📅</div>
+                        <div class="action-content">
+                            <h3>Manage Events</h3>
+                            <p>Create and edit events</p>
+                        </div>
+                        <div class="action-arrow">→</div>
+                    </a>
+                    <a href="/manage-surveys" class="action-card">
+                        <div class="action-icon">📊</div>
+                        <div class="action-content">
+                            <h3>Manage Surveys</h3>
+                            <p>View survey responses</p>
+                        </div>
+                        <div class="action-arrow">→</div>
+                    </a>
+                    <a href="/manage-participants" class="action-card">
+                        <div class="action-icon">👥</div>
+                        <div class="action-content">
+                            <h3>Manage Participants</h3>
+                            <p>View and manage users</p>
+                        </div>
+                        <div class="action-arrow">→</div>
+                    </a>
+                    <a href="/manage-milestones" class="action-card">
+                        <div class="action-icon">🏆</div>
+                        <div class="action-content">
+                            <h3>Manage Milestones</h3>
+                            <p>Track participant achievements</p>
+                        </div>
+                        <div class="action-arrow">→</div>
+                    </a>
+                <% } else { %>
+                    <!-- Participant Actions -->
+                    <a href="/my-donations" class="action-card">
+                        <div class="action-icon">💰</div>
+                        <div class="action-content">
+                            <h3>View Donations</h3>
+                            <p>See your donation history</p>
+                        </div>
+                        <div class="action-arrow">→</div>
+                    </a>
+                    <a href="/surveys-todo" class="action-card">
+                        <div class="action-icon">📝</div>
+                        <div class="action-content">
+                            <h3>View Surveys</h3>
+                            <p>Complete pending surveys</p>
+                        </div>
+                        <div class="action-arrow">→</div>
+                    </a>
+                    <a href="/milestone-progress" class="action-card">
+                        <div class="action-icon">🏆</div>
+                        <div class="action-content">
+                            <h3>View Milestones</h3>
+                            <p>Track your achievements</p>
+                        </div>
+                        <div class="action-arrow">→</div>
+                    </a>
+                    <a href="/my-reservations" class="action-card">
+                        <div class="action-icon">🎟️</div>
+                        <div class="action-content">
+                            <h3>View Reservations</h3>
+                            <p>See your event registrations</p>
+                        </div>
+                        <div class="action-arrow">→</div>
+                    </a>
+                <% } %>
             </div>
-        </main>
-    </div>
+        </section>
+    </main>
 
     <!-- Footer -->
-    <footer class="footer dashboard-footer">
+    <footer class="footer">
         <div class="footer-content">
             <div class="footer-section">
                 <h3>Ella Rises</h3>
@@ -288,6 +265,7 @@
                     userDropdown.classList.remove('active');
                 }
             });
+
         });
     </script>
 </body>

@@ -298,19 +298,6 @@
                 }
             });
 
-            // Navbar show/hide on scroll - only visible at top
-            const navbar = document.querySelector('.navbar');
-            
-            window.addEventListener('scroll', function() {
-                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                
-                if (scrollTop < 64) {
-                    navbar.classList.remove('hidden');
-                } else {
-                    navbar.classList.add('hidden');
-                }
-            });
-
             // View Details modal logic
             const detailsModal = document.getElementById('view-details-modal');
             const closeDetailsBtn = document.getElementById('close-details');
