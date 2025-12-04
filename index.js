@@ -712,7 +712,7 @@ app.get('/manage-participants/new', (req, res) => {
 // ~~~ ~~~ ~~~ ~~~ ~~~ Dashboard ~~~ ~~~ ~~~ ~~~ ~~~ 
 app.get('/dashboard', (req, res) => {
     // Render the user dashboard/landing page
-    res.render('user-home', {
+    res.render('dashboard', {
         error_message: ""
     });
 });
