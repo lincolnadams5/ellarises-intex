@@ -1152,6 +1152,45 @@ app.post('/registrations/:registration_id/cancel', (req, res) => {
         })
 });
 
+// ~~~ ~~~ REGISTER FOR EVENT ~~~ ~~~
+app.post('/registration/:user_id/register/:event_occurrence_id', (req, res) => {
+    const user_id = parseInt(req.params.user_id, 10);
+    const event_occurrence_id = parseInt(req.params.event_occurrence_id, 10);
+    const { registration_status, event_registration_deadline, event_capacity } = req.body;
+
+    // Check if the event registration deadline has passed
+    const currentDate = new Date();
+    const eventRegistrationDeadline = new Date(event_registration_deadline);
+    if (eventRegistrationDeadline < currentDate) {
+        return res.redirect('/registrations?error=Event registration deadline has passed');
+    }
+
+    // Check if the event capacity has been reached
+    const eventCapacity = parseInt(event_capacity, 10);
+    knex('registration')
+        .where('event_occurrence_id', event_occurrence_id)
+        .count('* as count')
+        .first()
+        .then(result => {
+            const currentCapacity = parseInt(result.count, 10);
+            if (currentCapacity >= eventCapacity) { // If the event capacity has been reached, redirect with an error message
+                return res.redirect('/registrations?error=Event capacity has been reached');
+            }
+            // Register the user
+            return knex('registration')
+                .insert({ user_id, event_occurrence_id, registration_status, registration_created_at: new Date() })
+                .then(() => {
+                    res.redirect(`/events`, {
+                        success_message: 'Registration Successful'
+                    });
+                });
+        })
+        .catch(err => { // If there is an error checking the event capacity, redirect with an error message
+            console.log('Error checking event capacity: ', err);
+            res.redirect('/registrations?error=Error checking event capacity. Please try again');
+        })
+});
+
 // ~~~ ~~~ MANAGE SURVEYS ~~~ ~~~
 app.get('/manage-surveys', (req, res) => { // Get the manage surveys page
     // Pagination logic
