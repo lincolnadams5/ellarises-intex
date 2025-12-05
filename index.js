@@ -131,6 +131,193 @@ app.get('/events', (req, res) => {
     res.render('events', { error_message: "" });
 });
 
+app.get('/manage-event-occurrences', (req, res) => {
+    // Pagination logic
+    const page = parseInt(req.query.page, 10) || 1;
+    const perPage = 20;
+    const offset = (page - 1) * perPage;
+    
+    // Get error message from query parameter if present
+    const errorMessage = req.query.error || "";
+
+    // Query for the current page of event occurrences
+    const eventsQuery = knex('event_occurrences')
+        .select(
+            'event_occurrences.event_occurrence_id',
+            'event_occurrences.event_template_id',
+            'event_occurrences.event_name',
+            'event_occurrences.event_date_time_start',
+            'event_occurrences.event_date_time_end',
+            'event_occurrences.event_location',
+            'event_occurrences.event_capacity',
+            'event_occurrences.event_registration_deadline'
+        )
+        .orderBy('event_occurrences.event_date_time_start', 'desc')
+        .limit(perPage)
+        .offset(offset);
+
+    const countQuery = getCount('event_occurrences');
+
+    // Also fetch templates for the edit modal dropdown
+    const templatesQuery = knex('event_templates')
+        .select('event_template_id', 'event_name')
+        .orderBy('event_name');
+
+    Promise.all([eventsQuery, countQuery, templatesQuery])
+        .then(([events, countResult, templates]) => {
+            const totalCount = parseInt(countResult.count, 10);
+            const totalPages = Math.ceil(totalCount / perPage);
+
+            res.render('manage-event-occurrences', {
+                event: events,
+                templates: templates,
+                currentPage: page,
+                totalPages,
+                totalCount,
+                error_message: errorMessage
+            });
+        }).catch(err => {
+            console.log('Error fetching event information: ', err);
+            res.render('manage-event-occurrences', {
+                event: [],
+                templates: [],
+                currentPage: page,
+                totalPages: 0,
+                totalCount: 0,
+                error_message: 'Error fetching event information'
+            });
+        });
+});
+
+app.get('/manage-event-occurrences/new', (req, res) => {
+    // Query to include event templates in dropdown with default capacity
+    knex('event_templates')
+        .select(
+            'event_template_id',
+            'event_name',
+            'event_default_capacity'
+        )
+        .orderBy('event_name')
+        .then(templates => {
+            res.render('add-event-occurrence', {
+                templates: templates,
+                error_message: ""
+            });
+        })
+        .catch(err => {
+            console.log('Error fetching event templates: ', err);
+            res.redirect('/manage-event-occurrences?error=Error fetching event templates');
+        });
+});
+
+app.post('/manage-event-occurrences/new', (req, res) => {
+    const { 
+        event_template_id, 
+        event_name, 
+        event_date_time_start, 
+        event_date_time_end, 
+        event_location, 
+        event_capacity, 
+        event_registration_deadline 
+    } = req.body;
+
+    // Build the insert object
+    const insertData = {
+        event_template_id,
+        event_name,
+        event_date_time_start,
+        event_date_time_end,
+        event_location,
+        event_capacity: parseInt(event_capacity, 10)
+    };
+
+    // Only add registration deadline if provided
+    if (event_registration_deadline) {
+        insertData.event_registration_deadline = event_registration_deadline;
+    }
+
+    knex('event_occurrences')
+        .insert(insertData)
+        .then(() => {
+            res.redirect('/manage-event-occurrences');
+        })
+        .catch(err => {
+            console.log('Error creating event occurrence: ', err);
+            // Fetch templates again for the form
+            knex('event_templates')
+                .select('event_template_id', 'event_name', 'event_default_capacity')
+                .orderBy('event_name')
+                .then(templates => {
+                    res.render('add-event-occurrence', {
+                        templates: templates,
+                        error_message: 'An error occurred while creating the event occurrence.'
+                    });
+                })
+                .catch(() => {
+                    res.redirect('/manage-event-occurrences?error=An error occurred while creating the event occurrence');
+                });
+        });
+});
+
+// Update event occurrence
+app.post('/manage-event-occurrences/:id/update', (req, res) => {
+    const occurrenceId = req.params.id;
+    const { 
+        event_template_id, 
+        event_name, 
+        event_date_time_start, 
+        event_date_time_end, 
+        event_location, 
+        event_capacity, 
+        event_registration_deadline 
+    } = req.body;
+
+    // Build the update object
+    const updateData = {
+        event_template_id,
+        event_name,
+        event_date_time_start,
+        event_date_time_end,
+        event_location,
+        event_capacity: parseInt(event_capacity, 10)
+    };
+
+    // Handle registration deadline - set to null if empty, otherwise use the value
+    if (event_registration_deadline) {
+        updateData.event_registration_deadline = event_registration_deadline;
+    } else {
+        updateData.event_registration_deadline = null;
+    }
+
+    knex('event_occurrences')
+        .where('event_occurrence_id', occurrenceId)
+        .update(updateData)
+        .then(() => {
+            res.redirect('/manage-event-occurrences');
+        })
+        .catch(err => {
+            console.log('Error updating event occurrence: ', err);
+            res.redirect('/manage-event-occurrences?error=An error occurred while updating the event occurrence');
+        });
+});
+
+// Delete event occurrence
+app.post('/manage-event-occurrences/:id/delete', (req, res) => {
+    const occurrenceId = req.params.id;
+
+    knex('event_occurrences')
+        .where('event_occurrence_id', occurrenceId)
+        .del()
+        .then(() => {
+            res.redirect('/manage-event-occurrences');
+        })
+        .catch(err => {
+            console.log('Error deleting event occurrence: ', err);
+            res.redirect('/manage-event-occurrences?error=An error occurred while deleting the event occurrence');
+        });
+});
+
+// ~~~~~ Manage Event Templates ~~~~~
 app.get('/manage-events', (req, res) => {
     // Pagination logic
     const page = parseInt(req.query.page, 10) || 1;
@@ -180,57 +367,6 @@ app.get('/manage-events', (req, res) => {
         });
 });
 
-app.get('/manage-event-occurrences', (req, res) => {
-    // Pagination logic
-    const page = parseInt(req.query.page, 10) || 1;
-    const perPage = 20;
-    const offset = (page - 1) * perPage;
-    
-    // Get error message from query parameter if present
-    const errorMessage = req.query.error || "";
-
-    // Query for the current page of events
-    const eventsQuery = knex('event_occurrences')
-        .select(
-            'event_occurrences.event_occurrence_id',
-            'event_occurrences.event_template_id',
-            'event_occurrences.event_name',
-            'event_occurrences.event_date_time_start',
-            'event_occurrences.event_date_time_end',
-            'event_occurrences.event_location',
-            'event_occurrences.event_capacity',
-            'event_occurrences.event_registration_deadline'
-        )
-        .orderBy('event_occurrences.event_date_time_start')
-        .limit(perPage)
-        .offset(offset)
-
-    const countQuery = getCount('event_occurrences')
-
-    Promise.all([eventsQuery, countQuery])
-        .then(([events, countResult]) => {
-            const totalCount = parseInt(countResult.count, 10);
-            const totalPages = Math.ceil(totalCount / perPage);
-
-            res.render('manage-event-occurrences', {
-                event: events,
-                currentPage: page,
-                totalPages,
-                totalCount,
-                error_message: errorMessage
-            });
-        }).catch(err => {
-            console.log('Error fetching event information: ', err);
-            res.render('manage-event-occurrences', {
-                event: [],
-                currentPage: page,
-                totalPages: 0,
-                totalCount: 0,
-                error_message: 'Error fetching event information'
-            });
-        });
-});
-
 app.get('/manage-events/new', (req, res) => {
     res.render('add-event-template', {
         error_message: "",
@@ -265,7 +401,7 @@ app.post('/manage-events/new-template', (req, res) => {
                 success_message: ""
             })
         })
-})
+});
 
 app.post('/manage-events/:template_id/new', (req, res) => {
     const template_id = parseInt(req.params.template_id, 10);
@@ -350,6 +486,37 @@ app.post('/manage-events/:template_id/new', (req, res) => {
                 });
         });
 })
+
+// Update event template
+app.post('/manage-events/:template_id/update', (req, res) => {
+    const template_id = parseInt(req.params.template_id, 10);
+    const { 
+        event_name, 
+        event_type, 
+        event_description, 
+        event_recurrence_pattern, 
+        event_default_capacity 
+    } = req.body;
+
+    const updateData = {
+        event_name,
+        event_type,
+        event_description: event_description || null,
+        event_recurrence_pattern: event_recurrence_pattern || null,
+        event_default_capacity: event_default_capacity ? parseInt(event_default_capacity, 10) : null
+    };
+
+    knex('event_templates')
+        .where('event_template_id', template_id)
+        .update(updateData)
+        .then(() => {
+            res.redirect('/manage-events');
+        })
+        .catch(err => {
+            console.log('Error updating event template:', err);
+            res.redirect('/manage-events?error=Error updating event template. Please try again.');
+        });
+});
 
 app.post('/manage-events/:template_id/delete', (req, res) => {
     const template_id = parseInt(req.params.template_id, 10);
@@ -1041,6 +1208,28 @@ app.get('/manage-surveys', (req, res) => { // Get the manage surveys page
         });
 });
 
+// Update survey
+app.post('/manage-surveys/:survey_id/update', (req, res) => {
+    const survey_id = parseInt(req.params.survey_id, 10);
+    const { overall_score, survey_submission_date } = req.body;
+
+    const updateData = {
+        overall_score: overall_score ? parseInt(overall_score, 10) : null,
+        survey_submission_date: survey_submission_date || null
+    };
+
+    knex('surveys')
+        .where('survey_id', survey_id)
+        .update(updateData)
+        .then(() => {
+            res.redirect('/manage-surveys');
+        })
+        .catch(err => {
+            console.log('Error updating survey:', err);
+            res.redirect('/manage-surveys?error=Error updating survey. Please try again.');
+        });
+});
+
 app.post('/manage-surveys/:survey_id/delete', (req, res) => {
     const survey_id = parseInt(req.params.survey_id, 10);
 
@@ -1082,7 +1271,15 @@ app.get('/manage-participants', (req, res) => {
             'user_first_name',
             'user_last_name',
             'user_email',
-            'user_role'
+            'user_role',
+            'user_dob',
+            'user_phone',
+            'user_city',
+            'user_state',
+            'user_zip',
+            'user_school',
+            'user_employer',
+            'user_field_of_interest'
         )
         .orderBy('user_last_name')
         .orderBy('user_first_name')
@@ -1224,7 +1421,20 @@ app.post('/manage-participants/:user_id/delete', (req, res) => {
 
 app.post('/manage-participants/:user_id/update', (req, res) => {
     const user_id = parseInt(req.params.user_id, 10);
-    const { user_first_name, user_last_name, user_email, user_role } = req.body;
+    const { 
+        user_first_name, 
+        user_last_name, 
+        user_email, 
+        user_role,
+        user_dob,
+        user_phone,
+        user_city,
+        user_state,
+        user_zip,
+        user_school,
+        user_employer,
+        user_field_of_interest
+    } = req.body;
 
     knex('users')
         .where('user_id', user_id)
@@ -1234,14 +1444,24 @@ app.post('/manage-participants/:user_id/update', (req, res) => {
                 return res.redirect('/manage-participants?error=User does not exist');
             }
 
+            // Build update object, only including fields that are provided
+            const updateData = {};
+            if (user_first_name !== undefined) updateData.user_first_name = user_first_name;
+            if (user_last_name !== undefined) updateData.user_last_name = user_last_name;
+            if (user_email !== undefined) updateData.user_email = user_email;
+            if (user_role !== undefined) updateData.user_role = user_role;
+            if (user_dob !== undefined && user_dob !== '') updateData.user_dob = user_dob;
+            if (user_phone !== undefined) updateData.user_phone = user_phone;
+            if (user_city !== undefined) updateData.user_city = user_city;
+            if (user_state !== undefined) updateData.user_state = user_state;
+            if (user_zip !== undefined && user_zip !== '') updateData.user_zip = user_zip;
+            if (user_school !== undefined) updateData.user_school = user_school;
+            if (user_employer !== undefined) updateData.user_employer = user_employer;
+            if (user_field_of_interest !== undefined) updateData.user_field_of_interest = user_field_of_interest;
+
             return knex('users')
                 .where('user_id', user_id)
-                .update({
-                    user_first_name,
-                    user_last_name,
-                    user_email,
-                    user_role
-                })
+                .update(updateData)
                 .then(() => {
                     res.redirect('/manage-participants');
                 });

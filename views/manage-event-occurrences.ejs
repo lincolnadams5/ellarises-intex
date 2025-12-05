@@ -67,7 +67,7 @@
 
     <!-- Breadcrumb -->
     <div class="breadcrumb">
-        <a href="/manage-events">← Back to Manage Events</a>
+        <a href="/dashboard">← Back to Dashboard</a>
     </div>
 
     <!-- Main Content -->
@@ -76,7 +76,7 @@
             <!-- Page Header -->
             <div class="manage-donations-header">
                 <h1 class="manage-donations-title">Manage Event Occurrences</h1>
-                <p class="manage-donations-subtitle">View all event occurrences</p>
+                <p class="manage-donations-subtitle">Create new, or select an event to edit or delete</p>
             </div>
 
             <!-- Error Message Display -->
@@ -85,7 +85,7 @@
                     <%= error_message %>
                 </div>
             <% } %>
-            <a href="#" class="btn-primary btn-create-event">
+            <a href="/manage-event-occurrences/new" class="btn-primary btn-create-event">
                 + Create New Event Occurrence
             </a>
             <!-- Events Table -->
@@ -99,7 +99,6 @@
                                 <th>Duration</th>
                                 <th>Location</th>
                                 <th>Capacity</th>
-                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -120,22 +119,32 @@
                                 const formattedStart = start.toLocaleDateString('en-US', dateOptions);
                                 const formattedEnd = end.toLocaleDateString('en-US', dateOptions);
                                 
+                                // Format for datetime-local input (YYYY-MM-DDTHH:MM)
+                                const startRaw = start.toISOString().slice(0, 16);
+                                const endRaw = end.toISOString().slice(0, 16);
+                                
                                 // Format registration deadline
                                 let formattedDeadline = 'N/A';
+                                let deadlineRaw = '';
                                 if (occurrence.event_registration_deadline) {
                                     const deadline = new Date(occurrence.event_registration_deadline);
                                     formattedDeadline = deadline.toLocaleDateString('en-US', dateOptions);
+                                    deadlineRaw = deadline.toISOString().slice(0, 16);
                                 }
                             %>
                                 <tr 
                                     class="event-row"
                                     data-occurrence-id="<%= occurrence.event_occurrence_id %>"
+                                    data-template-id="<%= occurrence.event_template_id %>"
                                     data-event-name="<%= occurrence.event_name %>"
                                     data-event-start="<%= formattedStart %>"
                                     data-event-end="<%= formattedEnd %>"
+                                    data-event-start-raw="<%= startRaw %>"
+                                    data-event-end-raw="<%= endRaw %>"
                                     data-event-location="<%= occurrence.event_location || 'N/A' %>"
                                     data-event-capacity="<%= occurrence.event_capacity || 'N/A' %>"
                                     data-event-deadline="<%= formattedDeadline %>"
+                                    data-event-deadline-raw="<%= deadlineRaw %>"
                                     style="cursor: pointer;"
                                 >
                                     <td><%= occurrence.event_name %></td>
@@ -143,17 +152,6 @@
                                     <td><%= durationStr %></td>
                                     <td><%= occurrence.event_location || 'N/A' %></td>
                                     <td><%= occurrence.event_capacity || 'N/A' %></td>
-                                    <td>
-                                        <form 
-                                            action="/manage-event-occurrences/<%= occurrence.event_occurrence_id %>/delete" 
-                                            method="POST" 
-                                            class="delete-form"
-                                            onsubmit="return confirm('Are you sure you want to delete this event occurrence?');"
-                                            onclick="event.stopPropagation();"
-                                        >
-                                            <button type="submit" class="btn-delete">Delete</button>
-                                        </form>
-                                    </td>
                                 </tr>
                             <% }); %>
                         </tbody>
@@ -256,8 +254,72 @@
                         </div>
                     </div>
                     <div class="modal-actions">
+                        <button type="button" id="btn-edit-occurrence" class="btn-primary">Edit</button>
+                        <button type="button" id="btn-delete-occurrence" class="btn-delete">Delete</button>
                         <button type="button" id="close-details" class="btn-secondary">Close</button>
                     </div>
+                </div>
+            </div>
+
+            <!-- Delete Confirmation Modal -->
+            <div id="delete-confirm-modal" class="modal hidden">
+                <div class="modal-content">
+                    <h2>Confirm Deletion</h2>
+                    <p>Are you sure you want to delete this event occurrence? This action cannot be undone.</p>
+                    <div class="modal-actions">
+                        <form id="delete-occurrence-form" method="POST" style="display: inline-block;">
+                            <button type="submit" class="btn-delete">Yes, Delete</button>
+                        </form>
+                        <button type="button" id="cancel-delete" class="btn-secondary">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Event Occurrence Modal -->
+            <div id="edit-occurrence-modal" class="modal hidden">
+                <div class="modal-content">
+                    <h2>Edit Event Occurrence</h2>
+                    <div id="edit-validation-error" class="error-message" style="display: none;"></div>
+                    <form id="edit-occurrence-form" method="POST">
+                        <div class="form-group">
+                            <label for="edit_event_template_id">Event Template</label>
+                            <select id="edit_event_template_id" name="event_template_id" required>
+                                <% if (typeof templates !== 'undefined' && templates.length > 0) { %>
+                                    <% templates.forEach(function(template) { %>
+                                        <option value="<%= template.event_template_id %>"><%= template.event_name %></option>
+                                    <% }); %>
+                                <% } %>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_event_name">Event Occurrence Name</label>
+                            <input type="text" id="edit_event_name" name="event_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_event_date_time_start">Start Date & Time</label>
+                            <input type="datetime-local" id="edit_event_date_time_start" name="event_date_time_start" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_event_date_time_end">End Date & Time</label>
+                            <input type="datetime-local" id="edit_event_date_time_end" name="event_date_time_end" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_event_location">Location</label>
+                            <input type="text" id="edit_event_location" name="event_location" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_event_capacity">Capacity</label>
+                            <input type="number" id="edit_event_capacity" name="event_capacity" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_event_registration_deadline">Registration Deadline (Optional)</label>
+                            <input type="datetime-local" id="edit_event_registration_deadline" name="event_registration_deadline">
+                        </div>
+                        <div class="modal-actions">
+                            <button type="submit" class="btn-primary">Save Changes</button>
+                            <button type="button" id="cancel-edit-occurrence" class="btn-secondary">Cancel</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -322,11 +384,24 @@
                 }
             });
 
-            // View Details modal logic
+            // Current row being viewed/edited
+            let currentRow = null;
+
+            // Modal elements
             const detailsModal = document.getElementById('view-details-modal');
+            const editModal = document.getElementById('edit-occurrence-modal');
+            const deleteModal = document.getElementById('delete-confirm-modal');
             const closeDetailsBtn = document.getElementById('close-details');
+            const editBtn = document.getElementById('btn-edit-occurrence');
+            const deleteBtn = document.getElementById('btn-delete-occurrence');
+            const editForm = document.getElementById('edit-occurrence-form');
+            const deleteForm = document.getElementById('delete-occurrence-form');
+            const cancelEditBtn = document.getElementById('cancel-edit-occurrence');
+            const cancelDeleteBtn = document.getElementById('cancel-delete');
+            const editValidationError = document.getElementById('edit-validation-error');
 
             function showOccurrenceDetails(row) {
+                currentRow = row;
                 document.getElementById('detail-event-name').textContent = row.getAttribute('data-event-name');
                 document.getElementById('detail-event-start').textContent = row.getAttribute('data-event-start');
                 document.getElementById('detail-event-end').textContent = row.getAttribute('data-event-end');
@@ -338,29 +413,114 @@
 
             // Make table rows clickable
             const eventRows = document.querySelectorAll('.event-row');
-            if (detailsModal && eventRows.length > 0) {
-                eventRows.forEach(row => {
-                    row.addEventListener('click', function(e) {
-                        if (e.target.closest('button, form') === null) {
-                            showOccurrenceDetails(this);
-                        }
-                    });
+            eventRows.forEach(row => {
+                row.addEventListener('click', function(e) {
+                    if (e.target.closest('button, form') === null) {
+                        showOccurrenceDetails(this);
+                    }
+                });
+            });
+
+            // Close details modal
+            if (closeDetailsBtn) {
+                closeDetailsBtn.addEventListener('click', () => detailsModal.classList.add('hidden'));
+            }
+            detailsModal.addEventListener('click', (e) => {
+                if (e.target === detailsModal) detailsModal.classList.add('hidden');
+            });
+
+            // Edit button - open edit modal
+            if (editBtn) {
+                editBtn.addEventListener('click', function() {
+                    if (!currentRow) return;
+                    
+                    const occurrenceId = currentRow.getAttribute('data-occurrence-id');
+                    editForm.action = '/manage-event-occurrences/' + occurrenceId + '/update';
+                    
+                    document.getElementById('edit_event_template_id').value = currentRow.getAttribute('data-template-id');
+                    document.getElementById('edit_event_name').value = currentRow.getAttribute('data-event-name');
+                    document.getElementById('edit_event_date_time_start').value = currentRow.getAttribute('data-event-start-raw');
+                    document.getElementById('edit_event_date_time_end').value = currentRow.getAttribute('data-event-end-raw');
+                    const location = currentRow.getAttribute('data-event-location');
+                    const capacity = currentRow.getAttribute('data-event-capacity');
+                    document.getElementById('edit_event_location').value = location !== 'N/A' ? location : '';
+                    document.getElementById('edit_event_capacity').value = capacity !== 'N/A' ? capacity : '';
+                    document.getElementById('edit_event_registration_deadline').value = currentRow.getAttribute('data-event-deadline-raw') || '';
+                    
+                    detailsModal.classList.add('hidden');
+                    editModal.classList.remove('hidden');
                 });
             }
 
-            if (detailsModal) {
-                if (closeDetailsBtn) {
-                    closeDetailsBtn.addEventListener('click', function() {
-                        detailsModal.classList.add('hidden');
-                    });
-                }
+            // Delete button - open confirmation modal
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', function() {
+                    if (!currentRow) return;
+                    deleteForm.action = '/manage-event-occurrences/' + currentRow.getAttribute('data-occurrence-id') + '/delete';
+                    detailsModal.classList.add('hidden');
+                    deleteModal.classList.remove('hidden');
+                });
+            }
 
-                detailsModal.addEventListener('click', function(e) {
-                    if (e.target === detailsModal) {
-                        detailsModal.classList.add('hidden');
+            // Edit form validation
+            if (editForm) {
+                editForm.addEventListener('submit', function(e) {
+                    editValidationError.style.display = 'none';
+                    editValidationError.textContent = '';
+
+                    const startInput = document.getElementById('edit_event_date_time_start');
+                    const endInput = document.getElementById('edit_event_date_time_end');
+                    const capacityInput = document.getElementById('edit_event_capacity');
+                    const deadlineInput = document.getElementById('edit_event_registration_deadline');
+
+                    const startDate = new Date(startInput.value);
+                    const endDate = new Date(endInput.value);
+                    const capacity = parseInt(capacityInput.value, 10);
+
+                    if (isNaN(capacity) || capacity < 1) {
+                        e.preventDefault();
+                        editValidationError.textContent = 'Capacity must be a positive number greater than 0.';
+                        editValidationError.style.display = 'block';
+                        capacityInput.focus();
+                        return;
+                    }
+
+                    if (startDate >= endDate) {
+                        e.preventDefault();
+                        editValidationError.textContent = 'Start date/time must be before end date/time.';
+                        editValidationError.style.display = 'block';
+                        startInput.focus();
+                        return;
+                    }
+
+                    if (deadlineInput.value) {
+                        const deadlineDate = new Date(deadlineInput.value);
+                        if (deadlineDate >= startDate) {
+                            e.preventDefault();
+                            editValidationError.textContent = 'Registration deadline must be before the start date/time.';
+                            editValidationError.style.display = 'block';
+                            deadlineInput.focus();
+                            return;
+                        }
                     }
                 });
             }
+
+            // Cancel edit
+            if (cancelEditBtn) {
+                cancelEditBtn.addEventListener('click', () => editModal.classList.add('hidden'));
+            }
+            editModal.addEventListener('click', (e) => {
+                if (e.target === editModal) editModal.classList.add('hidden');
+            });
+
+            // Cancel delete
+            if (cancelDeleteBtn) {
+                cancelDeleteBtn.addEventListener('click', () => deleteModal.classList.add('hidden'));
+            }
+            deleteModal.addEventListener('click', (e) => {
+                if (e.target === deleteModal) deleteModal.classList.add('hidden');
+            });
         });
     </script>
 </body>

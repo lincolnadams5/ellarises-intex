@@ -15,7 +15,6 @@
     <nav class="navbar navbar-static">
         <div class="nav-container">
             <ul class="nav-menu">
-                <!-- Events Dropdown -->
                 <li class="nav-dropdown">
                     <a href="/events" class="nav-dropdown-trigger">Events</a>
                     <div class="nav-dropdown-content">
@@ -23,7 +22,6 @@
                         <a href="/events?filter=past">Past Events</a>
                     </div>
                 </li>
-                <!-- About Dropdown -->
                 <li class="nav-dropdown">
                     <a href="/about" class="nav-dropdown-trigger">About</a>
                     <div class="nav-dropdown-content">
@@ -76,7 +74,7 @@
             <!-- Page Header -->
             <div class="manage-donations-header">
                 <h1 class="manage-donations-title">Manage Participants</h1>
-                <p class="manage-donations-subtitle">View all registered participants</p>
+                <p class="manage-donations-subtitle">Create new, or select a participant to edit or delete</p>
             </div>
 
             <a href="/manage-participants/new" class="btn-primary" style="margin-bottom: 1.5rem; display: inline-block;">
@@ -85,9 +83,7 @@
 
             <!-- Error Message Display -->
             <% if (typeof error_message !== 'undefined' && error_message && error_message.length > 0) { %>
-                <div class="error-message">
-                    <%= error_message %>
-                </div>
+                <div class="error-message"><%= error_message %></div>
             <% } %>
 
             <!-- Participants Table -->
@@ -100,18 +96,29 @@
                                 <th>Last Name</th>
                                 <th>Email</th>
                                 <th>Role</th>
-                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <% user.forEach(function(user) { %>
+                            <% user.forEach(function(usr) { %>
+                                <%
+                                    const role = usr.user_role || '';
+                                    const formattedRole = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
+                                %>
                                 <tr 
                                     class="participant-row"
-                                    data-user-id="<%= user.user_id %>"
-                                    data-first-name="<%= user.user_first_name %>"
-                                    data-last-name="<%= user.user_last_name %>"
-                                    data-email="<%= user.user_email %>"
-                                    data-role="<%= user.user_role || 'N/A' %>"
+                                    data-user-id="<%= usr.user_id %>"
+                                    data-first-name="<%= usr.user_first_name %>"
+                                    data-last-name="<%= usr.user_last_name %>"
+                                    data-email="<%= usr.user_email %>"
+                                    data-role="<%= usr.user_role || 'N/A' %>"
+                                    data-dob="<%= usr.user_dob ? new Date(usr.user_dob).toISOString().split('T')[0] : '' %>"
+                                    data-phone="<%= usr.user_phone || '' %>"
+                                    data-city="<%= usr.user_city || '' %>"
+                                    data-state="<%= usr.user_state || '' %>"
+                                    data-zip="<%= usr.user_zip || '' %>"
+                                    data-school="<%= usr.user_school || '' %>"
+                                    data-employer="<%= usr.user_employer || '' %>"
+                                    data-field-of-interest="<%= usr.user_field_of_interest || '' %>"
                                     style="cursor: pointer;"
                                 >
                                     <td><%= user.user_first_name %></td>
@@ -146,6 +153,10 @@
                                             </button>
                                         </form>
                                     </td>
+                                    <td><%= usr.user_first_name %></td>
+                                    <td><%= usr.user_last_name %></td>
+                                    <td><%= usr.user_email %></td>
+                                    <td><%= formattedRole %></td>
                                 </tr>
                             <% }); %>
                         </tbody>
@@ -156,6 +167,7 @@
                     <p class="empty-state-message">No participants found.</p>
                 </div>
             <% } %>
+
             <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
                 <div class="manage-donations-pagination">
                     <% if (currentPage > 1) { %>
@@ -163,13 +175,11 @@
                     <% } else { %>
                         <span class="pagination-btn disabled">Previous</span>
                     <% } %>
-        
                     <div class="pagination-pages">
                         <%
-                            const maxVisible = 5; // number of page buttons in the middle window
+                            const maxVisible = 5;
                             let startPage = Math.max(1, currentPage - 2);
                             let endPage = Math.min(totalPages, currentPage + 2);
-        
                             if (endPage - startPage + 1 < maxVisible) {
                                 if (startPage === 1) {
                                     endPage = Math.min(totalPages, startPage + maxVisible - 1);
@@ -178,40 +188,18 @@
                                 }
                             }
                         %>
-        
                         <% if (startPage > 1) { %>
-                            <!-- First page -->
-                            <a href="/manage-participants?page=1"
-                               class="pagination-page <%= currentPage === 1 ? 'active' : '' %>">
-                                1
-                            </a>
-        
-                            <% if (startPage > 2) { %>
-                                <span class="pagination-ellipsis">…</span>
-                            <% } %>
+                            <a href="/manage-participants?page=1" class="pagination-page <%= currentPage === 1 ? 'active' : '' %>">1</a>
+                            <% if (startPage > 2) { %><span class="pagination-ellipsis">…</span><% } %>
                         <% } %>
-        
-                        <!-- Window of pages around current -->
                         <% for (let i = startPage; i <= endPage; i++) { %>
-                            <a href="/manage-participants?page=<%= i %>"
-                               class="pagination-page <%= i === currentPage ? 'active' : '' %>">
-                                <%= i %>
-                            </a>
+                            <a href="/manage-participants?page=<%= i %>" class="pagination-page <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
                         <% } %>
-        
                         <% if (endPage < totalPages) { %>
-                            <% if (endPage < totalPages - 1) { %>
-                                <span class="pagination-ellipsis">…</span>
-                            <% } %>
-        
-                            <!-- Last page -->
-                            <a href="/manage-participants?page=<%= totalPages %>"
-                               class="pagination-page <%= currentPage === totalPages ? 'active' : '' %>">
-                                <%= totalPages %>
-                            </a>
+                            <% if (endPage < totalPages - 1) { %><span class="pagination-ellipsis">…</span><% } %>
+                            <a href="/manage-participants?page=<%= totalPages %>" class="pagination-page <%= currentPage === totalPages ? 'active' : '' %>"><%= totalPages %></a>
                         <% } %>
                     </div>
-        
                     <% if (currentPage < totalPages) { %>
                         <a href="/manage-participants?page=<%= currentPage + 1 %>" class="pagination-btn">Next</a>
                     <% } else { %>
@@ -222,35 +210,85 @@
 
             <!-- View Details Modal -->
             <div id="view-details-modal" class="modal hidden">
-                <div class="modal-content">
+                <div class="modal-content" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
                     <h2>Participant Details</h2>
-                    <div class="participant-details-container" style="padding: 20px 0;">
-                        <div class="detail-row" style="margin-bottom: 15px;">
-                            <strong style="display: inline-block; width: 180px;">First Name:</strong>
+                    <div class="event-details-container">
+                        <div class="detail-row">
+                            <strong class="detail-label">First Name:</strong>
                             <span id="detail-first-name"></span>
                         </div>
-                        <div class="detail-row" style="margin-bottom: 15px;">
-                            <strong style="display: inline-block; width: 180px;">Last Name:</strong>
+                        <div class="detail-row">
+                            <strong class="detail-label">Last Name:</strong>
                             <span id="detail-last-name"></span>
                         </div>
-                        <div class="detail-row" style="margin-bottom: 15px;">
-                            <strong style="display: inline-block; width: 180px;">Email:</strong>
+                        <div class="detail-row">
+                            <strong class="detail-label">Email:</strong>
                             <span id="detail-email"></span>
                         </div>
-                        <div class="detail-row" style="margin-bottom: 15px;">
-                            <strong style="display: inline-block; width: 180px;">Role:</strong>
+                        <div class="detail-row">
+                            <strong class="detail-label">Role:</strong>
                             <span id="detail-role"></span>
+                        </div>
+                        <div class="detail-row">
+                            <strong class="detail-label">Date of Birth:</strong>
+                            <span id="detail-dob"></span>
+                        </div>
+                        <div class="detail-row">
+                            <strong class="detail-label">Phone:</strong>
+                            <span id="detail-phone"></span>
+                        </div>
+                        <div class="detail-row">
+                            <strong class="detail-label">City:</strong>
+                            <span id="detail-city"></span>
+                        </div>
+                        <div class="detail-row">
+                            <strong class="detail-label">State:</strong>
+                            <span id="detail-state"></span>
+                        </div>
+                        <div class="detail-row">
+                            <strong class="detail-label">ZIP Code:</strong>
+                            <span id="detail-zip"></span>
+                        </div>
+                        <div class="detail-row">
+                            <strong class="detail-label">School:</strong>
+                            <span id="detail-school"></span>
+                        </div>
+                        <div class="detail-row">
+                            <strong class="detail-label">Employer:</strong>
+                            <span id="detail-employer"></span>
+                        </div>
+                        <div class="detail-row">
+                            <strong class="detail-label">Field of Interest:</strong>
+                            <span id="detail-field-of-interest"></span>
                         </div>
                     </div>
                     <div class="modal-actions" style="margin-top: 1.5rem;">
                         <button type="button" id="close-details" style="padding: 0.75rem 1.5rem; background-color: transparent; color: var(--color-text-light); border: 2px solid var(--color-text-light); border-radius: 8px; font-family: var(--font-primary); font-size: 0.95rem; font-weight: 600; cursor: pointer;">Close</button>
+                    <div class="modal-actions">
+                        <button type="button" id="btn-edit-participant" class="btn-primary">Edit</button>
+                        <button type="button" id="btn-delete-participant" class="btn-delete">Delete</button>
+                        <button type="button" id="close-details" class="btn-secondary">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delete Confirmation Modal -->
+            <div id="delete-confirm-modal" class="modal hidden">
+                <div class="modal-content">
+                    <h2>Confirm Deletion</h2>
+                    <p>Are you sure you want to delete this participant? This action cannot be undone.</p>
+                    <div class="modal-actions">
+                        <form id="delete-participant-form" method="POST" style="display: inline-block;">
+                            <button type="submit" class="btn-delete">Yes, Delete</button>
+                        </form>
+                        <button type="button" id="cancel-delete" class="btn-secondary">Cancel</button>
                     </div>
                 </div>
             </div>
 
             <!-- Edit Participant Modal -->
             <div id="edit-participant-modal" class="modal hidden">
-                <div class="modal-content">
+                <div class="modal-content" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
                     <h2>Edit Participant</h2>
                     <form id="edit-participant-form" method="POST">
                         <div class="form-group">
@@ -268,21 +306,55 @@
                         <div class="form-group">
                             <label for="edit_user_role">Role</label>
                             <select id="edit_user_role" name="user_role" required>
-                                <option value="student">Student</option>
-                                <option value="parent">Parent</option>
-                                <option value="volunteer">Volunteer</option>
+                                <option value="participant">Participant</option>
                                 <option value="admin">Admin</option>
                             </select>
                         </div>
                         <div class="modal-actions" style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                             <button type="submit" style="padding: 0.75rem 1.5rem; background-color: var(--color-secondary); color: white; border: none; border-radius: 8px; font-family: var(--font-primary); font-size: 0.95rem; font-weight: 600; cursor: pointer;">Save Changes</button>
                             <button type="button" id="cancel-edit-participant" style="padding: 0.75rem 1.5rem; background-color: transparent; color: var(--color-text-light); border: 2px solid var(--color-text-light); border-radius: 8px; font-family: var(--font-primary); font-size: 0.95rem; font-weight: 600; cursor: pointer;">Cancel</button>
+                        <div class="form-group">
+                            <label for="edit_user_dob">Date of Birth</label>
+                            <input type="date" id="edit_user_dob" name="user_dob">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_user_phone">Phone</label>
+                            <input type="tel" id="edit_user_phone" name="user_phone" placeholder="(555) 123-4567">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_user_city">City</label>
+                            <input type="text" id="edit_user_city" name="user_city">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_user_state">State</label>
+                            <input type="text" id="edit_user_state" name="user_state" placeholder="UT" maxlength="2">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_user_zip">ZIP Code</label>
+                            <input type="text" id="edit_user_zip" name="user_zip" pattern="[0-9]{5}" placeholder="84000">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_user_school">School</label>
+                            <input type="text" id="edit_user_school" name="user_school">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_user_employer">Employer</label>
+                            <input type="text" id="edit_user_employer" name="user_employer">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_user_field_of_interest">Field of Interest</label>
+                            <input type="text" id="edit_user_field_of_interest" name="user_field_of_interest">
+                        </div>
+                        <div class="modal-actions">
+                            <button type="submit" class="btn-primary">Save Changes</button>
+                            <button type="button" id="cancel-edit-participant" class="btn-secondary">Cancel</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
@@ -297,7 +369,6 @@
                     <li><a href="/events">Event Information</a></li>
                     <li><a href="/about">About Us</a></li>
                     <li><a href="/about#contact">Contact</a></li>
-                    <li><a href="/teapot">Teapot</a></li>
                 </ul>
             </div>
             <div class="footer-section">
@@ -325,8 +396,8 @@
     </footer>
 
     <script>
-        // User dropdown functionality
         document.addEventListener('DOMContentLoaded', function() {
+            // User dropdown functionality
             const userDropdown = document.querySelector('.user-dropdown');
             const dropdownBtn = document.querySelector('.user-dropdown-btn');
             
@@ -337,107 +408,137 @@
                 });
             }
             
-            // Close dropdown when clicking outside
             document.addEventListener('click', function(e) {
                 if (userDropdown && !userDropdown.contains(e.target)) {
                     userDropdown.classList.remove('active');
                 }
             });
 
-            // View Details modal logic
+            // Current row being viewed
+            let currentRow = null;
+
+            // Modal elements
             const detailsModal = document.getElementById('view-details-modal');
+            const editModal = document.getElementById('edit-participant-modal');
+            const deleteModal = document.getElementById('delete-confirm-modal');
             const closeDetailsBtn = document.getElementById('close-details');
+            const editBtn = document.getElementById('btn-edit-participant');
+            const deleteBtn = document.getElementById('btn-delete-participant');
+            const editForm = document.getElementById('edit-participant-form');
+            const deleteForm = document.getElementById('delete-participant-form');
+            const cancelEditBtn = document.getElementById('cancel-edit-participant');
+            const cancelDeleteBtn = document.getElementById('cancel-delete');
 
-            // Function to populate and show the details modal
+            // Helper function to format date for display
+            function formatDateForDisplay(dateString) {
+                if (!dateString || dateString === '') return 'N/A';
+                try {
+                    const date = new Date(dateString);
+                    if (isNaN(date.getTime())) return dateString;
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const year = date.getFullYear();
+                    return `${month}/${day}/${year}`;
+                } catch (e) {
+                    return dateString || 'N/A';
+                }
+            }
+
+            // Show details modal
             function showParticipantDetails(row) {
-                // Get all data attributes from the row
-                const firstName = row.getAttribute('data-first-name');
-                const lastName = row.getAttribute('data-last-name');
-                const email = row.getAttribute('data-email');
+                currentRow = row;
                 const role = row.getAttribute('data-role');
+                const formattedRole = role && role !== 'N/A' 
+                    ? role.charAt(0).toUpperCase() + role.slice(1).toLowerCase()
+                    : 'N/A';
 
-                // Format role: capitalize first letter
-                const formattedRole = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
-
-                // Populate modal with data
-                document.getElementById('detail-first-name').textContent = firstName;
-                document.getElementById('detail-last-name').textContent = lastName;
-                document.getElementById('detail-email').textContent = email;
+                document.getElementById('detail-first-name').textContent = row.getAttribute('data-first-name') || 'N/A';
+                document.getElementById('detail-last-name').textContent = row.getAttribute('data-last-name') || 'N/A';
+                document.getElementById('detail-email').textContent = row.getAttribute('data-email') || 'N/A';
                 document.getElementById('detail-role').textContent = formattedRole;
-
-                // Show modal
+                document.getElementById('detail-dob').textContent = formatDateForDisplay(row.getAttribute('data-dob'));
+                document.getElementById('detail-phone').textContent = row.getAttribute('data-phone') || 'N/A';
+                document.getElementById('detail-city').textContent = row.getAttribute('data-city') || 'N/A';
+                document.getElementById('detail-state').textContent = row.getAttribute('data-state') || 'N/A';
+                document.getElementById('detail-zip').textContent = row.getAttribute('data-zip') || 'N/A';
+                document.getElementById('detail-school').textContent = row.getAttribute('data-school') || 'N/A';
+                document.getElementById('detail-employer').textContent = row.getAttribute('data-employer') || 'N/A';
+                document.getElementById('detail-field-of-interest').textContent = row.getAttribute('data-field-of-interest') || 'N/A';
                 detailsModal.classList.remove('hidden');
             }
 
             // Make table rows clickable
             const participantRows = document.querySelectorAll('.participant-row');
-            if (detailsModal && participantRows.length > 0) {
-                participantRows.forEach(row => {
-                    row.addEventListener('click', function(e) {
-                        // Only trigger if clicking directly on the row, not on buttons/forms
-                        if (e.target.closest('button, form') === null) {
-                            showParticipantDetails(this);
-                        }
-                    });
-                });
-            }
-
-            if (detailsModal) {
-                if (closeDetailsBtn) {
-                    closeDetailsBtn.addEventListener('click', function() {
-                        detailsModal.classList.add('hidden');
-                    });
-                }
-
-                // Close modal when clicking outside content
-                detailsModal.addEventListener('click', function(e) {
-                    if (e.target === detailsModal) {
-                        detailsModal.classList.add('hidden');
+            participantRows.forEach(row => {
+                row.addEventListener('click', function(e) {
+                    if (e.target.closest('button, form') === null) {
+                        showParticipantDetails(this);
                     }
                 });
+            });
+
+            // Close details modal
+            if (closeDetailsBtn) {
+                closeDetailsBtn.addEventListener('click', () => detailsModal.classList.add('hidden'));
             }
+            detailsModal.addEventListener('click', (e) => {
+                if (e.target === detailsModal) detailsModal.classList.add('hidden');
+            });
 
-            // Edit Participant modal logic
-            const editModal = document.getElementById('edit-participant-modal');
-            const editForm = document.getElementById('edit-participant-form');
-            const cancelEditBtn = document.getElementById('cancel-edit-participant');
-
-            // Function to open edit modal and populate with data
-            window.openEditParticipantModal = function(button) {
-                const row = button.closest('.participant-row');
-                const userId = row.getAttribute('data-user-id');
-                const firstName = row.getAttribute('data-first-name');
-                const lastName = row.getAttribute('data-last-name');
-                const email = row.getAttribute('data-email');
-                const role = row.getAttribute('data-role');
-
-                // Set form action
-                editForm.action = '/manage-participants/' + userId + '/update';
-
-                // Populate form fields
-                document.getElementById('edit_user_first_name').value = firstName;
-                document.getElementById('edit_user_last_name').value = lastName;
-                document.getElementById('edit_user_email').value = email;
-                document.getElementById('edit_user_role').value = role;
-
-                // Show modal
-                editModal.classList.remove('hidden');
-            };
-
-            if (editModal) {
-                if (cancelEditBtn) {
-                    cancelEditBtn.addEventListener('click', function() {
-                        editModal.classList.add('hidden');
-                    });
-                }
-
-                // Close modal when clicking outside content
-                editModal.addEventListener('click', function(e) {
-                    if (e.target === editModal) {
-                        editModal.classList.add('hidden');
+            // Edit button - open edit modal
+            if (editBtn) {
+                editBtn.addEventListener('click', function() {
+                    if (!currentRow) return;
+                    editForm.action = '/manage-participants/' + currentRow.getAttribute('data-user-id') + '/update';
+                    
+                    document.getElementById('edit_user_first_name').value = currentRow.getAttribute('data-first-name') || '';
+                    document.getElementById('edit_user_last_name').value = currentRow.getAttribute('data-last-name') || '';
+                    document.getElementById('edit_user_email').value = currentRow.getAttribute('data-email') || '';
+                    
+                    let normalizedRole = (currentRow.getAttribute('data-role') || '').toLowerCase().trim();
+                    if (normalizedRole === 'n/a' || normalizedRole === '' || normalizedRole !== 'admin') {
+                        normalizedRole = 'participant';
                     }
+                    document.getElementById('edit_user_role').value = normalizedRole;
+                    document.getElementById('edit_user_dob').value = currentRow.getAttribute('data-dob') || '';
+                    document.getElementById('edit_user_phone').value = currentRow.getAttribute('data-phone') || '';
+                    document.getElementById('edit_user_city').value = currentRow.getAttribute('data-city') || '';
+                    document.getElementById('edit_user_state').value = currentRow.getAttribute('data-state') || '';
+                    document.getElementById('edit_user_zip').value = currentRow.getAttribute('data-zip') || '';
+                    document.getElementById('edit_user_school').value = currentRow.getAttribute('data-school') || '';
+                    document.getElementById('edit_user_employer').value = currentRow.getAttribute('data-employer') || '';
+                    document.getElementById('edit_user_field_of_interest').value = currentRow.getAttribute('data-field-of-interest') || '';
+                    
+                    detailsModal.classList.add('hidden');
+                    editModal.classList.remove('hidden');
                 });
             }
+
+            // Delete button - open confirmation modal
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', function() {
+                    if (!currentRow) return;
+                    deleteForm.action = '/manage-participants/' + currentRow.getAttribute('data-user-id') + '/delete';
+                    detailsModal.classList.add('hidden');
+                    deleteModal.classList.remove('hidden');
+                });
+            }
+
+            // Cancel edit
+            if (cancelEditBtn) {
+                cancelEditBtn.addEventListener('click', () => editModal.classList.add('hidden'));
+            }
+            editModal.addEventListener('click', (e) => {
+                if (e.target === editModal) editModal.classList.add('hidden');
+            });
+
+            // Cancel delete
+            if (cancelDeleteBtn) {
+                cancelDeleteBtn.addEventListener('click', () => deleteModal.classList.add('hidden'));
+            }
+            deleteModal.addEventListener('click', (e) => {
+                if (e.target === deleteModal) deleteModal.classList.add('hidden');
+            });
         });
     </script>
 </body>

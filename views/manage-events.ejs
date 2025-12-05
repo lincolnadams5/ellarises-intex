@@ -15,7 +15,6 @@
     <nav class="navbar navbar-static">
         <div class="nav-container">
             <ul class="nav-menu">
-                <!-- Events Dropdown -->
                 <li class="nav-dropdown">
                     <a href="/events" class="nav-dropdown-trigger">Events</a>
                     <div class="nav-dropdown-content">
@@ -23,7 +22,6 @@
                         <a href="/events?filter=past">Past Events</a>
                     </div>
                 </li>
-                <!-- About Dropdown -->
                 <li class="nav-dropdown">
                     <a href="/about" class="nav-dropdown-trigger">About</a>
                     <div class="nav-dropdown-content">
@@ -76,18 +74,16 @@
             <!-- Page Header -->
             <div class="manage-donations-header">
                 <h1 class="manage-donations-title">Manage Event Templates</h1>
-                <p class="manage-donations-subtitle">View all event templates</p>
+                <p class="manage-donations-subtitle">Create new, or select an event template to edit or delete</p>
             </div>
 
             <!-- Error Message Display -->
             <% if (typeof error_message !== 'undefined' && error_message && error_message.length > 0) { %>
-                <div class="error-message">
-                    <%= error_message %>
-                </div>
+                <div class="error-message"><%= error_message %></div>
             <% } %>
-            <a href="/manage-events/new" class="btn-primary btn-create-event">
-                + Create New Event Template
-            </a>
+
+            <a href="/manage-events/new" class="btn-primary btn-create-event">+ Create New Event Template</a>
+
             <!-- Events Table -->
             <% if (event && event.length > 0) { %>
                 <div class="donations-table-container">
@@ -97,35 +93,25 @@
                                 <th>Event Name</th>
                                 <th>Event Type</th>
                                 <th>Frequency</th>
-                                <th></th>
+                                <th>Capacity</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <% event.forEach(function(event) { %>
+                            <% event.forEach(function(evt) { %>
                                 <tr 
                                     class="event-row"
-                                    data-template-id="<%= event.event_template_id %>"
-                                    data-event-name="<%= event.event_name %>"
-                                    data-event-type="<%= event.event_type || 'N/A' %>"
-                                    data-event-description="<%= event.event_description || 'No description provided.' %>"
-                                    data-event-recurrence="<%= event.event_recurrence_pattern || 'N/A' %>"
-                                    data-event-capacity="<%= event.event_default_capacity || 'N/A' %>"
+                                    data-template-id="<%= evt.event_template_id %>"
+                                    data-event-name="<%= evt.event_name %>"
+                                    data-event-type="<%= evt.event_type || 'N/A' %>"
+                                    data-event-description="<%= evt.event_description || 'No description provided.' %>"
+                                    data-event-recurrence="<%= evt.event_recurrence_pattern || 'N/A' %>"
+                                    data-event-capacity="<%= evt.event_default_capacity || 'N/A' %>"
                                     style="cursor: pointer;"
                                 >
-                                    <td><%= event.event_name %></td>
-                                    <td><%= event.event_type %></td>
-                                    <td><%= event.event_recurrence_pattern %></td>
-                                    <td>
-                                        <form 
-                                            action="/manage-events/<%= event.event_template_id %>/delete" 
-                                            method="POST" 
-                                            class="delete-form"
-                                            onsubmit="return confirm('Are you sure you want to delete this event template? This will also delete all related event occurrences.');"
-                                            onclick="event.stopPropagation();"
-                                        >
-                                            <button type="submit" class="btn-delete">Delete</button>
-                                        </form>
-                                    </td>
+                                    <td><%= evt.event_name %></td>
+                                    <td><%= evt.event_type || 'N/A' %></td>
+                                    <td><%= evt.event_recurrence_pattern || 'N/A' %></td>
+                                    <td><%= evt.event_default_capacity || 'N/A' %></td>
                                 </tr>
                             <% }); %>
                         </tbody>
@@ -133,9 +119,10 @@
                 </div>
             <% } else { %>
                 <div class="empty-state">
-                    <p class="empty-state-message">No events found.</p>
+                    <p class="empty-state-message">No event templates found.</p>
                 </div>
             <% } %>
+
             <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
                 <div class="manage-donations-pagination">
                     <% if (currentPage > 1) { %>
@@ -143,13 +130,11 @@
                     <% } else { %>
                         <span class="pagination-btn disabled">Previous</span>
                     <% } %>
-        
                     <div class="pagination-pages">
                         <%
-                            const maxVisible = 5; // number of page buttons in the middle window
+                            const maxVisible = 5;
                             let startPage = Math.max(1, currentPage - 2);
                             let endPage = Math.min(totalPages, currentPage + 2);
-        
                             if (endPage - startPage + 1 < maxVisible) {
                                 if (startPage === 1) {
                                     endPage = Math.min(totalPages, startPage + maxVisible - 1);
@@ -158,40 +143,18 @@
                                 }
                             }
                         %>
-        
                         <% if (startPage > 1) { %>
-                            <!-- First page -->
-                            <a href="/manage-events?page=1"
-                               class="pagination-page <%= currentPage === 1 ? 'active' : '' %>">
-                                1
-                            </a>
-        
-                            <% if (startPage > 2) { %>
-                                <span class="pagination-ellipsis">…</span>
-                            <% } %>
+                            <a href="/manage-events?page=1" class="pagination-page <%= currentPage === 1 ? 'active' : '' %>">1</a>
+                            <% if (startPage > 2) { %><span class="pagination-ellipsis">…</span><% } %>
                         <% } %>
-        
-                        <!-- Window of pages around current -->
                         <% for (let i = startPage; i <= endPage; i++) { %>
-                            <a href="/manage-events?page=<%= i %>"
-                               class="pagination-page <%= i === currentPage ? 'active' : '' %>">
-                                <%= i %>
-                            </a>
+                            <a href="/manage-events?page=<%= i %>" class="pagination-page <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
                         <% } %>
-        
                         <% if (endPage < totalPages) { %>
-                            <% if (endPage < totalPages - 1) { %>
-                                <span class="pagination-ellipsis">…</span>
-                            <% } %>
-        
-                            <!-- Last page -->
-                            <a href="/manage-events?page=<%= totalPages %>"
-                               class="pagination-page <%= currentPage === totalPages ? 'active' : '' %>">
-                                <%= totalPages %>
-                            </a>
+                            <% if (endPage < totalPages - 1) { %><span class="pagination-ellipsis">…</span><% } %>
+                            <a href="/manage-events?page=<%= totalPages %>" class="pagination-page <%= currentPage === totalPages ? 'active' : '' %>"><%= totalPages %></a>
                         <% } %>
                     </div>
-        
                     <% if (currentPage < totalPages) { %>
                         <a href="/manage-events?page=<%= currentPage + 1 %>" class="pagination-btn">Next</a>
                     <% } else { %>
@@ -199,6 +162,7 @@
                     <% } %>
                 </div>
             <% } %>
+
             <!-- View Details Modal -->
             <div id="view-details-modal" class="modal hidden">
                 <div class="modal-content">
@@ -226,13 +190,74 @@
                         </div>
                     </div>
                     <div class="modal-actions">
+                        <button type="button" id="btn-edit-template" class="btn-primary">Edit</button>
+                        <button type="button" id="btn-delete-template" class="btn-delete">Delete</button>
                         <button type="button" id="close-details" class="btn-secondary">Close</button>
                     </div>
                 </div>
             </div>
+
+            <!-- Delete Confirmation Modal -->
+            <div id="delete-confirm-modal" class="modal hidden">
+                <div class="modal-content">
+                    <h2>Confirm Deletion</h2>
+                    <p>Are you sure you want to delete this event template? This will also delete all related event occurrences. This action cannot be undone.</p>
+                    <div class="modal-actions">
+                        <form id="delete-template-form" method="POST" style="display: inline-block;">
+                            <button type="submit" class="btn-delete">Yes, Delete</button>
+                        </form>
+                        <button type="button" id="cancel-delete" class="btn-secondary">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Event Template Modal -->
+            <div id="edit-template-modal" class="modal hidden">
+                <div class="modal-content">
+                    <h2>Edit Event Template</h2>
+                    <form id="edit-template-form" method="POST">
+                        <div class="form-group">
+                            <label for="edit_event_name">Event Name</label>
+                            <input type="text" id="edit_event_name" name="event_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_event_type">Event Type</label>
+                            <select id="edit_event_type" name="event_type" required>
+                                <option value="Mariachi">Mariachi</option>
+                                <option value="Ballet Folklorico">Ballet Folklorico</option>
+                                <option value="STEAM">STEAM</option>
+                                <option value="Ella Rises Summit">Ella Rises Summit</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_event_description">Description</label>
+                            <textarea id="edit_event_description" name="event_description" rows="4"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_event_recurrence_pattern">Recurrence Pattern</label>
+                            <select id="edit_event_recurrence_pattern" name="event_recurrence_pattern">
+                                <option value="One-time">One-time</option>
+                                <option value="Weekly">Weekly</option>
+                                <option value="Bi-weekly">Bi-weekly</option>
+                                <option value="Monthly">Monthly</option>
+                                <option value="Quarterly">Quarterly</option>
+                                <option value="Annually">Annually</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_event_default_capacity">Default Capacity</label>
+                            <input type="number" id="edit_event_default_capacity" name="event_default_capacity" min="1">
+                        </div>
+                        <div class="modal-actions">
+                            <button type="submit" class="btn-primary">Save Changes</button>
+                            <button type="button" id="cancel-edit-template" class="btn-secondary">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
-
 
     <!-- Footer -->
     <footer class="footer">
@@ -248,7 +273,6 @@
                     <li><a href="/events">Event Information</a></li>
                     <li><a href="/about">About Us</a></li>
                     <li><a href="/about#contact">Contact</a></li>
-                    <li><a href="/teapot">Teapot</a></li>
                 </ul>
             </div>
             <div class="footer-section">
@@ -294,11 +318,24 @@
                 }
             });
 
-            // View Details modal logic
-            const detailsModal = document.getElementById('view-details-modal');
-            const closeDetailsBtn = document.getElementById('close-details');
+            // Current row being viewed
+            let currentRow = null;
 
+            // Modal elements
+            const detailsModal = document.getElementById('view-details-modal');
+            const editModal = document.getElementById('edit-template-modal');
+            const deleteModal = document.getElementById('delete-confirm-modal');
+            const closeDetailsBtn = document.getElementById('close-details');
+            const editBtn = document.getElementById('btn-edit-template');
+            const deleteBtn = document.getElementById('btn-delete-template');
+            const editForm = document.getElementById('edit-template-form');
+            const deleteForm = document.getElementById('delete-template-form');
+            const cancelEditBtn = document.getElementById('cancel-edit-template');
+            const cancelDeleteBtn = document.getElementById('cancel-delete');
+
+            // Show details modal
             function showEventDetails(row) {
+                currentRow = row;
                 document.getElementById('detail-event-name').textContent = row.getAttribute('data-event-name');
                 document.getElementById('detail-event-type').textContent = row.getAttribute('data-event-type');
                 document.getElementById('detail-event-description').textContent = row.getAttribute('data-event-description');
@@ -309,29 +346,85 @@
 
             // Make table rows clickable
             const eventRows = document.querySelectorAll('.event-row');
-            if (detailsModal && eventRows.length > 0) {
-                eventRows.forEach(row => {
-                    row.addEventListener('click', function(e) {
-                        if (e.target.closest('button, form') === null) {
-                            showEventDetails(this);
-                        }
-                    });
-                });
-            }
-
-            if (detailsModal) {
-                if (closeDetailsBtn) {
-                    closeDetailsBtn.addEventListener('click', function() {
-                        detailsModal.classList.add('hidden');
-                    });
-                }
-
-                detailsModal.addEventListener('click', function(e) {
-                    if (e.target === detailsModal) {
-                        detailsModal.classList.add('hidden');
+            eventRows.forEach(row => {
+                row.addEventListener('click', function(e) {
+                    if (e.target.closest('button, form') === null) {
+                        showEventDetails(this);
                     }
                 });
+            });
+
+            // Close details modal
+            if (closeDetailsBtn) {
+                closeDetailsBtn.addEventListener('click', () => detailsModal.classList.add('hidden'));
             }
+            detailsModal.addEventListener('click', (e) => {
+                if (e.target === detailsModal) detailsModal.classList.add('hidden');
+            });
+
+            // Edit button - open edit modal
+            if (editBtn) {
+                editBtn.addEventListener('click', function() {
+                    if (!currentRow) return;
+                    const templateId = currentRow.getAttribute('data-template-id');
+                    editForm.action = '/manage-events/' + templateId + '/update';
+                    
+                    document.getElementById('edit_event_name').value = currentRow.getAttribute('data-event-name');
+                    
+                    const eventType = currentRow.getAttribute('data-event-type');
+                    const typeSelect = document.getElementById('edit_event_type');
+                    for (let i = 0; i < typeSelect.options.length; i++) {
+                        if (typeSelect.options[i].value === eventType) {
+                            typeSelect.selectedIndex = i;
+                            break;
+                        }
+                    }
+                    
+                    const description = currentRow.getAttribute('data-event-description');
+                    document.getElementById('edit_event_description').value = description !== 'No description provided.' ? description : '';
+                    
+                    const recurrence = currentRow.getAttribute('data-event-recurrence');
+                    const recurrenceSelect = document.getElementById('edit_event_recurrence_pattern');
+                    for (let i = 0; i < recurrenceSelect.options.length; i++) {
+                        if (recurrenceSelect.options[i].value === recurrence) {
+                            recurrenceSelect.selectedIndex = i;
+                            break;
+                        }
+                    }
+                    
+                    const capacity = currentRow.getAttribute('data-event-capacity');
+                    document.getElementById('edit_event_default_capacity').value = capacity !== 'N/A' ? capacity : '';
+                    
+                    detailsModal.classList.add('hidden');
+                    editModal.classList.remove('hidden');
+                });
+            }
+
+            // Delete button - open confirmation modal
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', function() {
+                    if (!currentRow) return;
+                    deleteForm.action = '/manage-events/' + currentRow.getAttribute('data-template-id') + '/delete';
+                    detailsModal.classList.add('hidden');
+                    deleteModal.classList.remove('hidden');
+                });
+            }
+
+            // Cancel edit
+            if (cancelEditBtn) {
+                cancelEditBtn.addEventListener('click', () => editModal.classList.add('hidden'));
+            }
+            editModal.addEventListener('click', (e) => {
+                if (e.target === editModal) editModal.classList.add('hidden');
+            });
+
+            // Cancel delete
+            if (cancelDeleteBtn) {
+                cancelDeleteBtn.addEventListener('click', () => deleteModal.classList.add('hidden'));
+            }
+            deleteModal.addEventListener('click', (e) => {
+                if (e.target === deleteModal) deleteModal.classList.add('hidden');
+            });
         });
     </script>
 </body>
