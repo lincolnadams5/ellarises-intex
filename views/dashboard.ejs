@@ -219,7 +219,7 @@
                         </div>
                         <div class="action-arrow">→</div>
                     </a>
-                    <a href="/registrations/<%= user_id %>" class="action-card">
+                    <a href="/registrations/<%= locals.user_id || '' %>" class="action-card">
                         <div class="action-icon">🎟️</div>
                         <div class="action-content">
                             <h3>View Registered Events</h3>

@@ -1112,7 +1112,10 @@ h1, h2, h3 {
 .form-group input[type="email"],
 .form-group input[type="password"],
 .form-group input[type="text"],
-.form-group input[type="date"] {
+.form-group input[type="date"],
+.form-group input[type="number"],
+.form-group select,
+.form-group textarea {
     width: 100%;
     padding: 0.9rem 1rem;
     border: 2px solid #e0e0e0;
@@ -1120,6 +1123,16 @@ h1, h2, h3 {
     font-size: 1rem;
     font-family: var(--font-primary);
     transition: all 0.3s ease;
+}
+
+.form-group select {
+    cursor: pointer;
+    background-color: var(--color-white);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
 }
 
 .form-group input:focus {
@@ -2273,7 +2286,7 @@ h1, h2, h3 {
 .manage-donations-container {
     background-color: var(--color-tertiary-bkgd);
     min-height: calc(100vh - 200px);
-    padding: 7rem 2rem 3rem;
+    padding: 2rem 2rem 3rem;
 }
 
 .manage-donations-wrapper {
@@ -3236,6 +3249,29 @@ ANALYTICS DASHBOARD PAGE
     display: inline-block;
     max-width: 400px;
     word-wrap: break-word;
+}
+
+/* ========== COMPLETE SURVEY BUTTON ========== */
+.btn-complete-survey {
+    padding: 0.25rem 0.5rem;
+    background-color: var(--color-soft-white);
+    color: var(--color-text);
+    border: 1px solid var(--color-text-light);
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-family: var(--font-primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-complete-survey:hover {
+    background-color: var(--color-tertiary-bkgd);
+    border-color: var(--color-text);
+}
+
+.btn-complete-survey:active {
+    background-color: #c0cfc2;
 }
 
 /* ========== BREADCRUMB NAVIGATION ========== */
