@@ -1252,9 +1252,7 @@ app.post('/registration/:user_id/register/:event_occurrence_id', (req, res) => {
             return knex('registration')
                 .insert({ user_id, event_occurrence_id, registration_status, registration_created_at: new Date() })
                 .then(() => {
-                    res.redirect(`/events`, {
-                        success_message: 'Registration Successful'
-                    });
+                    res.redirect('/events?success=Registration+Successful');
                 });
         })
         .catch(err => { // If there is an error checking the event capacity, redirect with an error message
