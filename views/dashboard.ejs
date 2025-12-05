@@ -121,6 +121,17 @@
                 <% } else { %>
                     <!-- Participant KPIs -->
                     <div class="kpi-card">
+                        <div class="kpi-icon">📅</div>
+                        <div class="kpi-value">
+                            <% if (typeof upcomingEvents !== 'undefined' && upcomingEvents !== null && !isNaN(upcomingEvents)) { %>
+                                <%= Number(upcomingEvents).toLocaleString('en-US') %>
+                            <% } else { %>
+                                —
+                            <% } %>
+                        </div>
+                        <div class="kpi-label">Upcoming Events</div>
+                    </div>
+                    <div class="kpi-card">
                         <div class="kpi-icon">🎟️</div>
                         <div class="kpi-value">
                             <% if (typeof upcomingReservations !== 'undefined' && upcomingReservations !== null) { %>
