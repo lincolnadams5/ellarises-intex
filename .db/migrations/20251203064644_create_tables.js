@@ -18,7 +18,7 @@ exports.up = function(knex) {
         table.string('user_school');
         table.string('user_employer');
         table.string('user_field_of_interest');
-        table.string('user_password').notNullable();
+        table.string('user_password', 255).notNullable(); // 255 chars to support bcrypt hashes (60 chars)
         table.timestamps(true, true);
     })
     .createTable('milestones', function (table) {
