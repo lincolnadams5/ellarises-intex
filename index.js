@@ -133,6 +133,7 @@ app.get('/events', (req, res) => {
     const perPage = 10;
     const offset = (page - 1) * perPage;
     const currentDate = new Date();
+    const currentUserId = req.session.user_id || null;
 
     // Build the query
     let eventsQuery = knex('event_occurrences')
@@ -175,10 +176,39 @@ app.get('/events', (req, res) => {
     // Apply pagination
     eventsQuery = eventsQuery.limit(perPage).offset(offset);
 
-    Promise.all([eventsQuery, countQuery])
-        .then(([events, countResult]) => {
+    // Query for registration counts per event
+    const registrationCountsQuery = knex('registration')
+        .select('event_occurrence_id')
+        .count('* as registration_count')
+        .groupBy('event_occurrence_id');
+
+    // Query for user's existing registrations (if logged in)
+    const userRegistrationsQuery = currentUserId 
+        ? knex('registration')
+            .select('event_occurrence_id')
+            .where('user_id', currentUserId)
+        : Promise.resolve([]);
+
+    Promise.all([eventsQuery, countQuery, registrationCountsQuery, userRegistrationsQuery])
+        .then(([events, countResult, registrationCounts, userRegistrations]) => {
             const totalCount = parseInt(countResult.count, 10);
             const totalPages = Math.ceil(totalCount / perPage);
+
+            // Create a map of registration counts
+            const registrationCountMap = {};
+            registrationCounts.forEach(rc => {
+                registrationCountMap[rc.event_occurrence_id] = parseInt(rc.registration_count, 10);
+            });
+
+            // Create a set of event_occurrence_ids the user is registered for
+            const userRegisteredEvents = new Set(userRegistrations.map(r => r.event_occurrence_id));
+
+            // Add registration info to each event
+            events = events.map(event => ({
+                ...event,
+                registration_count: registrationCountMap[event.event_occurrence_id] || 0,
+                is_user_registered: userRegisteredEvents.has(event.event_occurrence_id)
+            }));
 
             res.render('events', {
                 events: events,
@@ -200,6 +230,79 @@ app.get('/events', (req, res) => {
                 totalCount: 0,
                 error_message: 'Error loading events. Please try again.'
             });
+        });
+});
+
+// POST route to register for an event
+app.post('/events/:event_occurrence_id/register', (req, res) => {
+    const eventOccurrenceId = req.params.event_occurrence_id;
+    const userId = req.session.user_id;
+
+    // Check if user is logged in
+    if (!userId) {
+        return res.redirect('/login?redirect=' + encodeURIComponent('/events'));
+    }
+
+    // Fetch event details to validate
+    knex('event_occurrences')
+        .where('event_occurrence_id', eventOccurrenceId)
+        .first()
+        .then(event => {
+            if (!event) {
+                return res.redirect('/events?error=' + encodeURIComponent('Event not found.'));
+            }
+
+            const currentDate = new Date();
+            const eventStart = new Date(event.event_date_time_start);
+            const deadline = event.event_registration_deadline ? new Date(event.event_registration_deadline) : null;
+
+            // Check if event has already started
+            if (eventStart < currentDate) {
+                return res.redirect('/events?error=' + encodeURIComponent('This event has already started.'));
+            }
+
+            // Check if registration deadline has passed
+            if (deadline && deadline < currentDate) {
+                return res.redirect('/events?error=' + encodeURIComponent('Registration deadline has passed.'));
+            }
+
+            // Check if user is already registered
+            return knex('registration')
+                .where({ user_id: userId, event_occurrence_id: eventOccurrenceId })
+                .first()
+                .then(existingRegistration => {
+                    if (existingRegistration) {
+                        return res.redirect('/events?error=' + encodeURIComponent('You are already registered for this event.'));
+                    }
+
+                    // Check capacity
+                    return knex('registration')
+                        .where('event_occurrence_id', eventOccurrenceId)
+                        .count('* as count')
+                        .first()
+                        .then(countResult => {
+                            const currentCount = parseInt(countResult.count, 10);
+                            if (event.event_capacity && currentCount >= event.event_capacity) {
+                                return res.redirect('/events?error=' + encodeURIComponent('This event is at full capacity.'));
+                            }
+
+                            // All checks passed - insert registration
+                            return knex('registration')
+                                .insert({
+                                    user_id: userId,
+                                    event_occurrence_id: eventOccurrenceId,
+                                    registration_status: null,
+                                    registration_created_at: new Date()
+                                })
+                                .then(() => {
+                                    res.redirect('/events?success=' + encodeURIComponent('Successfully registered for the event!'));
+                                });
+                        });
+                });
+        })
+        .catch(err => {
+            console.log('Error registering for event:', err);
+            res.redirect('/events?error=' + encodeURIComponent('An error occurred. Please try again.'));
         });
 });
 
