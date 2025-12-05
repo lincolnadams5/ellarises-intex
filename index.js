@@ -2270,7 +2270,7 @@ app.post('/register', async (req, res) => {
 });
 
 // ~~~ Update Account Info ~~~
-app.post('/account-info', (req, res) => {
+app.post('/account-info', async (req, res) => {
     let first_name = req.body.first_name;
     let last_name = req.body.last_name;
     let email = req.body.email;
@@ -2344,61 +2344,92 @@ app.post('/account-info', (req, res) => {
         }
 
         // Verify current password
-        knex('users')
-            .select('user_password')
-            .where('user_id', req.session.user_id)
-            .first()
-            .then(user => {
-                if (!user || user.user_password !== current_password) {
-                    return knex('users')
-                        .select('user_first_name', 'user_last_name', 'user_email', 'user_dob', 'user_phone', 'user_city', 'user_state', 'user_zip', 'user_role')
-                        .where('user_id', req.session.user_id)
-                        .first()
-                        .then(user => {
-                            res.render('account-info', {
-                                first_name: user.user_first_name,
-                                last_name: user.user_last_name,
-                                email: user.user_email,
-                                birthdate: user.user_dob,
-                                user_phone: user.user_phone,
-                                user_city: user.user_city,
-                                user_state: user.user_state,
-                                user_zip: user.user_zip,
-                                level: user.user_role,
-                                error_message: 'Current password is incorrect',
-                                success_message: ""
-                            });
-                        });
-                }
+        try {
+            const user = await knex('users')
+                .select('user_password')
+                .where('user_id', req.session.user_id)
+                .first();
 
-                // Add new password to update data
-                updateData.user_password = new_password;
-
-                // Update user information including password
-                return performUpdate(updateData);
-            })
-            .catch(err => {
-                console.log('PASSWORD VERIFICATION ERROR:', err);
-                return knex('users')
+            if (!user) {
+                const userData = await knex('users')
                     .select('user_first_name', 'user_last_name', 'user_email', 'user_dob', 'user_phone', 'user_city', 'user_state', 'user_zip', 'user_role')
                     .where('user_id', req.session.user_id)
-                    .first()
-                    .then(user => {
-                        res.render('account-info', {
-                            first_name: user.user_first_name,
-                            last_name: user.user_last_name,
-                            email: user.user_email,
-                            birthdate: user.user_dob,
-                            user_phone: user.user_phone,
-                            user_city: user.user_city,
-                            user_state: user.user_state,
-                            user_zip: user.user_zip,
-                            level: user.user_role,
-                            error_message: 'Error verifying password',
-                            success_message: ""
-                        });
-                    });
+                    .first();
+                return res.render('account-info', {
+                    first_name: userData.user_first_name,
+                    last_name: userData.user_last_name,
+                    email: userData.user_email,
+                    birthdate: userData.user_dob,
+                    user_phone: userData.user_phone,
+                    user_city: userData.user_city,
+                    user_state: userData.user_state,
+                    user_zip: userData.user_zip,
+                    level: userData.user_role,
+                    error_message: 'User not found',
+                    success_message: ""
+                });
+            }
+
+            // Compare password - handle both hashed and legacy plaintext passwords
+            let validPassword = false;
+            
+            if (user.user_password && user.user_password.startsWith('$2')) {
+                // Password is a bcrypt hash (starts with $2a$, $2b$, etc.)
+                validPassword = await bcrypt.compare(current_password, user.user_password);
+            } else {
+                // Legacy plaintext password (for existing seed data with "default")
+                validPassword = (user.user_password === current_password);
+            }
+
+            if (!validPassword) {
+                const userData = await knex('users')
+                    .select('user_first_name', 'user_last_name', 'user_email', 'user_dob', 'user_phone', 'user_city', 'user_state', 'user_zip', 'user_role')
+                    .where('user_id', req.session.user_id)
+                    .first();
+                return res.render('account-info', {
+                    first_name: userData.user_first_name,
+                    last_name: userData.user_last_name,
+                    email: userData.user_email,
+                    birthdate: userData.user_dob,
+                    user_phone: userData.user_phone,
+                    user_city: userData.user_city,
+                    user_state: userData.user_state,
+                    user_zip: userData.user_zip,
+                    level: userData.user_role,
+                    error_message: 'Current password is incorrect',
+                    success_message: ""
+                });
+            }
+
+            // Hash the new password before storing
+            const saltRounds = 10;
+            const hashedNewPassword = await bcrypt.hash(new_password, saltRounds);
+
+            // Add hashed new password to update data
+            updateData.user_password = hashedNewPassword;
+
+            // Update user information including password
+            return performUpdate(updateData);
+        } catch (err) {
+            console.log('PASSWORD VERIFICATION ERROR:', err);
+            const userData = await knex('users')
+                .select('user_first_name', 'user_last_name', 'user_email', 'user_dob', 'user_phone', 'user_city', 'user_state', 'user_zip', 'user_role')
+                .where('user_id', req.session.user_id)
+                .first();
+            return res.render('account-info', {
+                first_name: userData.user_first_name,
+                last_name: userData.user_last_name,
+                email: userData.user_email,
+                birthdate: userData.user_dob,
+                user_phone: userData.user_phone,
+                user_city: userData.user_city,
+                user_state: userData.user_state,
+                user_zip: userData.user_zip,
+                level: userData.user_role,
+                error_message: 'Error verifying password',
+                success_message: ""
             });
+        }
     } else {
         // No password change, just update user info
         performUpdate(updateData);
