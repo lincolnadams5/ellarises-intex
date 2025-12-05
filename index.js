@@ -2269,12 +2269,44 @@ app.get('/account-info', (req, res) => {
         .first()
         .then(user => {
             if (user) {
+                // Format date of birth for HTML date input (needs YYYY-MM-DD format)
+                let formattedDob = '';
+                if (user.user_dob) {
+                    // If it's already a string in YYYY-MM-DD format, use it
+                    if (typeof user.user_dob === 'string' && user.user_dob.match(/^\d{4}-\d{2}-\d{2}/)) {
+                        formattedDob = user.user_dob.split('T')[0]; // Remove time if present
+                    } else {
+                        // If it's a Date object or other format, convert it
+                        const date = new Date(user.user_dob);
+                        if (!isNaN(date.getTime())) {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            formattedDob = `${year}-${month}-${day}`;
+                        }
+                    }
+                }
+
+                // Format phone number for display (remove formatting, then re-format)
+                let formattedPhone = '';
+                if (user.user_phone) {
+                    // Remove all non-digit characters
+                    const digits = user.user_phone.replace(/\D/g, '');
+                    // Format as (XXX) XXX-XXXX if we have 10 digits
+                    if (digits.length === 10) {
+                        formattedPhone = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+                    } else {
+                        // If not 10 digits, just use the original value
+                        formattedPhone = user.user_phone;
+                    }
+                }
+
                 res.render('account-info', {
                     first_name: user.user_first_name,
                     last_name: user.user_last_name,
                     email: user.user_email,
-                    birthdate: user.user_dob,
-                    user_phone: user.user_phone,
+                    birthdate: formattedDob,
+                    user_phone: formattedPhone,
                     user_city: user.user_city,
                     user_state: user.user_state,
                     user_zip: user.user_zip,
@@ -2479,6 +2511,48 @@ app.post('/account-info', async (req, res) => {
     let new_password = req.body.new_password;
     let confirm_password = req.body.confirm_password;
 
+    // Helper function to format user data for display
+    function formatUserDataForDisplay(user) {
+        // Format date of birth for HTML date input (needs YYYY-MM-DD format)
+        let formattedDob = '';
+        if (user.user_dob) {
+            if (typeof user.user_dob === 'string' && user.user_dob.match(/^\d{4}-\d{2}-\d{2}/)) {
+                formattedDob = user.user_dob.split('T')[0]; // Remove time if present
+            } else {
+                const date = new Date(user.user_dob);
+                if (!isNaN(date.getTime())) {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    formattedDob = `${year}-${month}-${day}`;
+                }
+            }
+        }
+
+        // Format phone number for display
+        let formattedPhone = '';
+        if (user.user_phone) {
+            const digits = user.user_phone.replace(/\D/g, '');
+            if (digits.length === 10) {
+                formattedPhone = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+            } else {
+                formattedPhone = user.user_phone;
+            }
+        }
+
+        return {
+            first_name: user.user_first_name,
+            last_name: user.user_last_name,
+            email: user.user_email,
+            birthdate: formattedDob,
+            user_phone: formattedPhone,
+            user_city: user.user_city,
+            user_state: user.user_state,
+            user_zip: user.user_zip,
+            level: user.user_role
+        };
+    }
+
     // Build update object for user information
     let updateData = {
         user_first_name: first_name,
@@ -2500,16 +2574,9 @@ app.post('/account-info', async (req, res) => {
                 .where('user_id', req.session.user_id)
                 .first()
                 .then(user => {
+                    const formattedData = formatUserDataForDisplay(user);
                     res.render('account-info', {
-                        first_name: user.user_first_name,
-                        last_name: user.user_last_name,
-                        email: user.user_email,
-                        birthdate: user.user_dob,
-                        user_phone: user.user_phone,
-                        user_city: user.user_city,
-                        user_state: user.user_state,
-                        user_zip: user.user_zip,
-                        level: user.user_role,
+                        ...formattedData,
                         error_message: 'All password fields are required to change password',
                         success_message: ""
                     });
@@ -2523,16 +2590,9 @@ app.post('/account-info', async (req, res) => {
                 .where('user_id', req.session.user_id)
                 .first()
                 .then(user => {
+                    const formattedData = formatUserDataForDisplay(user);
                     res.render('account-info', {
-                        first_name: user.user_first_name,
-                        last_name: user.user_last_name,
-                        email: user.user_email,
-                        birthdate: user.user_dob,
-                        user_phone: user.user_phone,
-                        user_city: user.user_city,
-                        user_state: user.user_state,
-                        user_zip: user.user_zip,
-                        level: user.user_role,
+                        ...formattedData,
                         error_message: 'New passwords do not match',
                         success_message: ""
                     });
@@ -2551,16 +2611,9 @@ app.post('/account-info', async (req, res) => {
                     .select('user_first_name', 'user_last_name', 'user_email', 'user_dob', 'user_phone', 'user_city', 'user_state', 'user_zip', 'user_role')
                     .where('user_id', req.session.user_id)
                     .first();
+                const formattedData = formatUserDataForDisplay(userData);
                 return res.render('account-info', {
-                    first_name: userData.user_first_name,
-                    last_name: userData.user_last_name,
-                    email: userData.user_email,
-                    birthdate: userData.user_dob,
-                    user_phone: userData.user_phone,
-                    user_city: userData.user_city,
-                    user_state: userData.user_state,
-                    user_zip: userData.user_zip,
-                    level: userData.user_role,
+                    ...formattedData,
                     error_message: 'User not found',
                     success_message: ""
                 });
@@ -2582,16 +2635,9 @@ app.post('/account-info', async (req, res) => {
                     .select('user_first_name', 'user_last_name', 'user_email', 'user_dob', 'user_phone', 'user_city', 'user_state', 'user_zip', 'user_role')
                     .where('user_id', req.session.user_id)
                     .first();
+                const formattedData = formatUserDataForDisplay(userData);
                 return res.render('account-info', {
-                    first_name: userData.user_first_name,
-                    last_name: userData.user_last_name,
-                    email: userData.user_email,
-                    birthdate: userData.user_dob,
-                    user_phone: userData.user_phone,
-                    user_city: userData.user_city,
-                    user_state: userData.user_state,
-                    user_zip: userData.user_zip,
-                    level: userData.user_role,
+                    ...formattedData,
                     error_message: 'Current password is incorrect',
                     success_message: ""
                 });
@@ -2612,16 +2658,9 @@ app.post('/account-info', async (req, res) => {
                 .select('user_first_name', 'user_last_name', 'user_email', 'user_dob', 'user_phone', 'user_city', 'user_state', 'user_zip', 'user_role')
                 .where('user_id', req.session.user_id)
                 .first();
+            const formattedData = formatUserDataForDisplay(userData);
             return res.render('account-info', {
-                first_name: userData.user_first_name,
-                last_name: userData.user_last_name,
-                email: userData.user_email,
-                birthdate: userData.user_dob,
-                user_phone: userData.user_phone,
-                user_city: userData.user_city,
-                user_state: userData.user_state,
-                user_zip: userData.user_zip,
-                level: userData.user_role,
+                ...formattedData,
                 error_message: 'Error verifying password',
                 success_message: ""
             });
@@ -2651,16 +2690,9 @@ app.post('/account-info', async (req, res) => {
                     .first();
             })
             .then(user => {
+                const formattedData = formatUserDataForDisplay(user);
                 res.render('account-info', {
-                    first_name: user.user_first_name,
-                    last_name: user.user_last_name,
-                    email: user.user_email,
-                    birthdate: user.user_dob,
-                    user_phone: user.user_phone,
-                    user_city: user.user_city,
-                    user_state: user.user_state,
-                    user_zip: user.user_zip,
-                    level: user.user_role,
+                    ...formattedData,
                     error_message: "",
                     success_message: "Your account information has been successfully updated!"
                 });
@@ -2672,16 +2704,9 @@ app.post('/account-info', async (req, res) => {
                     .where('user_id', req.session.user_id)
                     .first()
                     .then(user => {
+                        const formattedData = formatUserDataForDisplay(user);
                         res.render('account-info', {
-                            first_name: user.user_first_name,
-                            last_name: user.user_last_name,
-                            email: user.user_email,
-                            birthdate: user.user_dob,
-                            user_phone: user.user_phone,
-                            user_city: user.user_city,
-                            user_state: user.user_state,
-                            user_zip: user.user_zip,
-                            level: user.user_role,
+                            ...formattedData,
                             error_message: 'Error updating account information',
                             success_message: ""
                         });
