@@ -280,8 +280,15 @@
                             <strong class="detail-label">Field of Interest:</strong>
                             <span id="detail-field-of-interest"></span>
                         </div>
+                        <div class="detail-row" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e0e0e0;">
+                            <strong class="detail-label" style="display: block; margin-bottom: 0.5rem;">Milestones:</strong>
+                            <div id="detail-milestones" style="min-height: 40px;">
+                                <span style="color: #6c757d; font-style: italic;">Loading...</span>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-actions">
+                        <button type="button" id="btn-manage-milestones" class="btn-primary">Manage Milestones</button>
                         <button type="button" id="btn-edit-participant" class="btn-primary">Edit</button>
                         <button type="button" id="btn-delete-participant" class="btn-delete">Delete</button>
                         <button type="button" id="close-details" class="btn-secondary">Close</button>
@@ -366,6 +373,44 @@
                     </form>
                 </div>
             </div>
+
+            <!-- Manage Milestones Modal -->
+            <div id="manage-milestones-modal" class="modal hidden">
+                <div class="modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+                    <h2>Manage Milestones</h2>
+                    <div id="milestones-error" style="display: none; color: #dc3545; margin-bottom: 1rem; padding: 0.75rem; background-color: #f8d7da; border-radius: 4px;"></div>
+                    <div id="milestones-success" style="display: none; color: #155724; margin-bottom: 1rem; padding: 0.75rem; background-color: #d4edda; border-radius: 4px;"></div>
+                    
+                    <!-- Current Milestones Section -->
+                    <div style="margin-bottom: 2rem;">
+                        <h3 style="margin-bottom: 1rem; font-size: 1.2rem;">Current Milestones</h3>
+                        <div id="current-milestones-list" style="min-height: 60px;">
+                            <span style="color: #6c757d; font-style: italic;">Loading...</span>
+                        </div>
+                    </div>
+
+                    <!-- Add Milestone Section -->
+                    <div style="border-top: 1px solid #e0e0e0; padding-top: 1.5rem;">
+                        <h3 style="margin-bottom: 1rem; font-size: 1.2rem;">Add Milestone</h3>
+                        <form id="add-milestone-form">
+                            <div class="form-group">
+                                <label for="milestone-select">Select Milestone</label>
+                                <select id="milestone-select" name="milestone_id" required style="width: 100%; padding: 0.6rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; font-family: var(--font-primary);">
+                                    <option value="">-- Select a milestone --</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="milestone-date">Completion Date</label>
+                                <input type="date" id="milestone-date" name="milestone_date" style="width: 100%; padding: 0.6rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; font-family: var(--font-primary);">
+                            </div>
+                            <div class="modal-actions">
+                                <button type="submit" class="btn-primary">Add Milestone</button>
+                                <button type="button" id="cancel-manage-milestones" class="btn-secondary">Close</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -435,13 +480,22 @@
             const detailsModal = document.getElementById('view-details-modal');
             const editModal = document.getElementById('edit-participant-modal');
             const deleteModal = document.getElementById('delete-confirm-modal');
+            const milestonesModal = document.getElementById('manage-milestones-modal');
             const closeDetailsBtn = document.getElementById('close-details');
             const editBtn = document.getElementById('btn-edit-participant');
             const deleteBtn = document.getElementById('btn-delete-participant');
+            const manageMilestonesBtn = document.getElementById('btn-manage-milestones');
             const editForm = document.getElementById('edit-participant-form');
             const deleteForm = document.getElementById('delete-participant-form');
+            const addMilestoneForm = document.getElementById('add-milestone-form');
             const cancelEditBtn = document.getElementById('cancel-edit-participant');
             const cancelDeleteBtn = document.getElementById('cancel-delete');
+            const cancelManageMilestonesBtn = document.getElementById('cancel-manage-milestones');
+            
+            // Milestone data
+            let currentUserId = null;
+            let availableMilestones = [];
+            let userMilestones = [];
 
             // Helper function to format date for display
             function formatDateForDisplay(dateString) {
@@ -458,9 +512,119 @@
                 }
             }
 
+            // Load milestones for a user
+            function loadUserMilestones(userId) {
+                currentUserId = userId;
+                fetch(`/manage-participants/${userId}/milestones`)
+                    .then(response => response.json())
+                    .then(data => {
+                        userMilestones = data.userMilestones || [];
+                        availableMilestones = data.availableMilestones || [];
+                        displayMilestonesInDetails(userMilestones);
+                        populateMilestoneSelect();
+                        displayCurrentMilestones();
+                    })
+                    .catch(err => {
+                        console.error('Error loading milestones:', err);
+                        document.getElementById('detail-milestones').innerHTML = '<span style="color: #dc3545;">Error loading milestones</span>';
+                    });
+            }
+
+            // Display milestones in the details modal
+            function displayMilestonesInDetails(milestones) {
+                const container = document.getElementById('detail-milestones');
+                if (!milestones || milestones.length === 0) {
+                    container.innerHTML = '<span style="color: #6c757d; font-style: italic;">No milestones yet</span>';
+                    return;
+                }
+                
+                const list = milestones.map(m => {
+                    const date = formatDateForDisplay(m.milestone_date);
+                    return `<div style="padding: 0.5rem; margin-bottom: 0.5rem; background-color: #f8f9fa; border-radius: 4px;">
+                        <strong>${m.milestone_title}</strong> - ${date}
+                    </div>`;
+                }).join('');
+                container.innerHTML = list;
+            }
+
+            // Populate the milestone select dropdown (excluding already assigned milestones)
+            function populateMilestoneSelect() {
+                const select = document.getElementById('milestone-select');
+                const currentMilestoneIds = userMilestones.map(m => m.milestone_id);
+                const available = availableMilestones.filter(m => !currentMilestoneIds.includes(m.milestone_id));
+                
+                // Clear existing options except the first one
+                select.innerHTML = '<option value="">-- Select a milestone --</option>';
+                
+                available.forEach(milestone => {
+                    const option = document.createElement('option');
+                    option.value = milestone.milestone_id;
+                    option.textContent = milestone.milestone_title;
+                    select.appendChild(option);
+                });
+            }
+
+            // Display current milestones in the manage modal
+            function displayCurrentMilestones() {
+                const container = document.getElementById('current-milestones-list');
+                if (!userMilestones || userMilestones.length === 0) {
+                    container.innerHTML = '<span style="color: #6c757d; font-style: italic;">No milestones assigned</span>';
+                    return;
+                }
+                
+                const list = userMilestones.map(m => {
+                    const date = formatDateForDisplay(m.milestone_date);
+                    return `<div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; margin-bottom: 0.5rem; background-color: #f8f9fa; border-radius: 4px;">
+                        <div>
+                            <strong>${m.milestone_title}</strong>
+                            <span style="color: #6c757d; margin-left: 0.5rem;">- ${date}</span>
+                        </div>
+                        <button type="button" class="btn-delete" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;" data-milestone-id="${m.milestone_id}">Remove</button>
+                    </div>`;
+                }).join('');
+                container.innerHTML = list;
+                
+                // Add event listeners to remove buttons
+                container.querySelectorAll('button[data-milestone-id]').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const milestoneId = parseInt(this.getAttribute('data-milestone-id'), 10);
+                        removeMilestone(milestoneId);
+                    });
+                });
+            }
+
+            // Remove a milestone from user
+            function removeMilestone(milestoneId) {
+                if (!confirm('Are you sure you want to remove this milestone?')) {
+                    return;
+                }
+                
+                fetch(`/manage-participants/${currentUserId}/milestones/remove`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ milestone_id: milestoneId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showMilestonesError(data.error);
+                    } else {
+                        showMilestonesSuccess('Milestone removed successfully');
+                        loadUserMilestones(currentUserId);
+                    }
+                })
+                .catch(err => {
+                    console.error('Error removing milestone:', err);
+                    showMilestonesError('Error removing milestone');
+                });
+            }
+
             // Show details modal
             function showParticipantDetails(row) {
                 currentRow = row;
+                const userId = parseInt(row.getAttribute('data-user-id'), 10);
                 const role = row.getAttribute('data-role');
                 const formattedRole = role && role !== 'N/A' 
                     ? role.charAt(0).toUpperCase() + role.slice(1).toLowerCase()
@@ -478,7 +642,33 @@
                 document.getElementById('detail-school').textContent = row.getAttribute('data-school') || 'N/A';
                 document.getElementById('detail-employer').textContent = row.getAttribute('data-employer') || 'N/A';
                 document.getElementById('detail-field-of-interest').textContent = row.getAttribute('data-field-of-interest') || 'N/A';
+                
+                // Load milestones for this user
+                loadUserMilestones(userId);
+                
                 detailsModal.classList.remove('hidden');
+            }
+
+            // Show/hide error message
+            function showMilestonesError(message) {
+                const errorDiv = document.getElementById('milestones-error');
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+                document.getElementById('milestones-success').style.display = 'none';
+                setTimeout(() => {
+                    errorDiv.style.display = 'none';
+                }, 5000);
+            }
+
+            // Show/hide success message
+            function showMilestonesSuccess(message) {
+                const successDiv = document.getElementById('milestones-success');
+                successDiv.textContent = message;
+                successDiv.style.display = 'block';
+                document.getElementById('milestones-error').style.display = 'none';
+                setTimeout(() => {
+                    successDiv.style.display = 'none';
+                }, 3000);
             }
 
             // Make table rows clickable
@@ -537,6 +727,82 @@
                     deleteModal.classList.remove('hidden');
                 });
             }
+
+            // Manage milestones button - open milestones modal
+            if (manageMilestonesBtn) {
+                manageMilestonesBtn.addEventListener('click', function() {
+                    if (!currentRow) return;
+                    const userId = parseInt(currentRow.getAttribute('data-user-id'), 10);
+                    currentUserId = userId;
+                    loadUserMilestones(userId);
+                    // Set default date to today
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('milestone-date').value = today;
+                    // Clear any previous error/success messages
+                    document.getElementById('milestones-error').style.display = 'none';
+                    document.getElementById('milestones-success').style.display = 'none';
+                    detailsModal.classList.add('hidden');
+                    milestonesModal.classList.remove('hidden');
+                });
+            }
+
+            // Add milestone form submission
+            if (addMilestoneForm) {
+                addMilestoneForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const milestoneId = document.getElementById('milestone-select').value;
+                    const milestoneDate = document.getElementById('milestone-date').value || new Date().toISOString().split('T')[0];
+                    
+                    if (!milestoneId) {
+                        showMilestonesError('Please select a milestone');
+                        return;
+                    }
+                    
+                    fetch(`/manage-participants/${currentUserId}/milestones/add`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ 
+                            milestone_id: parseInt(milestoneId, 10),
+                            milestone_date: milestoneDate
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            showMilestonesError(data.error);
+                        } else {
+                            showMilestonesSuccess('Milestone added successfully');
+                            addMilestoneForm.reset();
+                            loadUserMilestones(currentUserId);
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error adding milestone:', err);
+                        showMilestonesError('Error adding milestone');
+                    });
+                });
+            }
+
+            // Cancel manage milestones
+            if (cancelManageMilestonesBtn) {
+                cancelManageMilestonesBtn.addEventListener('click', () => {
+                    milestonesModal.classList.add('hidden');
+                    // Reload milestones in details modal if it's still open
+                    if (currentUserId) {
+                        loadUserMilestones(currentUserId);
+                    }
+                });
+            }
+            milestonesModal.addEventListener('click', (e) => {
+                if (e.target === milestonesModal) {
+                    milestonesModal.classList.add('hidden');
+                    if (currentUserId) {
+                        loadUserMilestones(currentUserId);
+                    }
+                }
+            });
 
             // Highlight search results (server-side search already filtered the data)
             var searchInfoDiv = document.getElementById('search-results-info');
