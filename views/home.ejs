@@ -10,32 +10,34 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Skip Navigation Link -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
 
     <!-- Navigation -->
     <nav class="navbar navbar-static">
         <div class="nav-container">
             <ul class="nav-menu">
-                <!-- Events Dropdown -->
-                <li class="nav-dropdown">
-                    <a href="/events" class="nav-dropdown-trigger">Events</a>
-                    <div class="nav-dropdown-content">
-                        <a href="/events?filter=upcoming">Upcoming Events</a>
-                        <a href="/events?filter=past">Past Events</a>
-                    </div>
-                </li>
-                <!-- About Dropdown -->
-                <li class="nav-dropdown">
-                    <a href="/about" class="nav-dropdown-trigger">About</a>
-                    <div class="nav-dropdown-content">
-                        <a href="/about#mission-vision">Mission & Vision</a>
-                        <a href="/about#programs">Programs</a>
-                        <a href="/about#mariachi">Mariachi</a>
-                        <a href="/about#ballet">Ballet Folklorico</a>
-                        <a href="/about#steam">STEAM Workshops</a>
-                        <a href="/about#summit">Ella Rises Summit</a>
-                        <a href="/about#contact">Contact Us</a>
-                    </div>
-                </li>
+            <!-- Events Dropdown -->
+            <li class="nav-dropdown">
+                <a href="/events" class="nav-dropdown-trigger" aria-expanded="false" aria-haspopup="true" aria-controls="events-dropdown" id="events-trigger">Events</a>
+                <div class="nav-dropdown-content" id="events-dropdown" role="menu" aria-labelledby="events-trigger">
+                    <a href="/events?filter=upcoming" role="menuitem">Upcoming Events</a>
+                    <a href="/events?filter=past" role="menuitem">Past Events</a>
+                </div>
+            </li>
+            <!-- About Dropdown -->
+            <li class="nav-dropdown">
+                <a href="/about" class="nav-dropdown-trigger" aria-expanded="false" aria-haspopup="true" aria-controls="about-dropdown" id="about-trigger">About</a>
+                <div class="nav-dropdown-content" id="about-dropdown" role="menu" aria-labelledby="about-trigger">
+                    <a href="/about#mission-vision" role="menuitem">Mission & Vision</a>
+                    <a href="/about#programs" role="menuitem">Programs</a>
+                    <a href="/about#mariachi" role="menuitem">Mariachi</a>
+                    <a href="/about#ballet" role="menuitem">Ballet Folklorico</a>
+                    <a href="/about#steam" role="menuitem">STEAM Workshops</a>
+                    <a href="/about#summit" role="menuitem">Ella Rises Summit</a>
+                    <a href="/about#contact" role="menuitem">Contact Us</a>
+                </div>
+            </li>
                 <li><a href="/donate">Donate</a></li>
             </ul>
             <div class="nav-logo">
@@ -43,18 +45,18 @@
             </div>
             <% if (isLoggedIn) { %>
                 <div class="nav-auth">
-                    <div class="user-dropdown">
-                        <button class="user-dropdown-btn">
-                            <%= first_name %> <%= last_name %> ▼
-                        </button>
-                        <div class="user-dropdown-content">
-                            <a href="/dashboard">User Dashboard</a>
-                            <a href="/account-info">Account Info</a>
-                            <form action="/logout" method="POST" class="dropdown-logout-form">
-                                <button type="submit" class="dropdown-logout-btn">Logout</button>
-                            </form>
-                        </div>
+                <div class="user-dropdown">
+                    <button class="user-dropdown-btn" aria-expanded="false" aria-haspopup="true" aria-controls="user-dropdown-menu" id="user-menu-trigger">
+                        <%= first_name %> <%= last_name %> ▼
+                    </button>
+                    <div class="user-dropdown-content" id="user-dropdown-menu" role="menu" aria-labelledby="user-menu-trigger">
+                        <a href="/dashboard" role="menuitem">User Dashboard</a>
+                        <a href="/account-info" role="menuitem">Account Info</a>
+                        <form action="/logout" method="POST" class="dropdown-logout-form">
+                            <button type="submit" class="dropdown-logout-btn" role="menuitem">Logout</button>
+                        </form>
                     </div>
+                </div>
                 </div>
             <% } else { %>
                 <div class="nav-auth">
@@ -66,6 +68,7 @@
     </nav>
 
     <!-- Hero Section -->
+    <main id="main-content">
     <section class="hero">
         <div class="hero-content">
             <h2 class="hero-tagline">Empowering the future generation of women.</h2>
@@ -245,26 +248,26 @@
                     <div class="gallery-item"><img src="/public/images/ER Día de Muertos Show at NAC 2022-11.jpg" alt="Día de Muertos"></div>
                     <div class="gallery-item"><img src="/public/images/ER STEM Workshop Aug 2022-09.jpg" alt="STEAM Workshop"></div>
                     <div class="gallery-item"><img src="/public/images/ER STEM Workshop Aug 2022-31.jpg" alt="STEAM Workshop"></div>
-                    <div class="gallery-item"><img src="/public/images/IMG_0746.jpeg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/IMG_1056.jpeg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/IMG_6354.jpeg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/IMG_6363.jpeg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/IMG_7888.jpeg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/IMG_8012.jpeg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/IMG_8439.jpeg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/IMG_8498.jpeg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/IMG_8500.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_0746.jpeg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_1056.jpeg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_6354.jpeg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_6363.jpeg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_7888.jpeg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_8012.jpeg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_8439.jpeg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_8498.jpeg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_8500.jpeg" alt="Ella Rises community event participants"></div>
                     <div class="gallery-item"><img src="/public/images/lab_tour.jpeg" alt="Lab Tour"></div>
                     <div class="gallery-item"><img src="/public/images/skull_robot.JPG" alt="STEAM Project"></div>
                     <div class="gallery-item"><img src="/public/images/steam_workshop1.jpg" alt="STEAM Workshop"></div>
                     <div class="gallery-item"><img src="/public/images/summer_summit.jpg" alt="Summer Summit"></div>
                     <div class="gallery-item"><img src="/public/images/umfa_mural.jpg" alt="UMFA Mural"></div>
-                    <div class="gallery-item"><img src="/public/images/825D53BB-2464-458F-8163-81095033AE6C.jpeg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/82DC4094-9023-4E13-A5CA-59E6816026DB_1_105_c.jpeg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/DSC_0472.NEF.jpg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/DSC_0524.NEF.jpg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/DSC_0710.JPG" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/DSC_5359.jpg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/825D53BB-2464-458F-8163-81095033AE6C.jpeg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/82DC4094-9023-4E13-A5CA-59E6816026DB_1_105_c.jpeg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/DSC_0472.NEF.jpg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/DSC_0524.NEF.jpg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/DSC_0710.JPG" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/DSC_5359.jpg" alt="Ella Rises community event participants"></div>
                     <div class="gallery-item"><img src="/public/images/homepage1_workshop.jpg" alt="Workshop"></div>
                     <!-- Duplicate for seamless loop -->
                     <div class="gallery-item"><img src="/public/images/summer_summit2.jpg" alt="Ella Rises Summit"></div>
@@ -284,26 +287,26 @@
                 <div class="gallery-track gallery-track-2">
                     <div class="gallery-item"><img src="/public/images/ER STEM Workshop Aug 2022-09.jpg" alt="STEAM Workshop"></div>
                     <div class="gallery-item"><img src="/public/images/ER STEM Workshop Aug 2022-31.jpg" alt="STEAM Workshop"></div>
-                    <div class="gallery-item"><img src="/public/images/IMG_0746.jpeg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/IMG_1056.jpeg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/IMG_6354.jpeg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/IMG_6363.jpeg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/IMG_7888.jpeg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/IMG_8012.jpeg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/IMG_8439.jpeg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/IMG_8498.jpeg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/IMG_8500.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_0746.jpeg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_1056.jpeg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_6354.jpeg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_6363.jpeg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_7888.jpeg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_8012.jpeg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_8439.jpeg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_8498.jpeg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_8500.jpeg" alt="Ella Rises community event participants"></div>
                     <div class="gallery-item"><img src="/public/images/lab_tour.jpeg" alt="Lab Tour"></div>
                     <div class="gallery-item"><img src="/public/images/skull_robot.JPG" alt="STEAM Project"></div>
                     <div class="gallery-item"><img src="/public/images/steam_workshop1.jpg" alt="STEAM Workshop"></div>
                     <div class="gallery-item"><img src="/public/images/summer_summit.jpg" alt="Summer Summit"></div>
                     <div class="gallery-item"><img src="/public/images/umfa_mural.jpg" alt="UMFA Mural"></div>
-                    <div class="gallery-item"><img src="/public/images/825D53BB-2464-458F-8163-81095033AE6C.jpeg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/82DC4094-9023-4E13-A5CA-59E6816026DB_1_105_c.jpeg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/DSC_0472.NEF.jpg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/DSC_0524.NEF.jpg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/DSC_0710.JPG" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/DSC_5359.jpg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/825D53BB-2464-458F-8163-81095033AE6C.jpeg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/82DC4094-9023-4E13-A5CA-59E6816026DB_1_105_c.jpeg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/DSC_0472.NEF.jpg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/DSC_0524.NEF.jpg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/DSC_0710.JPG" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/DSC_5359.jpg" alt="Ella Rises community event participants"></div>
                     <div class="gallery-item"><img src="/public/images/homepage1_workshop.jpg" alt="Workshop"></div>
                     <div class="gallery-item"><img src="/public/images/summer_summit2.jpg" alt="Ella Rises Summit"></div>
                     <div class="gallery-item"><img src="/public/images/umfa_mural2.jpg" alt="Community Event"></div>
@@ -324,8 +327,8 @@
                     <div class="gallery-item"><img src="/public/images/ER Summer Summit 2022-165.jpg" alt="Summer Summit"></div>
                     <div class="gallery-item"><img src="/public/images/ER UMFA Mural_049.jpg" alt="UMFA Mural"></div>
                     <div class="gallery-item"><img src="/public/images/ER UMFA Mural_072.jpg" alt="UMFA Mural"></div>
-                    <div class="gallery-item"><img src="/public/images/IMG_0746.jpeg" alt="Event Photo"></div>
-                    <div class="gallery-item"><img src="/public/images/IMG_1056.jpeg" alt="Event Photo"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_0746.jpeg" alt="Ella Rises community event participants"></div>
+                    <div class="gallery-item"><img src="/public/images/IMG_1056.jpeg" alt="Ella Rises community event participants"></div>
                 </div>
             </div>
         </div>
@@ -451,6 +454,7 @@
             </div>
         </div>
     </section>
+    </main>
 
     <!-- Footer -->
     <footer class="footer">
@@ -498,18 +502,130 @@
         document.addEventListener('DOMContentLoaded', function() {
             const userDropdown = document.querySelector('.user-dropdown');
             const dropdownBtn = document.querySelector('.user-dropdown-btn');
+            const dropdownContent = document.querySelector('.user-dropdown-content');
             
             if (dropdownBtn) {
+                // Toggle dropdown
+                function toggleDropdown() {
+                    const isExpanded = dropdownBtn.getAttribute('aria-expanded') === 'true';
+                    dropdownBtn.setAttribute('aria-expanded', !isExpanded);
+                    userDropdown.classList.toggle('active');
+                }
+                
                 dropdownBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    userDropdown.classList.toggle('active');
+                    toggleDropdown();
+                });
+                
+                // Keyboard support
+                dropdownBtn.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggleDropdown();
+                        if (dropdownContent) {
+                            const firstItem = dropdownContent.querySelector('a, button');
+                            if (firstItem) firstItem.focus();
+                        }
+                    } else if (e.key === 'Escape') {
+                        dropdownBtn.setAttribute('aria-expanded', 'false');
+                        userDropdown.classList.remove('active');
+                        dropdownBtn.focus();
+                    }
                 });
             }
             
             // Close dropdown when clicking outside
             document.addEventListener('click', function(e) {
                 if (userDropdown && !userDropdown.contains(e.target)) {
+                    if (dropdownBtn) dropdownBtn.setAttribute('aria-expanded', 'false');
                     userDropdown.classList.remove('active');
+                }
+            });
+            
+            // Navigation dropdown keyboard accessibility
+            const navDropdowns = document.querySelectorAll('.nav-dropdown');
+            navDropdowns.forEach(dropdown => {
+                const trigger = dropdown.querySelector('.nav-dropdown-trigger');
+                const content = dropdown.querySelector('.nav-dropdown-content');
+                const menuItems = content ? content.querySelectorAll('a[role="menuitem"]') : [];
+                
+                if (trigger && content) {
+                    // Toggle dropdown function
+                    function toggleNavDropdown() {
+                        const isExpanded = trigger.getAttribute('aria-expanded') === 'true';
+                        trigger.setAttribute('aria-expanded', !isExpanded);
+                        if (!isExpanded) {
+                            content.style.display = 'block';
+                            content.style.opacity = '1';
+                            content.style.visibility = 'visible';
+                        } else {
+                            content.style.display = 'none';
+                            content.style.opacity = '0';
+                            content.style.visibility = 'hidden';
+                        }
+                    }
+                    
+                    // Keyboard support for trigger
+                    trigger.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            toggleNavDropdown();
+                            if (menuItems.length > 0) {
+                                menuItems[0].focus();
+                            }
+                        } else if (e.key === 'Escape') {
+                            trigger.setAttribute('aria-expanded', 'false');
+                            content.style.display = 'none';
+                            content.style.opacity = '0';
+                            content.style.visibility = 'hidden';
+                            trigger.focus();
+                        } else if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            if (trigger.getAttribute('aria-expanded') === 'false') {
+                                toggleNavDropdown();
+                            }
+                            if (menuItems.length > 0) {
+                                menuItems[0].focus();
+                            }
+                        }
+                    });
+                    
+                    // Keyboard navigation within dropdown
+                    menuItems.forEach((item, index) => {
+                        item.addEventListener('keydown', function(e) {
+                            if (e.key === 'ArrowDown') {
+                                e.preventDefault();
+                                const nextIndex = (index + 1) % menuItems.length;
+                                menuItems[nextIndex].focus();
+                            } else if (e.key === 'ArrowUp') {
+                                e.preventDefault();
+                                const prevIndex = (index - 1 + menuItems.length) % menuItems.length;
+                                menuItems[prevIndex].focus();
+                            } else if (e.key === 'Escape') {
+                                trigger.setAttribute('aria-expanded', 'false');
+                                content.style.display = 'none';
+                                content.style.opacity = '0';
+                                content.style.visibility = 'hidden';
+                                trigger.focus();
+                            } else if (e.key === 'Home') {
+                                e.preventDefault();
+                                menuItems[0].focus();
+                            } else if (e.key === 'End') {
+                                e.preventDefault();
+                                menuItems[menuItems.length - 1].focus();
+                            }
+                        });
+                    });
+                    
+                    // Close dropdown when focus leaves
+                    dropdown.addEventListener('focusout', function(e) {
+                        if (!dropdown.contains(e.relatedTarget)) {
+                            trigger.setAttribute('aria-expanded', 'false');
+                            content.style.display = 'none';
+                            content.style.opacity = '0';
+                            content.style.visibility = 'hidden';
+                        }
+                    });
                 }
             });
 

@@ -128,11 +128,10 @@
                                 <td>
                                     <% if (registration.registration_status !== 'cancelled' && registration.registration_status !== 'attended' && registration.registration_status !== 'no-show') { %>
                                         <div style="display: flex; justify-content: flex-end;">
-                                            <form action="/registrations/<%= registration.registration_id %>/cancel" method="POST" style="display:inline;">
+                                            <form action="/registrations/<%= registration.registration_id %>/cancel" method="POST" style="display:inline;" class="cancel-registration-form" data-registration-id="<%= registration.registration_id %>">
                                                 <button type="submit"
                                                     class="btn-cancel-registration"
                                                     style="background-color:#dc3545; color:white; border:none; padding:7px 16px; border-radius:4px; font-size:1em; cursor:pointer; transition:background 0.2s;"
-                                                    onclick="return confirm('Are you sure you want to cancel this registration?');"
                                                 >
                                                     Cancel Registration
                                                 </button>
@@ -201,5 +200,19 @@
             <p>&copy; 2025 Ella Rises. All rights reserved.</p>
         </div>
     </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cancel registration confirmation
+            const cancelForms = document.querySelectorAll('.cancel-registration-form');
+            cancelForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    if (!confirm('Are you sure you want to cancel this registration?')) {
+                        e.preventDefault();
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

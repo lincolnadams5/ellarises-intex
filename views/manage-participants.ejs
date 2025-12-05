@@ -123,6 +123,30 @@
                                     <td><%= usr.user_last_name %></td>
                                     <td><%= usr.user_email %></td>
                                     <td><%= formattedRole %></td>
+<<<<<<< Updated upstream
+=======
+                                    <td>
+                                        <button 
+                                            type="button"
+                                            class="btn-edit" 
+                                            style="background-color: var(--color-secondary); color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px; font-family: var(--font-primary); font-size: 0.85rem; font-weight: 500;"
+                                            data-user-id="<%= usr.user_id %>"
+                                        >
+                                            Edit
+                                        </button>
+                                        <form 
+                                            action="/manage-participants/<%= usr.user_id %>/delete" 
+                                            method="POST" 
+                                            style="display: inline-block;"
+                                            class="delete-user-form"
+                                            data-user-id="<%= usr.user_id %>"
+                                        >
+                                            <button type="submit" class="btn-delete" style="background-color: #dc3545; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-family: var(--font-primary); font-size: 0.85rem; font-weight: 500;">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </td>
+>>>>>>> Stashed changes
                                 </tr>
                             <% }); %>
                         </tbody>
@@ -499,6 +523,28 @@
             }
             deleteModal.addEventListener('click', (e) => {
                 if (e.target === deleteModal) deleteModal.classList.add('hidden');
+            });
+
+            // Edit button event listeners
+            const editButtons = document.querySelectorAll('.btn-edit');
+            editButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    openEditModal(this);
+                });
+            });
+
+            // Delete form confirmation
+            const deleteForms = document.querySelectorAll('.delete-user-form');
+            deleteForms.forEach(form => {
+                form.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+                form.addEventListener('submit', function(e) {
+                    if (!confirm('Are you sure you want to delete this user?')) {
+                        e.preventDefault();
+                    }
+                });
             });
         });
     </script>

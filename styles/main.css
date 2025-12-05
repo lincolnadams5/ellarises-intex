@@ -5,6 +5,26 @@
     box-sizing: border-box;
 }
 
+/* ========== SKIP NAVIGATION LINK ========== */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--color-text);
+    color: var(--color-white);
+    padding: 8px 16px;
+    text-decoration: none;
+    z-index: 10000;
+    font-weight: 600;
+    border-radius: 0 0 4px 0;
+}
+
+.skip-link:focus {
+    top: 0;
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+}
+
 :root {
     --color-primary: rgb(255, 216, 209);
     --color-secondary: #99b7c6;
@@ -79,6 +99,12 @@ h1, h2, h3 {
     color: var(--color-text-hover);
 }
 
+.nav-menu a:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
 .nav-auth {
     display: flex;
     gap: 1rem;
@@ -98,6 +124,11 @@ h1, h2, h3 {
     background-color: var(--color-soft-white);
 }
 
+.btn-signin:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+}
+
 .btn-signup {
     padding: 0.6rem 1.5rem;
     text-decoration: none;
@@ -112,6 +143,11 @@ h1, h2, h3 {
     background-color: #7a9fb0;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(153, 183, 198, 0.3);
+}
+
+.btn-signup:focus-visible {
+    outline: 2px solid var(--color-white);
+    outline-offset: 2px;
 }
 
 /* ========== USER DROPDOWN ========== */
@@ -140,6 +176,11 @@ h1, h2, h3 {
     background-color: #7a9fb0;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(153, 183, 198, 0.3);
+}
+
+.user-dropdown-btn:focus-visible {
+    outline: 2px solid var(--color-white);
+    outline-offset: 2px;
 }
 
 .user-dropdown-content {
@@ -171,6 +212,12 @@ h1, h2, h3 {
     padding-left: 1.8rem;
 }
 
+.user-dropdown-content a:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: -2px;
+    background-color: var(--color-soft-white);
+}
+
 .dropdown-logout-form {
     margin: 0;
     border-top: 1px solid #e0e0e0;
@@ -194,6 +241,12 @@ h1, h2, h3 {
     background-color: var(--color-soft-white);
     color: var(--color-text-hover);
     padding-left: 1.8rem;
+}
+
+.dropdown-logout-btn:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: -2px;
+    background-color: var(--color-soft-white);
 }
 
 /* Show dropdown when active */
@@ -264,6 +317,11 @@ h1, h2, h3 {
     box-shadow: 0 4px 15px rgba(250, 215, 209, 0.4);
 }
 
+.btn-primary:focus-visible {
+    outline: 2px solid var(--color-text);
+    outline-offset: 2px;
+}
+
 .btn-secondary {
     padding: 1rem 2rem;
     background-color: transparent;
@@ -281,6 +339,11 @@ h1, h2, h3 {
     border: 2px solid var(--color-secondary);
     color: var(--color-white);
     transform: translateY(-2px);
+}
+
+.btn-secondary:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
 }
 
 .hero-image {
@@ -1142,6 +1205,21 @@ h1, h2, h3 {
     box-shadow: 0 0 0 3px rgba(153, 183, 198, 0.1);
 }
 
+.form-group input:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 0 3px rgba(153, 183, 198, 0.1);
+}
+
+.form-group select:focus-visible,
+.form-group textarea:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 0 3px rgba(153, 183, 198, 0.1);
+}
+
 .form-group input::placeholder {
     color: #aaa;
 }
@@ -1282,6 +1360,11 @@ h1, h2, h3 {
     background-color: #7a9fb0;
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(153, 183, 198, 0.4);
+}
+
+.auth-submit-btn:focus-visible {
+    outline: 2px solid var(--color-white);
+    outline-offset: 2px;
 }
 
 .auth-submit-btn:active {
@@ -1591,6 +1674,14 @@ h1, h2, h3 {
     box-shadow: 0 0 0 3px rgba(153, 183, 198, 0.1);
 }
 
+.contact-form input:focus-visible,
+.contact-form textarea:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 0 3px rgba(153, 183, 198, 0.1);
+}
+
 .contact-form textarea {
     resize: vertical;
     min-height: 120px;
@@ -1613,6 +1704,11 @@ h1, h2, h3 {
     background-color: #7a9fb0;
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(153, 183, 198, 0.4);
+}
+
+.contact-submit-btn:focus-visible {
+    outline: 2px solid var(--color-white);
+    outline-offset: 2px;
 }
 
 .contact-submit-btn:active {
@@ -1868,6 +1964,11 @@ h1, h2, h3 {
     background-color: #7a9fb0;
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(153, 183, 198, 0.4);
+}
+
+.btn-reserve:focus-visible {
+    outline: 2px solid var(--color-white);
+    outline-offset: 2px;
 }
 
 .btn-reserve:active {
@@ -2149,6 +2250,13 @@ h1, h2, h3 {
     box-shadow: 0 0 0 3px rgba(153, 183, 198, 0.1);
 }
 
+.custom-amount-input input:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 0 3px rgba(153, 183, 198, 0.1);
+}
+
 /* Selected Amount Display */
 .selected-amount-display {
     background: var(--color-primary);
@@ -2194,6 +2302,11 @@ h1, h2, h3 {
     background-color: #7a9fb0;
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(153, 183, 198, 0.4);
+}
+
+.donate-submit-btn:focus-visible {
+    outline: 2px solid var(--color-white);
+    outline-offset: 2px;
 }
 
 .donate-submit-btn:active {
@@ -2629,6 +2742,11 @@ h1, h2, h3 {
     box-shadow: 0 6px 20px rgba(153, 183, 198, 0.4);
 }
 
+.account-submit-btn:focus-visible {
+    outline: 2px solid var(--color-white);
+    outline-offset: 2px;
+}
+
 .account-submit-btn:active {
     transform: translateY(0);
     background-color: #6a8fa0;
@@ -2752,6 +2870,11 @@ h1, h2, h3 {
     background-color: #c82333;
 }
 
+.modal-actions .btn-delete:focus-visible {
+    outline: 2px solid var(--color-white);
+    outline-offset: 2px;
+}
+
 /* Button styling for add instance button */
 .btn-add-instance {
     padding: 0.6rem 1.2rem;
@@ -2770,6 +2893,11 @@ h1, h2, h3 {
     background-color: #7a9fb0;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(153, 183, 198, 0.3);
+}
+
+.btn-add-instance:focus-visible {
+    outline: 2px solid var(--color-white);
+    outline-offset: 2px;
 }
 
 .btn-add-instance:active {
@@ -3247,6 +3375,11 @@ ANALYTICS DASHBOARD PAGE
     background-color: #c82333;
 }
 
+.btn-delete:focus-visible {
+    outline: 2px solid var(--color-white);
+    outline-offset: 2px;
+}
+
 .event-details-container {
     padding: 20px 0;
 }
@@ -3287,6 +3420,11 @@ ANALYTICS DASHBOARD PAGE
 .btn-complete-survey:hover {
     background-color: var(--color-tertiary-bkgd);
     border-color: var(--color-text);
+}
+
+.btn-complete-survey:focus-visible {
+    outline: 2px solid var(--color-text);
+    outline-offset: 2px;
 }
 
 .btn-complete-survey:active {
