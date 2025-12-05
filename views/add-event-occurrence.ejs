@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Event Occurrence - Ella Rises</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-static">
+        <div class="nav-container">
+            <ul class="nav-menu">
+                <!-- Events Dropdown -->
+                <li class="nav-dropdown">
+                    <a href="/events" class="nav-dropdown-trigger">Events</a>
+                    <div class="nav-dropdown-content">
+                        <a href="/events?filter=upcoming">Upcoming Events</a>
+                        <a href="/events?filter=past">Past Events</a>
+                    </div>
+                </li>
+                <!-- About Dropdown -->
+                <li class="nav-dropdown">
+                    <a href="/about" class="nav-dropdown-trigger">About</a>
+                    <div class="nav-dropdown-content">
+                        <a href="/about#mission-vision">Mission & Vision</a>
+                        <a href="/about#programs">Programs</a>
+                        <a href="/about#mariachi">Mariachi</a>
+                        <a href="/about#ballet">Ballet Folklorico</a>
+                        <a href="/about#steam">STEAM Workshops</a>
+                        <a href="/about#summit">Ella Rises Summit</a>
+                        <a href="/about#contact">Contact Us</a>
+                    </div>
+                </li>
+                <li><a href="/donate">Donate</a></li>
+            </ul>
+            <div class="nav-logo">
+                <h1><a href="/" style="text-decoration: none; color: inherit;">ELLA RISES</a></h1>
+            </div>
+            <% if (isLoggedIn) { %>
+                <div class="nav-auth">
+                    <div class="user-dropdown">
+                        <button class="user-dropdown-btn">
+                            <%= first_name %> <%= last_name %> ▼
+                        </button>
+                        <div class="user-dropdown-content">
+                            <a href="/dashboard">User Dashboard</a>
+                            <a href="/account-info">Account Info</a>
+                            <form action="/logout" method="POST" class="dropdown-logout-form">
+                                <button type="submit" class="dropdown-logout-btn">Logout</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="nav-auth">
+                    <a href="/login" class="btn-signin">Sign In</a>
+                    <a href="/register" class="btn-signup">Sign Up</a>
+                </div>
+            <% } %>
+        </div>
+    </nav>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a href="/manage-event-occurrences">← Back to Manage Event Occurrences</a>
+    </div>
+
+    <div class="manage-donations-container">
+        <div class="manage-donations-wrapper">
+            <div class="manage-donations-header">
+                <h1 class="manage-donations-title">Add Event Occurrence</h1>
+                <p class="manage-donations-subtitle">Create a new event occurrence</p>
+            </div>
+
+            <% if (typeof error_message !== 'undefined' && error_message && error_message.length > 0) { %>
+                <div class="error-message"><%= error_message %></div>
+            <% } %>
+
+            <div id="validation-error" class="error-message" style="display: none;"></div>
+
+            <form action="/manage-event-occurrences/new" method="POST" class="form" id="occurrence-form">
+                <div class="form-group">
+                    <label for="event_template_id">Event Template *</label>
+                    <select id="event_template_id" name="event_template_id" required>
+                        <option value="">-- Select an Event Template --</option>
+                        <% templates.forEach(function(template) { %>
+                            <option 
+                                value="<%= template.event_template_id %>" 
+                                data-default-capacity="<%= template.event_default_capacity || '' %>"
+                                data-template-name="<%= template.event_name %>"
+                            >
+                                <%= template.event_name %>
+                            </option>
+                        <% }); %>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="event_name">Event Occurrence Name *</label>
+                    <input type="text" id="event_name" name="event_name" placeholder="Enter a name for this occurrence" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="event_date_time_start">Start Date & Time *</label>
+                    <input type="datetime-local" id="event_date_time_start" name="event_date_time_start" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="event_date_time_end">End Date & Time *</label>
+                    <input type="datetime-local" id="event_date_time_end" name="event_date_time_end" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="event_location">Location *</label>
+                    <input type="text" id="event_location" name="event_location" placeholder="Enter event location" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="event_capacity">Capacity *</label>
+                    <input type="number" id="event_capacity" name="event_capacity" min="1" placeholder="Enter capacity" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="event_registration_deadline">Registration Deadline (Optional)</label>
+                    <input type="datetime-local" id="event_registration_deadline" name="event_registration_deadline">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Save Event Occurrence</button>
+                    <a href="/manage-event-occurrences" class="btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Ella Rises</h3>
+                <p>Empowering young women through culturally rooted educational programs.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/events">Event Information</a></li>
+                    <li><a href="/about">About Us</a></li>
+                    <li><a href="/about#contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Programs</h4>
+                <ul>
+                    <li><a href="/about#mariachi">Mariachi</a></li>
+                    <li><a href="/about#ballet">Ballet Folklorico</a></li>
+                    <li><a href="/about#steam">STEAM Workshops</a></li>
+                    <li><a href="/about#summit">Ella Rises Summit</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Get Involved</h4>
+                <ul>
+                    <li><a href="/about#contact">Volunteer</a></li>
+                    <li><a href="/donate">Donate</a></li>
+                    <li><a href="/about#contact">Sponsor</a></li>
+                    <li><a href="/analytics">Dashboard</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Ella Rises. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // User dropdown functionality
+            const userDropdown = document.querySelector('.user-dropdown');
+            const dropdownBtn = document.querySelector('.user-dropdown-btn');
+
+            if (dropdownBtn) {
+                dropdownBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('active');
+                });
+            }
+
+            document.addEventListener('click', function(e) {
+                if (userDropdown && !userDropdown.contains(e.target)) {
+                    userDropdown.classList.remove('active');
+                }
+            });
+
+            // Auto-fill capacity when template is selected
+            const templateSelect = document.getElementById('event_template_id');
+            const capacityInput = document.getElementById('event_capacity');
+            const eventNameInput = document.getElementById('event_name');
+
+            templateSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const defaultCapacity = selectedOption.getAttribute('data-default-capacity');
+                const templateName = selectedOption.getAttribute('data-template-name');
+                
+                if (defaultCapacity) {
+                    capacityInput.value = defaultCapacity;
+                }
+                
+                // Optionally pre-fill event name with template name
+                if (templateName && !eventNameInput.value) {
+                    eventNameInput.value = templateName;
+                }
+            });
+
+            // Form validation
+            const form = document.getElementById('occurrence-form');
+            const validationError = document.getElementById('validation-error');
+            const startInput = document.getElementById('event_date_time_start');
+            const endInput = document.getElementById('event_date_time_end');
+            const deadlineInput = document.getElementById('event_registration_deadline');
+
+            form.addEventListener('submit', function(e) {
+                validationError.style.display = 'none';
+                validationError.textContent = '';
+
+                const startDate = new Date(startInput.value);
+                const endDate = new Date(endInput.value);
+                const capacity = parseInt(capacityInput.value, 10);
+
+                // Validate capacity
+                if (isNaN(capacity) || capacity < 1) {
+                    e.preventDefault();
+                    validationError.textContent = 'Capacity must be a positive number greater than 0.';
+                    validationError.style.display = 'block';
+                    capacityInput.focus();
+                    return;
+                }
+
+                // Validate start date is before end date
+                if (startDate >= endDate) {
+                    e.preventDefault();
+                    validationError.textContent = 'Start date/time must be before end date/time.';
+                    validationError.style.display = 'block';
+                    startInput.focus();
+                    return;
+                }
+
+                // Validate registration deadline is before start date (if provided)
+                if (deadlineInput.value) {
+                    const deadlineDate = new Date(deadlineInput.value);
+                    if (deadlineDate >= startDate) {
+                        e.preventDefault();
+                        validationError.textContent = 'Registration deadline must be before the start date/time.';
+                        validationError.style.display = 'block';
+                        deadlineInput.focus();
+                        return;
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
