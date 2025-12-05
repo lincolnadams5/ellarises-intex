@@ -1577,8 +1577,16 @@ app.post('/login', async (req, res) => {
             return res.render('login', { error_message: 'Incorrect email or password' });
         }
 
-        // Compare password with hashed password
-        const validPassword = await bcrypt.compare(password, user.user_password);
+        // Compare password - handle both hashed and legacy plaintext passwords
+        let validPassword = false;
+        
+        if (user.user_password && user.user_password.startsWith('$2')) {
+            // Password is a bcrypt hash (starts with $2a$, $2b$, etc.)
+            validPassword = await bcrypt.compare(password, user.user_password);
+        } else {
+            // Legacy plaintext password (for existing seed data with "default")
+            validPassword = (user.user_password === password);
+        }
 
         if (!validPassword) {
             return res.render('login', { error_message: 'Incorrect email or password' });
