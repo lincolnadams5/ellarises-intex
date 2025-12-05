@@ -952,7 +952,48 @@ app.post('/manage-milestones/:milestone_id/update', (req, res) => {
 
 // ~~~ ~~~ ~~~ ~~~ ~~~ DONATIONS ~~~ ~~~ ~~~ ~~~ ~~~ 
 app.get('/donate', (req, res) => {
-    res.render('donate', { error_message: "" });
+    const success_message = req.query.success || "";
+    res.render('donate', { error_message: "", success_message: success_message });
+});
+
+app.post('/donate', (req, res) => {
+    const { donation_amount } = req.body;
+    
+    // Validate donation amount
+    if (!donation_amount || parseFloat(donation_amount) <= 0) {
+        return res.render('donate', { 
+            error_message: "Please enter a valid donation amount",
+            success_message: ""
+        });
+    }
+
+    // Use logged-in user's ID, or anonymous user ID (1179) for guests
+    const user_id = req.session.isLoggedIn ? req.session.user_id : 1179;
+
+    // Get the next donation_id
+    knex('donations')
+        .max('donation_id as maxId')
+        .first()
+        .then(result => {
+            const nextId = (result.maxId || 0) + 1;
+            
+            return knex('donations').insert({
+                donation_id: nextId,
+                user_id: user_id,
+                donation_amount: parseFloat(donation_amount),
+                donation_date: new Date().toISOString().split('T')[0]
+            });
+        })
+        .then(() => {
+            res.redirect('/donate?success=Thank+you+for+your+generous+donation!');
+        })
+        .catch(err => {
+            console.log('Error processing donation: ', err);
+            res.render('donate', { 
+                error_message: "Error processing donation. Please try again.",
+                success_message: ""
+            });
+        });
 });
 
 app.get('/my-donations', (req, res) => {
