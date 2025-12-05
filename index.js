@@ -30,6 +30,7 @@ app.use(express.static(path.join(__dirname))); // Making sure that Express can s
 const port = process.env.PORT || 3000; // Use AWS port, or 3000 if local
 
 app.use(express.urlencoded({extended: true}));
+app.use(express.json()); // Parse JSON request bodies
 app.use(cookieParser()); // Parse cookies (needed for i18n language preference)
 
 // Initializing Knex and connecting to the database
@@ -90,7 +91,7 @@ app.use((req, res, next) => {
     if ((req.path.startsWith('/manage-events/') && (req.path.endsWith('/delete') || req.path.endsWith('/new'))) ||
         (req.path.startsWith('/manage-milestones/') && (req.path.endsWith('/delete') || req.path.endsWith('/update'))) ||
         (req.path.startsWith('/manage-donations/') && (req.path.endsWith('/delete') || req.path.endsWith('/update'))) ||
-        (req.path.startsWith('/manage-participants/') && (req.path.endsWith('/delete') || req.path.endsWith('/update')))) {
+        (req.path.startsWith('/manage-participants/') && (req.path.endsWith('/delete') || req.path.endsWith('/update') || req.path.endsWith('/milestones') || req.path.endsWith('/milestones/add') || req.path.endsWith('/milestones/remove')))) {
         if (!req.session.isLoggedIn || !req.session.level || req.session.level.toLowerCase() !== 'admin') {
             return res.render("login", { error_message: "Authentication error" });
         } else {
@@ -1931,6 +1932,107 @@ app.post('/manage-participants/:user_id/update', (req, res) => {
         .catch(err => {
             console.log('Error updating user: ', err);
             res.redirect('/manage-participants?error=Error updating user. Please try again');
+        });
+});
+
+// Get user milestones and available milestones for a specific user
+app.get('/manage-participants/:user_id/milestones', (req, res) => {
+    const user_id = parseInt(req.params.user_id, 10);
+
+    // Get user's current milestones
+    const userMilestonesQuery = knex('user_milestones')
+        .innerJoin('milestones', 'user_milestones.milestone_id', '=', 'milestones.milestone_id')
+        .select(
+            'milestones.milestone_id',
+            'milestones.milestone_title',
+            'user_milestones.milestone_date'
+        )
+        .where('user_milestones.user_id', user_id)
+        .orderBy('user_milestones.milestone_date', 'desc');
+
+    // Get all available milestones
+    const allMilestonesQuery = knex('milestones')
+        .select('milestone_id', 'milestone_title')
+        .orderBy('milestone_title');
+
+    Promise.all([userMilestonesQuery, allMilestonesQuery])
+        .then(([userMilestones, allMilestones]) => {
+            res.json({
+                userMilestones: userMilestones,
+                availableMilestones: allMilestones
+            });
+        })
+        .catch(err => {
+            console.log('Error fetching milestones: ', err);
+            res.status(500).json({ error: 'Error fetching milestone information' });
+        });
+});
+
+// Add milestone to user
+app.post('/manage-participants/:user_id/milestones/add', (req, res) => {
+    const user_id = parseInt(req.params.user_id, 10);
+    
+    if (!req.body) {
+        return res.status(400).json({ error: 'Request body is missing' });
+    }
+    
+    const { milestone_id, milestone_date } = req.body;
+
+    if (!milestone_id) {
+        return res.status(400).json({ error: 'Milestone ID is required' });
+    }
+
+    // Check if user already has this milestone (composite primary key prevents duplicates)
+    knex('user_milestones')
+        .where('user_id', user_id)
+        .where('milestone_id', milestone_id)
+        .first()
+        .then(existing => {
+            if (existing) {
+                return res.status(400).json({ error: 'User already has this milestone' });
+            }
+
+            // Insert the milestone
+            return knex('user_milestones')
+                .insert({
+                    user_id: user_id,
+                    milestone_id: milestone_id,
+                    milestone_date: milestone_date || new Date().toISOString().split('T')[0]
+                })
+                .then(() => {
+                    res.json({ success: true });
+                });
+        })
+        .catch(err => {
+            console.log('Error adding milestone to user: ', err);
+            res.status(500).json({ error: 'Error adding milestone to user' });
+        });
+});
+
+// Remove milestone from user
+app.post('/manage-participants/:user_id/milestones/remove', (req, res) => {
+    const user_id = parseInt(req.params.user_id, 10);
+    
+    if (!req.body) {
+        return res.status(400).json({ error: 'Request body is missing' });
+    }
+    
+    const { milestone_id } = req.body;
+
+    if (!milestone_id) {
+        return res.status(400).json({ error: 'Milestone ID is required' });
+    }
+
+    knex('user_milestones')
+        .where('user_id', user_id)
+        .where('milestone_id', milestone_id)
+        .del()
+        .then(() => {
+            res.json({ success: true });
+        })
+        .catch(err => {
+            console.log('Error removing milestone from user: ', err);
+            res.status(500).json({ error: 'Error removing milestone from user' });
         });
 });
 
