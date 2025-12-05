@@ -1,19 +1,44 @@
+<!--
+    ==============================================
+    HOME PAGE - Ella Rises
+    ==============================================
+    This is the main landing page for the Ella Rises website.
+    It showcases:
+    - Hero section with call-to-action buttons
+    - Impact statistics
+    - Programs overview (Mariachi, Ballet, STEAM, Summit)
+    - Sponsor logos
+    - Footer with links
+    
+    The page uses i18n translations (__('key')) for English/Spanish support.
+    Session variables (isLoggedIn, first_name, etc.) come from res.locals middleware.
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ella Rises</title>
+    <!-- Main stylesheet - all custom styles are in here -->
     <link rel="stylesheet" href="/styles/main.css">
+    <!-- Google Fonts - Montserrat for body text, DM Serif Display for headings -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Skip Navigation Link -->
+    <!-- Skip Link - Accessibility feature for keyboard users to skip past navigation -->
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
-    <!-- Navigation -->
+    <!-- 
+        ========== NAVIGATION BAR ==========
+        The navbar has:
+        - Hamburger menu for mobile
+        - Navigation links with dropdowns (Events, About, Donate)
+        - Logo in the center
+        - Auth section (login/signup OR user dropdown if logged in)
+        - Language toggle (English/Spanish flag)
+    -->
     <nav class="navbar navbar-static">
         <div class="nav-container">
             <!-- Hamburger Menu Button (Mobile Only) -->
@@ -84,10 +109,16 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
+    <!-- 
+        ========== HERO SECTION ==========
+        The big banner at the top of the page.
+        Uses i18n translations for tagline/mission text.
+        Two CTAs: Join Events and Support Mission (donate)
+    -->
     <main id="main-content">
     <section class="hero">
         <div class="hero-content">
+            <!-- __() is the i18n translation function - looks up text in /locales/en.json or es.json -->
             <h2 class="hero-tagline"><%= __('home.tagline') %></h2>
             <p class="hero-mission"><%= __('home.mission') %></p>
             <div class="hero-cta">
@@ -100,7 +131,11 @@
         </div>
     </section>
 
-    <!-- Impact Section -->
+    <!-- 
+        ========== IMPACT SECTION ==========
+        Shows organizational statistics (women served, events hosted, etc.)
+        These are currently hardcoded - could be made dynamic from the database
+    -->
     <section class="impact-hero">
         <div class="impact-hero-content">
             <div class="impact-hero-header">
@@ -128,13 +163,23 @@
         </div>
     </section>
 
-    <!-- Programs Section -->
+    <!-- 
+        ========== PROGRAMS SECTION ==========
+        Shows the four main programs with flip cards:
+        1. Mariachi - traditional music
+        2. Ballet Folklorico - traditional dance
+        3. STEAM Workshops - science/tech/engineering/art/math
+        4. Ella Rises Summit - annual conference
+        
+        Each card flips on hover to show description
+    -->
     <section class="programs">
         <div class="section-header">
             <h2><%= __('home.join_programs') %></h2>
             <p><%= __('home.programs_description') %></p>
         </div>
         <div class="program-grid">
+            <!-- Program cards flip on hover - front has image, back has description -->
             <div class="program-flip-card" data-program="mariachi">
                 <div class="program-flip-inner">
                     <div class="program-flip-front">
@@ -514,9 +559,23 @@
         </div>
     </footer>
 
+    <!-- 
+        ========================================
+        JAVASCRIPT - Page Interactivity
+        ========================================
+        Handles:
+        1. Mobile hamburger menu toggle
+        2. User dropdown menu (when logged in)
+        3. Navigation dropdown menus with:
+           - Touch/click support for mobile
+           - Hover support for desktop
+           - Full keyboard accessibility (arrow keys, escape, etc.)
+    -->
     <script>
-        // Mobile menu and touch-friendly dropdowns
+        // Wait for the DOM to be fully loaded before attaching event listeners
         document.addEventListener('DOMContentLoaded', function() {
+            // ===== MOBILE HAMBURGER MENU =====
+            // Toggles the navigation menu on mobile devices
             const hamburgerBtn = document.getElementById('hamburger-btn');
             const navMenu = document.getElementById('nav-menu');
             

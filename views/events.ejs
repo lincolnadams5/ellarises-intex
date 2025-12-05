@@ -1,8 +1,34 @@
+<!--
+    ==============================================
+    EVENTS PAGE - Ella Rises
+    ==============================================
+    Public page showing upcoming or past events.
+    
+    Key features:
+    - Toggle between "Upcoming Events" and "Past Events" views
+    - Displays events as cards with image, details, and registration button
+    - Registration button behavior depends on:
+        * User logged in status
+        * Whether event is at capacity
+        * Whether registration deadline has passed
+        * Whether user is already registered
+    - Pagination for large event lists (10 per page)
+    
+    Data passed from server:
+    - events: array of event objects from database
+    - filter: 'upcoming' or 'past'
+    - currentPage, totalPages, totalCount: for pagination
+    - success_message, error_message: for feedback after actions
+    
+    Each event object includes registration_count and is_user_registered
+    to determine button state.
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Dynamic title based on filter -->
     <title><%= filter === 'past' ? 'Past Events' : 'Upcoming Events' %> - Ella Rises</title>
     <link rel="stylesheet" href="/styles/main.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,7 +37,7 @@
 </head>
 <body>
 
-    <!-- Navigation -->
+    <!-- Standard site navigation -->
     <nav class="navbar navbar-static">
         <div class="nav-container">
             <ul class="nav-menu">

@@ -1,3 +1,29 @@
+<!--
+    ==============================================
+    REGISTRATION PAGE - Ella Rises
+    ==============================================
+    New user signup form with multiple fields:
+    - Name (first/last)
+    - Email
+    - Password + confirmation
+    - Date of birth
+    - Phone number (with auto-formatting)
+    - City, State, Zipcode
+    
+    Layout: Split screen with form on left, decorative image on right.
+    
+    On form submit, POST to /register which:
+    - Validates passwords match
+    - Checks if email already exists
+    - Hashes password with bcrypt
+    - Creates user record in database
+    - Auto-logs them in and redirects to dashboard
+    
+    All new registrations are 'participant' role.
+    Admins must be created manually in the database.
+    
+    The phone input has JavaScript for auto-formatting as (000) 000-0000
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,7 +36,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Language Switcher (Floating) -->
+    <!-- Floating language toggle (no navbar on auth pages) -->
     <div class="auth-lang-switcher">
         <% if (currentLang === 'en') { %>
             <a href="/lang/es" class="lang-toggle" title="Cambiar a Español" aria-label="Switch to Spanish">🇪🇸</a>
@@ -19,21 +45,21 @@
         <% } %>
     </div>
 
-    <!-- Register Container -->
+    <!-- Split screen layout: form left, image right -->
     <div class="auth-container">
         <div class="auth-form-section">
             <div class="auth-form-wrapper">
                 <h1 class="auth-title">Join Ella Rises</h1>
                 <p class="auth-subtitle">Create an account to get started</p>
 
-                <!-- Error Message Display -->
+                <!-- Error display for validation failures (passwords don't match, email taken, etc.) -->
                 <% if (typeof error_message !== 'undefined' && error_message && error_message.length > 0) { %>
                     <div class="error-message">
                         <%= error_message %>
                     </div>
                 <% } %>
 
-                <!-- Register Form -->
+                <!-- Registration form - POSTs to /register route in index.js -->
                 <form action="/register" method="POST" class="auth-form">
                     <div class="name-fields-container">
                         <div class="form-group">

@@ -1,80 +1,140 @@
+/*
+ * =============================================
+ * ELLA RISES - Main Server File (index.js)
+ * =============================================
+ * 
+ * This is the heart of the Ella Rises web application.
+ * It handles all the routing, database queries, authentication,
+ * and serves up our EJS templates to users.
+ * 
+ * The app is built with:
+ * - Express.js for the web server
+ * - PostgreSQL database via Knex.js
+ * - EJS for templating
+ * - bcrypt for password hashing
+ * - i18n for English/Spanish language support
+ * 
+ * Main sections:
+ * 1. Initialization & Config
+ * 2. Middleware (auth, session, etc.)
+ * 3. Routes organized by feature (events, donations, users, etc.)
+ */
+
 // ========== INITIALIZATION ==========
+// This is where we load all our dependencies and set up the basic config
 
-require('dotenv').config(); // Load environment variables from .env file into memory
+require('dotenv').config(); // Pulls in environment variables from .env file (like DB credentials, secrets, etc.)
 
-const express = require("express"); 
-const session = require("express-session"); // Needed for the session variable
-const XLSX = require("xlsx"); // For Excel file generation
-const i18n = require("i18n"); // For internationalization
-const cookieParser = require("cookie-parser"); // For reading cookies (needed by i18n)
-let path = require("path");
-let app = express();
-const bcrypt = require("bcrypt");
+// Core dependencies
+const express = require("express");  // The web framework that makes everything work
+const session = require("express-session"); // Keeps track of logged-in users across requests
+const XLSX = require("xlsx"); // Used when admins want to export donation data to Excel
+const i18n = require("i18n"); // Handles English/Spanish translations throughout the site
+const cookieParser = require("cookie-parser"); // Reads cookies - i18n needs this to remember language preference
+let path = require("path"); // Node's built-in path helper for file paths
+let app = express(); // Create our Express app instance
+const bcrypt = require("bcrypt"); // For securely hashing passwords - never store plain text!
 
-// Configure i18n
+/*
+ * i18n Configuration
+ * This sets up our internationalization (fancy word for multi-language support).
+ * We support English (en) and Spanish (es).
+ * The actual translations live in the /locales folder as JSON files.
+ */
 i18n.configure({
-    locales: ['en', 'es'],
-    directory: path.join(__dirname, 'locales'),
-    defaultLocale: 'en',
-    cookie: 'lang',
-    queryParameter: 'lang',
-    autoReload: true,
-    syncFiles: true,
-    objectNotation: true
+    locales: ['en', 'es'], // Languages we support
+    directory: path.join(__dirname, 'locales'), // Where translation files live
+    defaultLocale: 'en', // English is the default
+    cookie: 'lang', // Cookie name that stores user's language preference
+    queryParameter: 'lang', // Can also switch language via ?lang=es in URL
+    autoReload: true, // Reload translations if files change (helpful for development)
+    syncFiles: true, // Keep translation files in sync
+    objectNotation: true // Allows nested keys like "nav.home" in translation files
 });
 
+// Tell Express to use EJS as our templating engine
+// EJS lets us write HTML with embedded JavaScript for dynamic content
 app.set("view engine", "ejs");
 
-app.use(express.static(path.join(__dirname))); // Making sure that Express can serve static files (for imported fonts)
+// Serve static files (CSS, images, fonts, etc.) from the project root
+// This is why we can use paths like "/styles/main.css" in our HTML
+app.use(express.static(path.join(__dirname)));
 
-const port = process.env.PORT || 3000; // Use AWS port, or 3000 if local
+// Port configuration - AWS will set PORT env variable in production,
+// otherwise we use 3000 for local development
+const port = process.env.PORT || 3000;
 
-app.use(express.urlencoded({extended: true}));
-app.use(express.json()); // Parse JSON request bodies
-app.use(cookieParser()); // Parse cookies (needed for i18n language preference)
+// These middleware functions parse incoming request data
+app.use(express.urlencoded({extended: true})); // Parses form submissions (POST data)
+app.use(express.json()); // Parses JSON request bodies (for AJAX/fetch requests)
+app.use(cookieParser()); // Parses cookies from request headers
 
-// Initializing Knex and connecting to the database
+/*
+ * Database Setup with Knex
+ * Knex is a SQL query builder that makes database operations way cleaner than raw SQL.
+ * The config comes from knexfile.js and includes connection details for dev/prod.
+ */
 const knexConfig = require("./knexfile"); 
-const environment = process.env.NODE_ENV || "development";
+const environment = process.env.NODE_ENV || "development"; // "development" or "production"
 const knex = require("knex")(knexConfig[environment]);
 
-// Initialize session
+/*
+ * Session Configuration
+ * Sessions let us remember that a user is logged in across multiple page requests.
+ * The session data is stored server-side (in memory by default).
+ */
 app.use(
     session({ 
-        secret: process.env.SESSION_SECRET || 'secret',
-        resave: false,
-        saveUninitialized: false
+        secret: process.env.SESSION_SECRET || 'secret', // Used to sign the session cookie
+        resave: false, // Don't save session if nothing changed
+        saveUninitialized: false // Don't create session until something is stored
     })
 );
 
-// Initialize i18n middleware
+// Activate the i18n middleware - this makes translation functions available in routes
 app.use(i18n.init);
 
 // ========== MIDDLEWARE ==========
+/*
+ * Middleware runs on EVERY request before it hits a route.
+ * Think of it as a checkpoint that all requests pass through.
+ */
 
-// Makes session variables automatically available on each EJS view without having to pass them individually through each route
+/*
+ * Session Variables Middleware
+ * This is super handy - it automatically makes session data available 
+ * to all our EJS templates via res.locals. Without this, we'd have to 
+ * pass isLoggedIn, first_name, etc. to every single res.render() call.
+ */
 app.use((req, res, next) => {
+    // These become available as variables in any EJS template
     res.locals.isLoggedIn = req.session.isLoggedIn || false;
     res.locals.user_id = req.session.user_id || '';
     res.locals.email = req.session.email || '';
-    res.locals.level = req.session.level || '';
+    res.locals.level = req.session.level || ''; // 'admin' or 'participant'
     res.locals.first_name = req.session.first_name || '';
     res.locals.last_name = req.session.last_name || '';
-    // Make current language available in templates
-    res.locals.currentLang = req.getLocale();
-    next();
+    res.locals.currentLang = req.getLocale(); // Current language ('en' or 'es')
+    next(); // Don't forget this! It passes control to the next middleware/route
 });
 
-// ~~~~~ Global Authentication ~~~~~
+/*
+ * ~~~~~ Global Authentication Middleware ~~~~~
+ * This is our security guard. It checks every request and decides:
+ * 1. Is this a public page anyone can access? Let them through.
+ * 2. Is this an admin-only page? Check if they're an admin.
+ * 3. Is this a logged-in-user page? Check if they're logged in.
+ */
 app.use((req, res, next) => {
-    // Skip authentication for login routes
+    // Public routes - anyone can access these without logging in
     let public_routes = ['/', '/login', '/register', '/about', '/events', '/donate', '/analytics', '/teapot'];
-    // Allow language switch routes
+    
+    // Language switch routes should always work (even for logged-out users)
     if (public_routes.includes(req.path) || req.path.startsWith('/lang/')) {
-        return next();
+        return next(); // Let them through!
     }
 
-    // Checks if user is admin for the following routes
+    // Admin-only routes - these require admin privileges
     let admin_routes = [
         '/manage-events',
         '/manage-events/new',
@@ -87,17 +147,25 @@ app.use((req, res, next) => {
         '/manage-participants',
         '/manage-participants/new'
     ];
-    // Also check admin routes with parameters (like /manage-events/:id/delete, /manage-events/:id/new, or /manage-*/:id/update)
+    
+    /*
+     * Handle dynamic admin routes (ones with IDs in them)
+     * For example: /manage-events/5/delete or /manage-participants/123/update
+     * We check if the path starts with a manage route and ends with an action keyword
+     */
     if ((req.path.startsWith('/manage-events/') && (req.path.endsWith('/delete') || req.path.endsWith('/new'))) ||
         (req.path.startsWith('/manage-milestones/') && (req.path.endsWith('/delete') || req.path.endsWith('/update'))) ||
         (req.path.startsWith('/manage-donations/') && (req.path.endsWith('/delete') || req.path.endsWith('/update'))) ||
         (req.path.startsWith('/manage-participants/') && (req.path.endsWith('/delete') || req.path.endsWith('/update') || req.path.endsWith('/milestones') || req.path.endsWith('/milestones/add') || req.path.endsWith('/milestones/remove')))) {
+        // Must be logged in AND be an admin
         if (!req.session.isLoggedIn || !req.session.level || req.session.level.toLowerCase() !== 'admin') {
             return res.render("login", { error_message: "Authentication error" });
         } else {
             return next();
         }
     }
+    
+    // Check static admin routes
     if (admin_routes.includes(req.path)) {
         if (!req.session.isLoggedIn || !req.session.level || req.session.level.toLowerCase() !== 'admin') {
             return res.render("login", { error_message: "Authentication error" });
@@ -106,15 +174,30 @@ app.use((req, res, next) => {
         }
     }
 
-    // Check if user is logged in for all other routes
+    // For all other routes, just check if user is logged in
     if (req.session.isLoggedIn) {
         next();
     } else {
-        res.render('login', { error_message: "" }); // TODO: Set EJS files to receive error message
+        // Not logged in? Send them to the login page
+        res.render('login', { error_message: "" });
     }
 });
 
 // ========== HELPER FUNCTIONS ==========
+/*
+ * Reusable utility functions that get used across multiple routes.
+ * Keeps our code DRY (Don't Repeat Yourself).
+ */
+
+/**
+ * getCount - Gets the total count of rows in a table
+ * @param {string} tableName - The name of the database table
+ * @returns {Promise} - Resolves to an object with { count: number }
+ * 
+ * Example usage: 
+ *   const result = await getCount('users');
+ *   console.log(result.count); // 150
+ */
 function getCount (tableName) {
     return knex(tableName)
         .count('* as count')
@@ -123,53 +206,92 @@ function getCount (tableName) {
 
 
 // ========== LANGUAGE SWITCH ==========
+/*
+ * This route handles switching between English and Spanish.
+ * When user clicks the flag icon, it hits this route with the new language.
+ */
 app.get('/lang/:locale', (req, res) => {
-    const locale = req.params.locale;
+    const locale = req.params.locale; // 'en' or 'es'
+    
+    // Only accept valid locales (don't let someone set it to random stuff)
     if (['en', 'es'].includes(locale)) {
-        res.cookie('lang', locale, { maxAge: 365 * 24 * 60 * 60 * 1000 }); // 1 year
-        req.setLocale(locale);
+        // Save their preference in a cookie that lasts 1 year
+        res.cookie('lang', locale, { maxAge: 365 * 24 * 60 * 60 * 1000 });
+        req.setLocale(locale); // Set for this request
     }
-    // Redirect back to the previous page, or home if no referer
+    
+    // Send them back to whatever page they were on
+    // req.get('Referer') gets the previous page URL from the browser
     const referer = req.get('Referer') || '/';
     res.redirect(referer);
 });
 
-// ========== VIEWS ==========
+
+// ========== BASIC PAGE ROUTES ==========
+/*
+ * These are simple routes that just render a page without needing
+ * to fetch any data from the database. Nice and straightforward.
+ */
+
+// Homepage
 app.get('/', (req, res) => {
     res.render('home', { error_message: "" });
 });
 
+// Login page - shows the login form
 app.get('/login', (req, res) => {
     res.render('login', { error_message: "" });
 });
 
+// Registration page - shows the signup form
 app.get('/register', (req, res) => {
     res.render('register', { error_message: "" });
 });
 
+// About page - info about Ella Rises, programs, contact, etc.
 app.get('/about', (req, res) => {
     res.render('about', { error_message: "" });
 });
 
+
 // ~~~ ~~~ ~~~ ~~~ ~~~ ANALYTICS DASHBOARD ~~~ ~~~ ~~~ ~~~ ~~~ 
+// This page embeds a Tableau dashboard with organizational analytics
 app.get('/analytics', (req, res) => {
     res.render('analytics-dashboard', { error_message: "" });
 });
 
+// Easter egg! HTTP 418 "I'm a teapot" - a fun joke status code from April Fools
 app.get('/teapot', (req, res) => {
     res.status(418).render('teapot');
 });
 
 // ~~~ ~~~ ~~~ ~~~ ~~~ EVENTS ~~~ ~~~ ~~~ ~~~ ~~~ 
+/*
+ * Public Events Page
+ * Shows all upcoming or past events with pagination.
+ * Users can register for upcoming events if logged in.
+ * 
+ * Query params:
+ *   - filter: 'upcoming' (default) or 'past'
+ *   - page: page number for pagination
+ */
 app.get('/events', (req, res) => {
-    const filter = req.query.filter || 'upcoming'; // Default to upcoming
+    // Get filter from query string, default to showing upcoming events
+    const filter = req.query.filter || 'upcoming';
+    
+    // Pagination setup - show 10 events per page
     const page = parseInt(req.query.page, 10) || 1;
     const perPage = 10;
-    const offset = (page - 1) * perPage;
+    const offset = (page - 1) * perPage; // Skip this many records
+    
     const currentDate = new Date();
-    const currentUserId = req.session.user_id || null;
+    const currentUserId = req.session.user_id || null; // null if not logged in
 
-    // Build the query
+    /*
+     * Main events query - joins event_occurrences with event_templates
+     * event_occurrences = specific instances of events (with dates, locations)
+     * event_templates = the "blueprint" for event types (descriptions, types)
+     */
     let eventsQuery = knex('event_occurrences')
         .join('event_templates', 'event_occurrences.event_template_id', '=', 'event_templates.event_template_id')
         .select(
@@ -185,21 +307,24 @@ app.get('/events', (req, res) => {
             'event_templates.event_description'
         );
 
-    // Filter and sort based on upcoming/past
+    // Apply filter and sorting based on upcoming vs past
     if (filter === 'past') {
+        // Past events: before today, sorted newest first
         eventsQuery = eventsQuery
             .where('event_occurrences.event_date_time_start', '<', currentDate)
             .orderBy('event_occurrences.event_date_time_start', 'desc');
     } else {
+        // Upcoming events: today or later, sorted soonest first
         eventsQuery = eventsQuery
             .where('event_occurrences.event_date_time_start', '>=', currentDate)
             .orderBy('event_occurrences.event_date_time_start', 'asc');
     }
 
-    // Count query for pagination
+    // Separate count query for pagination (need to know total events)
     let countQuery = knex('event_occurrences')
         .join('event_templates', 'event_occurrences.event_template_id', '=', 'event_templates.event_template_id');
     
+    // Apply same filter to count query
     if (filter === 'past') {
         countQuery = countQuery.where('event_occurrences.event_date_time_start', '<', currentDate);
     } else {
@@ -207,43 +332,47 @@ app.get('/events', (req, res) => {
     }
     countQuery = countQuery.count('* as count').first();
 
-    // Apply pagination
+    // Apply pagination limits to main query
     eventsQuery = eventsQuery.limit(perPage).offset(offset);
 
-    // Query for registration counts per event
+    // Get how many people are registered for each event
+    // This helps us show "X/Y spots filled" and check if event is full
     const registrationCountsQuery = knex('registration')
         .select('event_occurrence_id')
         .count('* as registration_count')
         .groupBy('event_occurrence_id');
 
-    // Query for user's existing registrations (if logged in)
+    // If user is logged in, get their existing registrations
+    // So we can disable the Register button for events they already signed up for
     const userRegistrationsQuery = currentUserId 
         ? knex('registration')
             .select('event_occurrence_id')
             .where('user_id', currentUserId)
-        : Promise.resolve([]);
+        : Promise.resolve([]); // Empty array if not logged in
 
+    // Run all queries in parallel for better performance
     Promise.all([eventsQuery, countQuery, registrationCountsQuery, userRegistrationsQuery])
         .then(([events, countResult, registrationCounts, userRegistrations]) => {
             const totalCount = parseInt(countResult.count, 10);
             const totalPages = Math.ceil(totalCount / perPage);
 
-            // Create a map of registration counts
+            // Build a lookup map: event_id -> registration count
             const registrationCountMap = {};
             registrationCounts.forEach(rc => {
                 registrationCountMap[rc.event_occurrence_id] = parseInt(rc.registration_count, 10);
             });
 
-            // Create a set of event_occurrence_ids the user is registered for
+            // Build a Set of events the user is registered for (fast lookup)
             const userRegisteredEvents = new Set(userRegistrations.map(r => r.event_occurrence_id));
 
-            // Add registration info to each event
+            // Enrich each event with registration info
             events = events.map(event => ({
                 ...event,
                 registration_count: registrationCountMap[event.event_occurrence_id] || 0,
                 is_user_registered: userRegisteredEvents.has(event.event_occurrence_id)
             }));
 
+            // Render the events page with all our data
             res.render('events', {
                 events: events,
                 filter: filter,
@@ -256,6 +385,7 @@ app.get('/events', (req, res) => {
         })
         .catch(err => {
             console.log('Error fetching events:', err);
+            // On error, show empty state with error message
             res.render('events', {
                 events: [],
                 filter: filter,
@@ -267,21 +397,26 @@ app.get('/events', (req, res) => {
         });
 });
 
-// POST route to register for an event
+/*
+ * Event Registration Route
+ * When a user clicks "Register" on an event, this handles the signup process.
+ * We do a bunch of validation before actually creating the registration.
+ */
 app.post('/events/:event_occurrence_id/register', (req, res) => {
     const eventOccurrenceId = req.params.event_occurrence_id;
     const userId = req.session.user_id;
 
-    // Check if user is logged in
+    // Must be logged in to register for events
     if (!userId) {
         return res.redirect('/login?redirect=' + encodeURIComponent('/events'));
     }
 
-    // Fetch event details to validate
+    // First, get the event details so we can validate
     knex('event_occurrences')
         .where('event_occurrence_id', eventOccurrenceId)
         .first()
         .then(event => {
+            // Make sure the event actually exists
             if (!event) {
                 return res.redirect('/events?error=' + encodeURIComponent('Event not found.'));
             }
@@ -290,17 +425,17 @@ app.post('/events/:event_occurrence_id/register', (req, res) => {
             const eventStart = new Date(event.event_date_time_start);
             const deadline = event.event_registration_deadline ? new Date(event.event_registration_deadline) : null;
 
-            // Check if event has already started
+            // Validation 1: Can't register for events that already started
             if (eventStart < currentDate) {
                 return res.redirect('/events?error=' + encodeURIComponent('This event has already started.'));
             }
 
-            // Check if registration deadline has passed
+            // Validation 2: Check if registration deadline passed (if there is one)
             if (deadline && deadline < currentDate) {
                 return res.redirect('/events?error=' + encodeURIComponent('Registration deadline has passed.'));
             }
 
-            // Check if user is already registered
+            // Validation 3: Check if user is already registered (no double-booking!)
             return knex('registration')
                 .where({ user_id: userId, event_occurrence_id: eventOccurrenceId })
                 .first()
@@ -309,7 +444,7 @@ app.post('/events/:event_occurrence_id/register', (req, res) => {
                         return res.redirect('/events?error=' + encodeURIComponent('You are already registered for this event.'));
                     }
 
-                    // Check capacity
+                    // Validation 4: Check if event is at capacity
                     return knex('registration')
                         .where('event_occurrence_id', eventOccurrenceId)
                         .count('* as count')
@@ -320,12 +455,12 @@ app.post('/events/:event_occurrence_id/register', (req, res) => {
                                 return res.redirect('/events?error=' + encodeURIComponent('This event is at full capacity.'));
                             }
 
-                            // All checks passed - insert registration
+                            // All validations passed! Create the registration
                             return knex('registration')
                                 .insert({
                                     user_id: userId,
                                     event_occurrence_id: eventOccurrenceId,
-                                    registration_status: null,
+                                    registration_status: null, // null = pending, can be updated later
                                     registration_created_at: new Date()
                                 })
                                 .then(() => {
@@ -340,19 +475,24 @@ app.post('/events/:event_occurrence_id/register', (req, res) => {
         });
 });
 
+/*
+ * ========== ADMIN: MANAGE EVENT OCCURRENCES ==========
+ * Event occurrences are specific instances of events (like "STEAM Workshop on Dec 15")
+ * These routes let admins view, create, edit, and delete event occurrences.
+ */
+
+// List all event occurrences with search and pagination
 app.get('/manage-event-occurrences', (req, res) => {
-    // Get search query from URL
     const searchQuery = req.query.search || '';
     
-    // Pagination logic
+    // Pagination - 20 items per page
     const page = parseInt(req.query.page, 10) || 1;
     const perPage = 20;
     const offset = (page - 1) * perPage;
     
-    // Get error message from query parameter if present
     const errorMessage = req.query.error || "";
 
-    // Query for the current page of event occurrences
+    // Main query to fetch event occurrences
     let eventsQuery = knex('event_occurrences')
         .select(
             'event_occurrences.event_occurrence_id',
@@ -365,7 +505,7 @@ app.get('/manage-event-occurrences', (req, res) => {
             'event_occurrences.event_registration_deadline'
         );
 
-    // If there's a search query, filter by event name or location
+    // Apply search filter if provided (searches name and location)
     if (searchQuery.trim() !== '') {
         const searchTerm = '%' + searchQuery.trim() + '%';
         eventsQuery = eventsQuery.where(function () {
@@ -374,12 +514,13 @@ app.get('/manage-event-occurrences', (req, res) => {
         });
     }
 
+    // Sort by date (newest first) and apply pagination
     eventsQuery = eventsQuery
         .orderBy('event_occurrences.event_date_time_start', 'desc')
         .limit(perPage)
         .offset(offset);
 
-    // Count query with same filter
+    // Count query needs same filters for accurate pagination
     let countQuery = knex('event_occurrences');
     if (searchQuery.trim() !== '') {
         const searchTerm = '%' + searchQuery.trim() + '%';
@@ -390,11 +531,12 @@ app.get('/manage-event-occurrences', (req, res) => {
     }
     countQuery = countQuery.count('* as count').first();
 
-    // Also fetch templates for the edit modal dropdown
+    // Also get templates for the edit modal's dropdown
     const templatesQuery = knex('event_templates')
         .select('event_template_id', 'event_name')
         .orderBy('event_name');
 
+    // Run all queries and render the page
     Promise.all([eventsQuery, countQuery, templatesQuery])
         .then(([events, countResult, templates]) => {
             const totalCount = parseInt(countResult.count, 10);
@@ -423,8 +565,10 @@ app.get('/manage-event-occurrences', (req, res) => {
         });
 });
 
+// Show the "Add New Event Occurrence" form
 app.get('/manage-event-occurrences/new', (req, res) => {
-    // Query to include event templates in dropdown with default capacity
+    // Fetch templates for the dropdown - includes default capacity
+    // so we can auto-fill capacity when user selects a template
     knex('event_templates')
         .select(
             'event_template_id',
@@ -951,15 +1095,25 @@ app.post('/manage-milestones/:milestone_id/update', (req, res) => {
 });
 
 // ~~~ ~~~ ~~~ ~~~ ~~~ DONATIONS ~~~ ~~~ ~~~ ~~~ ~~~ 
+/*
+ * Donation Routes
+ * Handles the public donation page and tracking user donations.
+ * 
+ * Note: The payment processing is just a demo - no real charges happen.
+ * Anonymous donations use user_id 1179 (a pre-created "anonymous" user).
+ */
+
+// Public donation page
 app.get('/donate', (req, res) => {
     const success_message = req.query.success || "";
     res.render('donate', { error_message: "", success_message: success_message });
 });
 
+// Process a donation submission
 app.post('/donate', (req, res) => {
     const { donation_amount } = req.body;
     
-    // Validate donation amount
+    // Make sure they entered a valid positive amount
     if (!donation_amount || parseFloat(donation_amount) <= 0) {
         return res.render('donate', { 
             error_message: "Please enter a valid donation amount",
@@ -967,24 +1121,27 @@ app.post('/donate', (req, res) => {
         });
     }
 
-    // Use logged-in user's ID, or anonymous user ID (1179) for guests
+    // If logged in, use their user_id. Otherwise use 1179 (anonymous donor account)
     const user_id = req.session.isLoggedIn ? req.session.user_id : 1179;
 
-    // Get the next donation_id
+    // Get the next available donation_id (max + 1)
+    // Note: In production, you'd probably let the database handle auto-increment
     knex('donations')
         .max('donation_id as maxId')
         .first()
         .then(result => {
             const nextId = (result.maxId || 0) + 1;
             
+            // Create the donation record
             return knex('donations').insert({
                 donation_id: nextId,
                 user_id: user_id,
                 donation_amount: parseFloat(donation_amount),
-                donation_date: new Date().toISOString().split('T')[0]
+                donation_date: new Date().toISOString().split('T')[0] // Today's date in YYYY-MM-DD format
             });
         })
         .then(() => {
+            // Success! Redirect back with a thank you message
             res.redirect('/donate?success=Thank+you+for+your+generous+donation!');
         })
         .catch(err => {
@@ -996,14 +1153,16 @@ app.post('/donate', (req, res) => {
         });
 });
 
+// User's donation history page (for logged-in users)
 app.get('/my-donations', (req, res) => {
+    // Fetch all donations made by the current user
     knex('donations')
         .select(
             'donation_amount',
             'donation_date'
         )
         .where('user_id', req.session.user_id)
-        .orderBy('donation_date', 'desc')
+        .orderBy('donation_date', 'desc') // Newest first
         .then(donation => {
             res.render('my-donations', {
                 donation: donation,
@@ -1751,12 +1910,20 @@ app.get('/manage-participants/new', (req, res) => {
 });
 
 // ~~~ ~~~ ~~~ ~~~ ~~~ Dashboard ~~~ ~~~ ~~~ ~~~ ~~~ 
+/*
+ * User Dashboard
+ * Shows different KPIs (Key Performance Indicators) based on user role:
+ * - Admins see organizational stats (total donations, participant count, etc.)
+ * - Participants see personal stats (upcoming reservations, milestones, pending surveys)
+ */
 app.get('/dashboard', (req, res) => {
     const currentUserId = req.session.user_id;
     const currentDate = new Date();
 
     // ===== ADMIN KPIs =====
-    // Get the total number of participants
+    // These queries fetch organization-wide statistics
+    
+    // Total registered users in the system
     const totalParticipantsQuery = knex('users')
         .count('* as count')
         .first()
@@ -1766,7 +1933,7 @@ app.get('/dashboard', (req, res) => {
             return 0;
         });
 
-    // Get the total number of donations
+    // Sum of all donations ever received (regardless of donor)
     const totalDonationsQuery = knex('donations')
         .sum('donation_amount as total_donations')
         .first()
@@ -1776,7 +1943,7 @@ app.get('/dashboard', (req, res) => {
             return 0;
         });
 
-    // Get count of upcoming events (for admin)
+    // How many events are scheduled for the future
     const upcomingEventsCountQuery = knex('event_occurrences')
         .where('event_date_time_start', '>=', currentDate)
         .count('* as count')
@@ -1787,7 +1954,7 @@ app.get('/dashboard', (req, res) => {
             return 0;
         });
 
-    // Get the upcoming event details
+    // Details of the NEXT upcoming event (soonest one)
     const upcomingEventQuery = knex('event_occurrences')
         .select('event_occurrence_id', 'event_name', 'event_date_time_start', 'event_date_time_end', 'event_location')
         .where('event_date_time_start', '>=', currentDate)
@@ -1800,7 +1967,10 @@ app.get('/dashboard', (req, res) => {
         });
 
     // ===== PARTICIPANT KPIs =====
-    // 1. Upcoming Reservations: registrations with NULL status for future events
+    // These queries fetch stats specific to the logged-in user
+    
+    // 1. Upcoming Reservations: events they're registered for that haven't happened yet
+    //    (registration_status = NULL means pending/confirmed, vs cancelled)
     const upcomingReservationsQuery = knex('registration')
         .join('event_occurrences', 'registration.event_occurrence_id', '=', 'event_occurrences.event_occurrence_id')
         .where('registration.user_id', currentUserId)
@@ -1814,7 +1984,7 @@ app.get('/dashboard', (req, res) => {
             return 0;
         });
 
-    // 2. Milestones Completed: count of user_milestones for this user
+    // 2. Milestones Completed: how many achievements/badges the user has earned
     const milestonesCompletedQuery = knex('user_milestones')
         .where('user_id', currentUserId)
         .count('* as count')
@@ -1825,13 +1995,14 @@ app.get('/dashboard', (req, res) => {
             return 0;
         });
 
-    // 3. Surveys Pending: past event registrations without a survey
+    // 3. Surveys Pending: past events they attended but haven't submitted feedback for
+    //    Uses LEFT JOIN to find registrations that DON'T have a matching survey
     const surveysPendingQuery = knex('registration')
         .join('event_occurrences', 'registration.event_occurrence_id', '=', 'event_occurrences.event_occurrence_id')
         .leftJoin('surveys', 'registration.registration_id', '=', 'surveys.registration_id')
         .where('registration.user_id', currentUserId)
-        .where('event_occurrences.event_date_time_start', '<', currentDate)
-        .whereNull('surveys.survey_id')
+        .where('event_occurrences.event_date_time_start', '<', currentDate) // Event already happened
+        .whereNull('surveys.survey_id') // No survey submitted yet
         .count('registration.registration_id as count')
         .first()
         .then(result => parseInt(result.count, 10))
@@ -1840,6 +2011,7 @@ app.get('/dashboard', (req, res) => {
             return 0;
         });
 
+    // Run all queries in parallel and render the dashboard with all the data
     Promise.all([
         totalDonationsQuery, 
         upcomingEventQuery, 
@@ -1864,6 +2036,7 @@ app.get('/dashboard', (req, res) => {
             });
         }).catch(err => {
             console.log('Error fetching dashboard information: ', err);
+            // On error, render dashboard with null values (the EJS template handles this gracefully)
             res.render('dashboard', {
                 error_message: 'Error fetching dashboard information',
                 totalDonations: null,
@@ -2124,33 +2297,44 @@ app.get('/account-info', (req, res) => {
         });
 });
 
-// ========== POST ROUTES ==========
+// ========== AUTHENTICATION ROUTES ==========
+/*
+ * Login, Logout, and Registration handling.
+ * We use bcrypt for password hashing - never store passwords in plain text!
+ * Sessions keep users logged in across page requests.
+ */
 
-// ~~~ Login ~~~
+/*
+ * Login Route
+ * Validates email/password combo and creates a session if successful.
+ * Supports both bcrypt-hashed passwords (new users) and legacy plaintext (seed data).
+ */
 app.post('/login', async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
     try {
-        // Get user by email (include password for comparison)
+        // Look up the user by email
         const user = await knex('users')
             .select('user_id', 'user_email', 'user_password', 'user_role', 'user_first_name', 'user_last_name')
             .where('user_email', email)
             .first();
 
-        // Check if user exists
+        // User not found? Don't tell them which field was wrong (security best practice)
         if (!user) {
             return res.render('login', { error_message: 'Incorrect email or password' });
         }
 
-        // Compare password - handle both hashed and legacy plaintext passwords
+        // Password validation - we need to handle two cases:
+        // 1. New users have bcrypt hashed passwords (start with $2)
+        // 2. Seed data users might have plaintext passwords like "default"
         let validPassword = false;
         
         if (user.user_password && user.user_password.startsWith('$2')) {
-            // Password is a bcrypt hash (starts with $2a$, $2b$, etc.)
+            // It's a bcrypt hash - use bcrypt.compare() for secure comparison
             validPassword = await bcrypt.compare(password, user.user_password);
         } else {
-            // Legacy plaintext password (for existing seed data with "default")
+            // Legacy plaintext password (for demo/seed data purposes)
             validPassword = (user.user_password === password);
         }
 
@@ -2158,23 +2342,24 @@ app.post('/login', async (req, res) => {
             return res.render('login', { error_message: 'Incorrect email or password' });
         }
 
-        // Set session data
+        // Success! Store user info in the session
+        // This data becomes available as req.session.* in all future requests
         req.session.isLoggedIn = true;
         req.session.email = user.user_email;
-        req.session.level = user.user_role;
+        req.session.level = user.user_role; // 'admin' or 'participant'
         req.session.first_name = user.user_first_name;
         req.session.last_name = user.user_last_name;
         req.session.user_id = user.user_id;
 
         console.log('User "', user.user_email, '" successfully logged in.');
 
-        // Save session before redirecting
+        // Make sure session is saved before redirecting
         req.session.save((err) => {
             if (err) {
                 console.log('Session save error:', err);
                 return res.render('login', { error_message: 'Session error. Please try again.' });
             }
-            res.redirect('/dashboard');
+            res.redirect('/dashboard'); // Take them to their dashboard
         });
     } catch (err) {
         console.log('LOGIN ERROR:', err);
@@ -2182,19 +2367,26 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// ~~~ Logout ~~~
+/*
+ * Logout Route
+ * Destroys the session and sends user back to login page.
+ */
 app.post('/logout', (req, res) => {
-    // Destroys the session object
     req.session.destroy((err) => {
         if (err) {
             console.log(err)
         }
-        res.redirect("/login"); // Redirects to the login page
+        res.redirect("/login");
     });
 });
 
-// ~~~ Register New User ~~~
+/*
+ * Registration Route
+ * Creates a new user account and automatically logs them in.
+ * All new users are created as 'participant' role (admins are created manually).
+ */
 app.post('/register', async (req, res) => {
+    // Pull all the form fields from the request body
     let first_name = req.body.first_name;
     let last_name = req.body.last_name;
     let email = req.body.email;
@@ -2205,32 +2397,32 @@ app.post('/register', async (req, res) => {
     let city = req.body.user_city;
     let state = req.body.user_state;
     let zipcode = req.body.user_zip;
-    let level = 'participant';
+    let level = 'participant'; // New users are always participants
 
-    // Hashing password
+    // Hash the password before storing - 10 salt rounds is standard
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-
-    // Validate password confirmation
+    // Make sure passwords match (client-side validation too, but always validate server-side)
     if (password !== confirmPassword) {
         return res.render('register', { error_message: 'Passwords do not match' });
     }
 
-    // Check if user already exists
+    // Check if email is already registered
     knex.select('user_email')
         .from('users')
         .where('user_email', email)
         .first()
         .then(existingUser => {
             if (existingUser) {
+                // Email already taken
                 res.render('register', { error_message: 'An account with this email already exists' });
             } else {
-                // Insert new user
+                // All good - create the new user account
                 knex('users')
                     .insert({
                         user_email: email,
-                        user_password: hashedPassword, // Inserting hashed password
+                        user_password: hashedPassword, // Store the HASHED password, never plaintext!
                         user_role: level,
                         user_first_name: first_name,
                         user_last_name: last_name,
@@ -2242,20 +2434,24 @@ app.post('/register', async (req, res) => {
                     })
                     .then(() => {
                         console.log('New user registered:', first_name, last_name, 'Email:', email, 'Level:', level);
-                        // Get the newly created user's ID and auto-login
+                        
+                        // Fetch the new user's ID so we can log them in automatically
                         return knex('users')
                             .select('user_id')
                             .where('user_email', email)
                             .first();
                     })
                     .then(user => {
+                        // Auto-login: set up their session just like the login route does
                         req.session.isLoggedIn = true;
                         req.session.first_name = first_name;
                         req.session.last_name = last_name;
                         req.session.email = email;
                         req.session.level = level;
                         req.session.user_id = user.user_id;
-                        res.redirect('/dashboard'); // Redirect successful account registration to new landing page
+                        
+                        // Take them straight to their dashboard
+                        res.redirect('/dashboard');
                     })
                     .catch(err => {
                         console.log('REGISTRATION ERROR:', err);
@@ -2495,6 +2691,11 @@ app.post('/account-info', async (req, res) => {
 });
 
 // ========== SERVER LISTENING ==========
+/*
+ * Start the server!
+ * This is the last thing that runs - it tells Express to start
+ * accepting HTTP requests on the configured port.
+ */
 app.listen(port, () => {
-    console.log(`Listening on port ${port}`);
+    console.log(`🚀 Ella Rises server is running at http://localhost:${port}`);
 });

@@ -1,3 +1,25 @@
+<!--
+    ==============================================
+    DASHBOARD PAGE - Ella Rises
+    ==============================================
+    This is the logged-in user's personal dashboard.
+    Shows different content based on user role:
+    
+    ADMINS see:
+    - Total participants count
+    - Total donations amount
+    - Upcoming events count
+    - Quick links to manage pages (participants, events, donations, etc.)
+    
+    PARTICIPANTS see:
+    - Upcoming reservations (events they're signed up for)
+    - Milestones completed (achievements earned)
+    - Surveys pending (feedback forms to complete)
+    - Quick links to their registrations, donations, surveys
+    
+    Data comes from the /dashboard route in index.js.
+    The 'level' variable determines which view to show (admin vs participant).
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,7 +33,7 @@
 </head>
 <body>
 
-    <!-- Navigation -->
+    <!-- Standard site navigation bar -->
     <nav class="navbar navbar-static">
         <div class="nav-container">
             <ul class="nav-menu">
@@ -74,9 +96,13 @@
         </div>
     </nav>
 
-    <!-- Main Dashboard Content -->
+    <!-- ========== MAIN DASHBOARD CONTENT ========== -->
     <main class="dashboard-container">
-        <!-- Welcome Header -->
+        <!-- 
+            Welcome Header
+            first_name and last_name come from session data (set during login)
+            level determines if we show admin or participant messaging
+        -->
         <div class="dashboard-welcome">
             <h1>Welcome, <%= first_name %> <%= last_name %></h1>
             <p>
@@ -88,12 +114,20 @@
             </p>
         </div>
 
-        <!-- KPI Stats Section -->
+        <!-- 
+            ========== KPI STATS SECTION ==========
+            Shows key metrics in card format.
+            We check if each value exists/is valid before displaying
+            (the server might return null on database errors).
+            
+            Admins see: Total Donations, Total Participants, Upcoming Events
+            Participants see: Upcoming Events, Reservations, Milestones, Pending Surveys
+        -->
         <section class="dashboard-kpi-section">
             <h2>Overview</h2>
             <div class="dashboard-kpi-grid">
                 <% if (level === 'admin') { %>
-                    <!-- Admin KPIs -->
+                    <!-- Admin KPIs - Organization-wide statistics -->
                     <div class="kpi-card">
                         <div class="kpi-icon">💰</div>
                         <div class="kpi-value">

@@ -1,3 +1,26 @@
+<!--
+    ==============================================
+    DONATION PAGE - Ella Rises
+    ==============================================
+    Public page for accepting donations.
+    
+    Key features:
+    - Logged-in users: donation linked to their account
+    - Guest users: donation linked to anonymous user (user_id 1179)
+    - Guest users are encouraged to create an account to track donations
+    
+    Form sections:
+    1. Account prompt (guests only) - encourages signup
+    2. Payment info - demo only, not actually processed
+    3. Donation amount - preset buttons ($25, $50, etc.) or custom
+    
+    JavaScript handles:
+    - Amount button selection
+    - Custom amount input updates display
+    - Card number/expiry formatting
+    
+    On submit, POST to /donate creates a record in donations table.
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,7 +34,7 @@
 </head>
 <body>
 
-    <!-- Navigation -->
+    <!-- Standard site navigation -->
     <nav class="navbar navbar-static">
         <div class="nav-container">
             <ul class="nav-menu">

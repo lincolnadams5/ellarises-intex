@@ -1,3 +1,20 @@
+<!--
+    ==============================================
+    LOGIN PAGE - Ella Rises
+    ==============================================
+    Simple login page with email/password form.
+    
+    Layout: Split screen with form on left, decorative image on right.
+    
+    On form submit, POST to /login which:
+    - Validates credentials
+    - Creates session if successful
+    - Redirects to dashboard
+    - Shows error_message if credentials invalid
+    
+    This page doesn't have a navbar (full-screen auth design),
+    but does have a floating language toggle.
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,7 +27,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Language Switcher (Floating) -->
+    <!-- 
+        Floating language toggle in top-right corner
+        Auth pages don't have a navbar, so we show the toggle separately
+    -->
     <div class="auth-lang-switcher">
         <% if (currentLang === 'en') { %>
             <a href="/lang/es" class="lang-toggle" title="Cambiar a Español" aria-label="Switch to Spanish">🇪🇸</a>
@@ -19,21 +39,28 @@
         <% } %>
     </div>
 
-    <!-- Login Container -->
+    <!-- 
+        Auth Container - Split screen layout
+        Left side: form, Right side: decorative image
+    -->
     <div class="auth-container">
         <div class="auth-form-section">
             <div class="auth-form-wrapper">
                 <h1 class="auth-title">Welcome Back</h1>
                 <p class="auth-subtitle">Sign in to your account dashboard</p>
 
-                <!-- Error Message Display -->
+                <!-- 
+                    Error message display
+                    Shown when login fails (wrong email/password)
+                    error_message is passed from the server
+                -->
                 <% if (error_message && error_message.length > 0) { %>
                     <div class="error-message">
                         <%= error_message %>
                     </div>
                 <% } %>
 
-                <!-- Login Form -->
+                <!-- Login form - POSTs to /login route in index.js -->
                 <form action="/login" method="POST" class="auth-form">
                     <div class="form-group">
                         <label for="email">Email Address</label>
