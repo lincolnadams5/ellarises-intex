@@ -177,6 +177,14 @@ h1, h2, h3 {
     color: var(--color-text-hover);
 }
 
+/* Nav Right Container (auth + language switcher) */
+.nav-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
 /* Language Switcher */
 .lang-switcher {
     display: flex;
@@ -184,23 +192,53 @@ h1, h2, h3 {
 }
 
 .lang-toggle {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0.35rem 0.75rem;
-    background-color: var(--color-primary);
-    color: var(--color-white) !important;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 500;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background-color: var(--color-white);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     text-decoration: none !important;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-size: 1.25rem;
+    line-height: 1;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
 }
 
 .lang-toggle:hover {
-    background-color: var(--color-secondary);
-    transform: scale(1.05);
-    color: var(--color-white) !important;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.lang-toggle:active {
+    transform: scale(0.95);
+}
+
+/* Responsive sizing for language toggle */
+@media (min-width: 1200px) {
+    .lang-toggle {
+        width: 2.25rem;
+        height: 2.25rem;
+        font-size: 1.4rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .lang-toggle {
+        width: 1.75rem;
+        height: 1.75rem;
+        font-size: 1.1rem;
+    }
+}
+
+/* Floating language switcher for auth pages */
+.auth-lang-switcher {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
 }
 
 .nav-menu a:focus-visible {
@@ -209,10 +247,13 @@ h1, h2, h3 {
     border-radius: 4px;
 }
 
+.nav-right {
+    justify-self: end;
+}
+
 .nav-auth {
     display: flex;
     gap: 1rem;
-    justify-self: end;
 }
 
 .btn-signin {
@@ -1048,7 +1089,7 @@ h1, h2, h3 {
         order: 3;
     }
 
-    .nav-auth {
+    .nav-right {
         order: 1;
     }
 
@@ -1206,8 +1247,11 @@ h1, h2, h3 {
         border-bottom: 1px solid #e0e0e0;
     }
 
-    .nav-auth {
+    .nav-right {
         order: 3;
+    }
+    
+    .nav-auth {
         gap: 0.5rem;
     }
 

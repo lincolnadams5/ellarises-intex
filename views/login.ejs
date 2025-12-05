@@ -10,6 +10,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Language Switcher (Floating) -->
+    <div class="auth-lang-switcher">
+        <% if (currentLang === 'en') { %>
+            <a href="/lang/es" class="lang-toggle" title="Cambiar a Español" aria-label="Switch to Spanish">🇪🇸</a>
+        <% } else { %>
+            <a href="/lang/en" class="lang-toggle" title="Switch to English" aria-label="Switch to English">🇬🇧</a>
+        <% } %>
+    </div>
+
     <!-- Login Container -->
     <div class="auth-container">
         <div class="auth-form-section">

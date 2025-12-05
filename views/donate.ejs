@@ -41,27 +41,36 @@
             <div class="nav-logo">
                 <h1><a href="/" style="text-decoration: none; color: inherit;">ELLA RISES</a></h1>
             </div>
-            <% if (isLoggedIn) { %>
-                <div class="nav-auth">
-                    <div class="user-dropdown">
-                        <button class="user-dropdown-btn">
-                            <%= first_name %> <%= last_name %> ▼
-                        </button>
-                        <div class="user-dropdown-content">
-                            <a href="/dashboard">User Dashboard</a>
-                            <a href="/account-info">Account Info</a>
-                            <form action="/logout" method="POST" class="dropdown-logout-form">
-                                <button type="submit" class="dropdown-logout-btn">Logout</button>
-                            </form>
+            <div class="nav-right">
+                <% if (isLoggedIn) { %>
+                    <div class="nav-auth">
+                        <div class="user-dropdown">
+                            <button class="user-dropdown-btn">
+                                <%= first_name %> <%= last_name %> ▼
+                            </button>
+                            <div class="user-dropdown-content">
+                                <a href="/dashboard">User Dashboard</a>
+                                <a href="/account-info">Account Info</a>
+                                <form action="/logout" method="POST" class="dropdown-logout-form">
+                                    <button type="submit" class="dropdown-logout-btn">Logout</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
+                <% } else { %>
+                    <div class="nav-auth">
+                        <a href="/login" class="btn-signin">Sign In</a>
+                        <a href="/register" class="btn-signup">Sign Up</a>
+                    </div>
+                <% } %>
+                <div class="lang-switcher">
+                    <% if (currentLang === 'en') { %>
+                        <a href="/lang/es" class="lang-toggle" title="Cambiar a Español" aria-label="Switch to Spanish">🇪🇸</a>
+                    <% } else { %>
+                        <a href="/lang/en" class="lang-toggle" title="Switch to English" aria-label="Switch to English">🇬🇧</a>
+                    <% } %>
                 </div>
-            <% } else { %>
-                <div class="nav-auth">
-                    <a href="/login" class="btn-signin">Sign In</a>
-                    <a href="/register" class="btn-signup">Sign Up</a>
-                </div>
-            <% } %>
+            </div>
         </div>
     </nav>
 
