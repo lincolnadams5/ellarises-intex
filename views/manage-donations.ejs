@@ -112,12 +112,37 @@
                 </div>
             <% } %>
             
-            <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem;">
+            <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap;">
                 <a href="/manage-donations/new" class="btn-primary">+ Add Donation</a>
                 <a href="/manage-donations/export" class="btn-primary" style="background-color: #28a745; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; color: white; display: inline-flex; align-items: center; gap: 0.5rem;">
                     📥 Download Excel
                 </a>
+                
+                <!-- Search Bar -->
+                <form action="/manage-donations" method="GET" style="display: flex; gap: 0.5rem; flex: 1; min-width: 250px; max-width: 400px;">
+                    <input 
+                        type="text" 
+                        name="search"
+                        placeholder="Search by donor name..." 
+                        value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>"
+                        style="flex: 1; padding: 0.5rem 1rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem;"
+                    >
+                    <button type="submit" style="padding: 0.5rem 1rem; background-color: var(--color-secondary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                        Search
+                    </button>
+                    <% if (typeof searchQuery !== 'undefined' && searchQuery && searchQuery.trim() !== '') { %>
+                    <a href="/manage-donations" style="padding: 0.5rem 1rem; background-color: #6c757d; color: white; border-radius: 8px; text-decoration: none;">
+                        Clear
+                    </a>
+                    <% } %>
+                </form>
             </div>
+            
+            <% if (typeof searchQuery !== 'undefined' && searchQuery && searchQuery.trim() !== '') { %>
+            <div id="search-results-info" data-search="<%= searchQuery %>" style="margin-bottom: 1rem; color: #71717a; font-size: 0.95rem;">
+                Showing results for "<strong><%= searchQuery %></strong>" (<%= typeof totalCount !== 'undefined' ? totalCount : 0 %> found)
+            </div>
+            <% } %>
 
             <!-- Error Message Display -->
             <% if (typeof error_message !== 'undefined' && error_message && error_message.length > 0) { %>
@@ -173,8 +198,14 @@
 
                 <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
                     <div class="manage-donations-pagination">
+                        <%
+                            var searchParam = '';
+                            if (typeof searchQuery !== 'undefined' && searchQuery && searchQuery.trim() !== '') {
+                                searchParam = '&search=' + encodeURIComponent(searchQuery);
+                            }
+                        %>
                         <% if (currentPage > 1) { %>
-                            <a href="/manage-donations?page=<%= currentPage - 1 %>" class="pagination-btn">Previous</a>
+                            <a href="/manage-donations?page=<%= currentPage - 1 %><%= searchParam %>" class="pagination-btn">Previous</a>
                         <% } else { %>
                             <span class="pagination-btn disabled">Previous</span>
                         <% } %>
@@ -192,19 +223,19 @@
                                 }
                             %>
                             <% if (startPage > 1) { %>
-                                <a href="/manage-donations?page=1" class="pagination-page <%= currentPage === 1 ? 'active' : '' %>">1</a>
+                                <a href="/manage-donations?page=1<%= searchParam %>" class="pagination-page <%= currentPage === 1 ? 'active' : '' %>">1</a>
                                 <% if (startPage > 2) { %><span class="pagination-ellipsis">…</span><% } %>
                             <% } %>
                             <% for (let i = startPage; i <= endPage; i++) { %>
-                                <a href="/manage-donations?page=<%= i %>" class="pagination-page <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+                                <a href="/manage-donations?page=<%= i %><%= searchParam %>" class="pagination-page <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
                             <% } %>
                             <% if (endPage < totalPages) { %>
                                 <% if (endPage < totalPages - 1) { %><span class="pagination-ellipsis">…</span><% } %>
-                                <a href="/manage-donations?page=<%= totalPages %>" class="pagination-page <%= currentPage === totalPages ? 'active' : '' %>"><%= totalPages %></a>
+                                <a href="/manage-donations?page=<%= totalPages %><%= searchParam %>" class="pagination-page <%= currentPage === totalPages ? 'active' : '' %>"><%= totalPages %></a>
                             <% } %>
                         </div>
                         <% if (currentPage < totalPages) { %>
-                            <a href="/manage-donations?page=<%= currentPage + 1 %>" class="pagination-btn">Next</a>
+                            <a href="/manage-donations?page=<%= currentPage + 1 %><%= searchParam %>" class="pagination-btn">Next</a>
                         <% } else { %>
                             <span class="pagination-btn disabled">Next</span>
                         <% } %>

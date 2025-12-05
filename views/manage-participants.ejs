@@ -77,7 +77,44 @@
                 <p class="manage-donations-subtitle">Create new, or select a participant to edit or delete</p>
             </div>
 
-            <a href="/manage-participants/new" class="btn-primary btn-create-event">+ Add Participant</a>
+            <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                <a href="/manage-participants/new" class="btn-primary btn-create-event">+ Add Participant</a>
+                
+                <!-- Search Bar - This is a FORM that submits to the server -->
+                <form action="/manage-participants" method="GET" style="display: flex; gap: 0.5rem; flex: 1; min-width: 300px; max-width: 500px;">
+                    <input 
+                        type="text" 
+                        name="search"
+                        id="participant-search-input"
+                        placeholder="Search by name..." 
+                        value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>"
+                        style="flex: 1; padding: 0.6rem 1rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; font-family: var(--font-primary); transition: border-color 0.3s ease;"
+                        onfocus="this.style.borderColor='var(--color-secondary)'"
+                        onblur="this.style.borderColor='#e0e0e0'"
+                    >
+                    <button 
+                        type="submit"
+                        style="padding: 0.6rem 1.5rem; background-color: var(--color-secondary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s ease;"
+                    >
+                        Search
+                    </button>
+                    <% if (typeof searchQuery !== 'undefined' && searchQuery && searchQuery.trim() !== '') { %>
+                    <a 
+                        href="/manage-participants"
+                        style="padding: 0.6rem 1rem; background-color: #6c757d; color: white; border: none; border-radius: 8px; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center;"
+                    >
+                        Clear
+                    </a>
+                    <% } %>
+                </form>
+            </div>
+
+            <!-- Search Results Info -->
+            <% if (typeof searchQuery !== 'undefined' && searchQuery && searchQuery.trim() !== '') { %>
+            <div id="search-results-info" data-search="<%= searchQuery %>" style="margin-bottom: 1rem; color: var(--color-text-light); font-size: 0.95rem;">
+                Showing results for "<strong><%= searchQuery %></strong>" (<%= typeof totalCount !== 'undefined' ? totalCount : 0 %> found)
+            </div>
+            <% } %>
 
             <!-- Error Message Display -->
             <% if (typeof error_message !== 'undefined' && error_message && error_message.length > 0) { %>
@@ -136,8 +173,15 @@
 
             <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
                 <div class="manage-donations-pagination">
+                    <%
+                        // Build search parameter for pagination links
+                        var searchParam = '';
+                        if (typeof searchQuery !== 'undefined' && searchQuery && searchQuery.trim() !== '') {
+                            searchParam = '&search=' + encodeURIComponent(searchQuery);
+                        }
+                    %>
                     <% if (currentPage > 1) { %>
-                        <a href="/manage-participants?page=<%= currentPage - 1 %>" class="pagination-btn">Previous</a>
+                        <a href="/manage-participants?page=<%= currentPage - 1 %><%= searchParam %>" class="pagination-btn">Previous</a>
                     <% } else { %>
                         <span class="pagination-btn disabled">Previous</span>
                     <% } %>
@@ -155,19 +199,19 @@
                             }
                         %>
                         <% if (startPage > 1) { %>
-                            <a href="/manage-participants?page=1" class="pagination-page <%= currentPage === 1 ? 'active' : '' %>">1</a>
+                            <a href="/manage-participants?page=1<%= searchParam %>" class="pagination-page <%= currentPage === 1 ? 'active' : '' %>">1</a>
                             <% if (startPage > 2) { %><span class="pagination-ellipsis">…</span><% } %>
                         <% } %>
                         <% for (let i = startPage; i <= endPage; i++) { %>
-                            <a href="/manage-participants?page=<%= i %>" class="pagination-page <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+                            <a href="/manage-participants?page=<%= i %><%= searchParam %>" class="pagination-page <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
                         <% } %>
                         <% if (endPage < totalPages) { %>
                             <% if (endPage < totalPages - 1) { %><span class="pagination-ellipsis">…</span><% } %>
-                            <a href="/manage-participants?page=<%= totalPages %>" class="pagination-page <%= currentPage === totalPages ? 'active' : '' %>"><%= totalPages %></a>
+                            <a href="/manage-participants?page=<%= totalPages %><%= searchParam %>" class="pagination-page <%= currentPage === totalPages ? 'active' : '' %>"><%= totalPages %></a>
                         <% } %>
                     </div>
                     <% if (currentPage < totalPages) { %>
-                        <a href="/manage-participants?page=<%= currentPage + 1 %>" class="pagination-btn">Next</a>
+                        <a href="/manage-participants?page=<%= currentPage + 1 %><%= searchParam %>" class="pagination-btn">Next</a>
                     <% } else { %>
                         <span class="pagination-btn disabled">Next</span>
                     <% } %>
@@ -482,6 +526,27 @@
                     deleteForm.action = '/manage-participants/' + currentRow.getAttribute('data-user-id') + '/delete';
                     detailsModal.classList.add('hidden');
                     deleteModal.classList.remove('hidden');
+                });
+            }
+
+            // Highlight search results (server-side search already filtered the data)
+            var searchInfoDiv = document.getElementById('search-results-info');
+            if (searchInfoDiv && searchInfoDiv.dataset.search) {
+                var searchTerm = searchInfoDiv.dataset.search;
+                var rows = document.querySelectorAll('.participant-row');
+                
+                function highlightText(text, term) {
+                    if (!term) return text;
+                    var escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    var regex = new RegExp('(' + escaped + ')', 'gi');
+                    return text.replace(regex, '<mark style="background-color: #ffeb3b;">$1</mark>');
+                }
+                
+                rows.forEach(function(row) {
+                    var firstCell = row.querySelector('td:nth-child(1)');
+                    var lastCell = row.querySelector('td:nth-child(2)');
+                    if (firstCell) firstCell.innerHTML = highlightText(firstCell.textContent, searchTerm);
+                    if (lastCell) lastCell.innerHTML = highlightText(lastCell.textContent, searchTerm);
                 });
             }
 
