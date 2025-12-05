@@ -1491,7 +1491,8 @@ app.post('/manage-participants/new', (req, res) => {
             user_first_name,
             user_last_name,
             user_email,
-            user_role
+            user_role,
+            user_password: 'default' // Same as seed data
         })
         .then(() => {
             res.redirect('/manage-participants');
