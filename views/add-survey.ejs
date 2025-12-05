@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Participant - Ella Rises</title>
+    <title>Event Feedback - Ella Rises</title>
     <link rel="stylesheet" href="/styles/main.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -69,51 +69,92 @@
         <a href="/surveys">← Back to My Surveys</a>
     </div>
 
-    <div class="manage-donations-container">
-        <div class="manage-donations-wrapper">
-            <div class="manage-donations-header">
-                <!-- <h1 class="manage-donations-title"><%= event_name %> Survey</h1>
-                <p class="manage-donations-subtitle"><%= event_date %> at <%= event_location %></p> -->
+    <div class="account-info-container">
+        <div class="account-info-wrapper">
+            <!-- Page Header -->
+            <div class="account-info-header">
+                <h1 class="account-info-title">Event Feedback</h1>
+                <p class="account-info-subtitle">Share your experience from <strong><%= event_name %></strong> on <%= event_date %></p>
             </div>
 
             <% if (typeof error_message !== 'undefined' && error_message && error_message.length > 0) { %>
                 <div class="error-message"><%= error_message %></div>
             <% } %>
 
-            <form action="/add-survey/<%= registration_id %>" method="POST" class="form">
-                <div class="form-group">
-                    <label for="satisfaction_score">How would you rate your overall satisfaction with the event?</label>
-                    <input type="number" id="satisfaction_score" name="satisfaction_score" min="1" max="5" required>
-                </div>
+            <div class="account-info-form">
+                <form action="/add-survey/<%= registration_id %>" method="POST">
+                    <!-- Rating Questions Section -->
+                    <div class="form-section">
+                        <h2 class="form-section-title">Rate Your Experience</h2>
+                        <p class="form-section-subtitle">Please rate each aspect from 1 (Poor) to 5 (Excellent)</p>
 
-                <div class="form-group">
-                    <label for="usefulness_score">How useful was the event for you?</label>
-                    <input type="number" id="usefulness_score" name="usefulness_score" min="1" max="5" required>
-                </div>
+                        <div class="form-group">
+                            <label for="satisfaction_score">Overall Satisfaction</label>
+                            <select id="satisfaction_score" name="satisfaction_score" required>
+                                <option value="">Select a rating...</option>
+                                <option value="5">⭐⭐⭐⭐⭐ Excellent (5)</option>
+                                <option value="4">⭐⭐⭐⭐ Very Good (4)</option>
+                                <option value="3">⭐⭐⭐ Good (3)</option>
+                                <option value="2">⭐⭐ Fair (2)</option>
+                                <option value="1">⭐ Poor (1)</option>
+                            </select>
+                        </div>
 
-                <div class="form-group">
-                    <label for="instructor_score">How would you rate the instructors?</label>
-                    <input type="number" id="instructor_score" name="instructor_score" min="1" max="5" required>
-                </div>
+                        <div class="form-group">
+                            <label for="usefulness_score">How useful was this event?</label>
+                            <select id="usefulness_score" name="usefulness_score" required>
+                                <option value="">Select a rating...</option>
+                                <option value="5">⭐⭐⭐⭐⭐ Extremely Useful (5)</option>
+                                <option value="4">⭐⭐⭐⭐ Very Useful (4)</option>
+                                <option value="3">⭐⭐⭐ Somewhat Useful (3)</option>
+                                <option value="2">⭐⭐ Slightly Useful (2)</option>
+                                <option value="1">⭐ Not Useful (1)</option>
+                            </select>
+                        </div>
 
-                <div class="form-group">
-                    <label for="recommendation_score">Would you recommend this event to a friend or colleague?</label>
-                    <select id="recommendation_score" name="recommendation_score" required>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                    </select>
-                    <label for="survey_comments">Comments</label>
-                    <textarea id="survey_comments" name="survey_comments" rows="4" required></textarea>
-                </div>
+                        <div class="form-group">
+                            <label for="instructor_score">Instructor Quality</label>
+                            <select id="instructor_score" name="instructor_score" required>
+                                <option value="">Select a rating...</option>
+                                <option value="5">⭐⭐⭐⭐⭐ Outstanding (5)</option>
+                                <option value="4">⭐⭐⭐⭐ Very Good (4)</option>
+                                <option value="3">⭐⭐⭐ Good (3)</option>
+                                <option value="2">⭐⭐ Fair (2)</option>
+                                <option value="1">⭐ Poor (1)</option>
+                            </select>
+                        </div>
 
-                <div class="form-actions">
-                    <button type="submit" class="btn-primary">Submit Response</button>
-                    <a href="/surveys" class="btn-secondary">Cancel</a>
-                </div>
-            </form>
+                        <div class="form-group">
+                            <label for="recommendation_score">Would you recommend this event?</label>
+                            <select id="recommendation_score" name="recommendation_score" required>
+                                <option value="">Select a rating...</option>
+                                <option value="5">⭐⭐⭐⭐⭐ Definitely! (5)</option>
+                                <option value="4">⭐⭐⭐⭐ Probably (4)</option>
+                                <option value="3">⭐⭐⭐ Maybe (3)</option>
+                                <option value="2">⭐⭐ Probably Not (2)</option>
+                                <option value="1">⭐ Definitely Not (1)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Comments Section -->
+                    <div class="form-section">
+                        <h2 class="form-section-title">Additional Comments</h2>
+                        <p class="form-section-subtitle">Share any additional thoughts or suggestions</p>
+
+                        <div class="form-group">
+                            <label for="survey_comments">Your Comments</label>
+                            <textarea id="survey_comments" name="survey_comments" rows="5" placeholder="What did you enjoy most? Any suggestions for improvement?"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div style="display: flex; gap: 1rem; margin-top: 2rem; align-items: center;">
+                        <button type="submit" class="auth-submit-btn" style="flex: 1; height: 52px; margin-top: 0;">Submit Feedback</button>
+                        <a href="/surveys" style="height: 52px; padding: 0 2rem; background-color: transparent; color: var(--color-text-light); text-decoration: none; border: 2px solid var(--color-text-light); border-radius: 8px; font-weight: 600; font-family: var(--font-primary); display: flex; align-items: center; justify-content: center; box-sizing: border-box;">Cancel</a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 

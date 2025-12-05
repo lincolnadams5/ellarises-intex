@@ -6,8 +6,8 @@ const express = require("express");
 const session = require("express-session"); // Needed for the session variable
 const XLSX = require("xlsx"); // For Excel file generation
 let path = require("path");
-let bodyParser = require("body-parser");
 let app = express();
+const bcrypt = require("bcrypt");
 
 app.set("view engine", "ejs");
 
@@ -128,7 +128,79 @@ app.get('/teapot', (req, res) => {
 
 // ~~~ ~~~ ~~~ ~~~ ~~~ EVENTS ~~~ ~~~ ~~~ ~~~ ~~~ 
 app.get('/events', (req, res) => {
-    res.render('events', { error_message: "" });
+    const filter = req.query.filter || 'upcoming'; // Default to upcoming
+    const page = parseInt(req.query.page, 10) || 1;
+    const perPage = 10;
+    const offset = (page - 1) * perPage;
+    const currentDate = new Date();
+
+    // Build the query
+    let eventsQuery = knex('event_occurrences')
+        .join('event_templates', 'event_occurrences.event_template_id', '=', 'event_templates.event_template_id')
+        .select(
+            'event_occurrences.event_occurrence_id',
+            'event_occurrences.event_template_id',
+            'event_occurrences.event_name',
+            'event_occurrences.event_date_time_start',
+            'event_occurrences.event_date_time_end',
+            'event_occurrences.event_location',
+            'event_occurrences.event_capacity',
+            'event_occurrences.event_registration_deadline',
+            'event_templates.event_type',
+            'event_templates.event_description'
+        );
+
+    // Filter and sort based on upcoming/past
+    if (filter === 'past') {
+        eventsQuery = eventsQuery
+            .where('event_occurrences.event_date_time_start', '<', currentDate)
+            .orderBy('event_occurrences.event_date_time_start', 'desc');
+    } else {
+        eventsQuery = eventsQuery
+            .where('event_occurrences.event_date_time_start', '>=', currentDate)
+            .orderBy('event_occurrences.event_date_time_start', 'asc');
+    }
+
+    // Count query for pagination
+    let countQuery = knex('event_occurrences')
+        .join('event_templates', 'event_occurrences.event_template_id', '=', 'event_templates.event_template_id');
+    
+    if (filter === 'past') {
+        countQuery = countQuery.where('event_occurrences.event_date_time_start', '<', currentDate);
+    } else {
+        countQuery = countQuery.where('event_occurrences.event_date_time_start', '>=', currentDate);
+    }
+    countQuery = countQuery.count('* as count').first();
+
+    // Apply pagination
+    eventsQuery = eventsQuery.limit(perPage).offset(offset);
+
+    Promise.all([eventsQuery, countQuery])
+        .then(([events, countResult]) => {
+            const totalCount = parseInt(countResult.count, 10);
+            const totalPages = Math.ceil(totalCount / perPage);
+
+            res.render('events', {
+                events: events,
+                filter: filter,
+                currentPage: page,
+                totalPages: totalPages,
+                totalCount: totalCount,
+                error_message: req.query.error || '',
+                success_message: req.query.success || ''
+            });
+        })
+        .catch(err => {
+            console.log('Error fetching events:', err);
+            res.render('events', {
+                events: [],
+                filter: filter,
+                currentPage: 1,
+                totalPages: 1,
+                totalCount: 0,
+                error_message: 'Error loading events. Please try again.'
+            });
+        });
 });
 
 app.get('/manage-event-occurrences', (req, res) => {
@@ -1239,6 +1311,43 @@ app.post('/registrations/:registration_id/cancel', (req, res) => {
         })
 });
 
+// ~~~ ~~~ REGISTER FOR EVENT ~~~ ~~~
+app.post('/registration/:user_id/register/:event_occurrence_id', (req, res) => {
+    const user_id = parseInt(req.params.user_id, 10);
+    const event_occurrence_id = parseInt(req.params.event_occurrence_id, 10);
+    const { registration_status, event_registration_deadline, event_capacity } = req.body;
+
+    // Check if the event registration deadline has passed
+    const currentDate = new Date();
+    const eventRegistrationDeadline = new Date(event_registration_deadline);
+    if (eventRegistrationDeadline < currentDate) {
+        return res.redirect('/registrations?error=Event registration deadline has passed');
+    }
+
+    // Check if the event capacity has been reached
+    const eventCapacity = parseInt(event_capacity, 10);
+    knex('registration')
+        .where('event_occurrence_id', event_occurrence_id)
+        .count('* as count')
+        .first()
+        .then(result => {
+            const currentCapacity = parseInt(result.count, 10);
+            if (currentCapacity >= eventCapacity) { // If the event capacity has been reached, redirect with an error message
+                return res.redirect('/registrations?error=Event capacity has been reached');
+            }
+            // Register the user
+            return knex('registration')
+                .insert({ user_id, event_occurrence_id, registration_status, registration_created_at: new Date() })
+                .then(() => {
+                    res.redirect('/events?success=Registration+Successful');
+                });
+        })
+        .catch(err => { // If there is an error checking the event capacity, redirect with an error message
+            console.log('Error checking event capacity: ', err);
+            res.redirect('/registrations?error=Error checking event capacity. Please try again');
+        })
+});
+
 // ~~~ ~~~ MANAGE SURVEYS ~~~ ~~~
 app.get('/manage-surveys', (req, res) => { // Get the manage surveys page
     // Get search query from URL
@@ -1530,7 +1639,8 @@ app.post('/manage-participants/new', (req, res) => {
             user_first_name,
             user_last_name,
             user_email,
-            user_role
+            user_role,
+            user_password: 'default' // Same as seed data
         })
         .then(() => {
             res.redirect('/manage-participants');
@@ -1670,39 +1780,59 @@ app.get('/account-info', (req, res) => {
 // ========== POST ROUTES ==========
 
 // ~~~ Login ~~~
-app.post('/login', (req, res) => {
-    let email = req.body.email
-    let password = req.body.password
+app.post('/login', async (req, res) => {
+    const email = req.body.email;
+    const password = req.body.password;
 
-    knex.select('user_email', 'user_role', 'user_first_name', 'user_last_name', 'user_id') // Gets user row where email and password match row values
-        .from('users')
-        .where('user_email', email)
-        .andWhere('user_password', password) // NOTE: All passwords are "default", we should add encryption here as well
-        .first() // Gets only first return
-        .then(user => {
-            if (user) {
-                req.session.isLoggedIn = true; // Sets session login value to true
-                req.session.email = user.user_email; // Saves email to session storage
-                req.session.level = user.user_role // Saves user authentication level
-                req.session.first_name = user.user_first_name // Saves user first name
-                req.session.last_name = user.user_last_name // Saves user last name
-                req.session.user_id = user.user_id // Saves user id
-                console.log('User "', user.user_email, '" successfully logged in.'); // Logs user login in console
-                // Save session before redirecting to ensure session data is persisted
-                req.session.save((err) => {
-                    if (err) {
-                        console.log('Session save error:', err);
-                        return res.render('login', { error_message: 'Session error. Please try again.'});
-                    }
-                    res.redirect('/dashboard'); // Sends successful login to the user dashboard
-                });
-            } else {
-                res.render('login', { error_message: 'Incorrect email or password'}); // Otherwise returns to login page with error message
+    try {
+        // Get user by email (include password for comparison)
+        const user = await knex('users')
+            .select('user_id', 'user_email', 'user_password', 'user_role', 'user_first_name', 'user_last_name')
+            .where('user_email', email)
+            .first();
+
+        // Check if user exists
+        if (!user) {
+            return res.render('login', { error_message: 'Incorrect email or password' });
+        }
+
+        // Compare password - handle both hashed and legacy plaintext passwords
+        let validPassword = false;
+        
+        if (user.user_password && user.user_password.startsWith('$2')) {
+            // Password is a bcrypt hash (starts with $2a$, $2b$, etc.)
+            validPassword = await bcrypt.compare(password, user.user_password);
+        } else {
+            // Legacy plaintext password (for existing seed data with "default")
+            validPassword = (user.user_password === password);
+        }
+
+        if (!validPassword) {
+            return res.render('login', { error_message: 'Incorrect email or password' });
+        }
+
+        // Set session data
+        req.session.isLoggedIn = true;
+        req.session.email = user.user_email;
+        req.session.level = user.user_role;
+        req.session.first_name = user.user_first_name;
+        req.session.last_name = user.user_last_name;
+        req.session.user_id = user.user_id;
+
+        console.log('User "', user.user_email, '" successfully logged in.');
+
+        // Save session before redirecting
+        req.session.save((err) => {
+            if (err) {
+                console.log('Session save error:', err);
+                return res.render('login', { error_message: 'Session error. Please try again.' });
             }
-        }).catch(err => {
-            console.log('LOGIN ERROR:', err);
-            res.render('login', { error_message: 'Server connection error'}); // Returns to login page with error message
+            res.redirect('/dashboard');
         });
+    } catch (err) {
+        console.log('LOGIN ERROR:', err);
+        res.render('login', { error_message: 'Server connection error' });
+    }
 });
 
 // ~~~ Logout ~~~
@@ -1717,7 +1847,7 @@ app.post('/logout', (req, res) => {
 });
 
 // ~~~ Register New User ~~~
-app.post('/register', (req, res) => {
+app.post('/register', async (req, res) => {
     let first_name = req.body.first_name;
     let last_name = req.body.last_name;
     let email = req.body.email;
@@ -1729,6 +1859,11 @@ app.post('/register', (req, res) => {
     let state = req.body.user_state;
     let zipcode = req.body.user_zip;
     let level = 'participant';
+
+    // Hashing password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
 
     // Validate password confirmation
     if (password !== confirmPassword) {
@@ -1748,7 +1883,7 @@ app.post('/register', (req, res) => {
                 knex('users')
                     .insert({
                         user_email: email,
-                        user_password: password, // NOTE: currently omitting passwords from the requirements because we don't have a column for it in the database
+                        user_password: hashedPassword, // Inserting hashed password
                         user_role: level,
                         user_first_name: first_name,
                         user_last_name: last_name,
