@@ -32,7 +32,4 @@ maintenance, milestones maintenance, donations maintenance, and commenting withi
 There are respective ejs files to the relative pages and routes in the index.js file.
 
 415:
-There is a link to a google colab file that contains our Python Exploratory Analysis with
-the proper requirements. There are clean headers and markdowns after the sections with
-insights. The folder looks professional. The charts are embedded in the presentation slides.
-There are four charts.
+There is a text file titled INTEX EDA with a link to a google colab file that contains our Python Exploratory Analysis with the proper requirements. There are clean headers and markdowns after the sections with insights. The folder looks professional. The charts are embedded in the presentation slides. There are four charts.
