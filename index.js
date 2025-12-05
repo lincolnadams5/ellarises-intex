@@ -128,7 +128,79 @@ app.get('/teapot', (req, res) => {
 
 // ~~~ ~~~ ~~~ ~~~ ~~~ EVENTS ~~~ ~~~ ~~~ ~~~ ~~~ 
 app.get('/events', (req, res) => {
-    res.render('events', { error_message: "" });
+    const filter = req.query.filter || 'upcoming'; // Default to upcoming
+    const page = parseInt(req.query.page, 10) || 1;
+    const perPage = 10;
+    const offset = (page - 1) * perPage;
+    const currentDate = new Date();
+
+    // Build the query
+    let eventsQuery = knex('event_occurrences')
+        .join('event_templates', 'event_occurrences.event_template_id', '=', 'event_templates.event_template_id')
+        .select(
+            'event_occurrences.event_occurrence_id',
+            'event_occurrences.event_template_id',
+            'event_occurrences.event_name',
+            'event_occurrences.event_date_time_start',
+            'event_occurrences.event_date_time_end',
+            'event_occurrences.event_location',
+            'event_occurrences.event_capacity',
+            'event_occurrences.event_registration_deadline',
+            'event_templates.event_type',
+            'event_templates.event_description'
+        );
+
+    // Filter and sort based on upcoming/past
+    if (filter === 'past') {
+        eventsQuery = eventsQuery
+            .where('event_occurrences.event_date_time_start', '<', currentDate)
+            .orderBy('event_occurrences.event_date_time_start', 'desc');
+    } else {
+        eventsQuery = eventsQuery
+            .where('event_occurrences.event_date_time_start', '>=', currentDate)
+            .orderBy('event_occurrences.event_date_time_start', 'asc');
+    }
+
+    // Count query for pagination
+    let countQuery = knex('event_occurrences')
+        .join('event_templates', 'event_occurrences.event_template_id', '=', 'event_templates.event_template_id');
+    
+    if (filter === 'past') {
+        countQuery = countQuery.where('event_occurrences.event_date_time_start', '<', currentDate);
+    } else {
+        countQuery = countQuery.where('event_occurrences.event_date_time_start', '>=', currentDate);
+    }
+    countQuery = countQuery.count('* as count').first();
+
+    // Apply pagination
+    eventsQuery = eventsQuery.limit(perPage).offset(offset);
+
+    Promise.all([eventsQuery, countQuery])
+        .then(([events, countResult]) => {
+            const totalCount = parseInt(countResult.count, 10);
+            const totalPages = Math.ceil(totalCount / perPage);
+
+            res.render('events', {
+                events: events,
+                filter: filter,
+                currentPage: page,
+                totalPages: totalPages,
+                totalCount: totalCount,
+                error_message: req.query.error || '',
+                success_message: req.query.success || ''
+            });
+        })
+        .catch(err => {
+            console.log('Error fetching events:', err);
+            res.render('events', {
+                events: [],
+                filter: filter,
+                currentPage: 1,
+                totalPages: 1,
+                totalCount: 0,
+                error_message: 'Error loading events. Please try again.'
+            });
+        });
 });
 
 app.get('/manage-event-occurrences', (req, res) => {
