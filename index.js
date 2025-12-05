@@ -204,6 +204,9 @@ app.get('/events', (req, res) => {
 });
 
 app.get('/manage-event-occurrences', (req, res) => {
+    // Get search query from URL
+    const searchQuery = req.query.search || '';
+    
     // Pagination logic
     const page = parseInt(req.query.page, 10) || 1;
     const perPage = 20;
@@ -213,7 +216,7 @@ app.get('/manage-event-occurrences', (req, res) => {
     const errorMessage = req.query.error || "";
 
     // Query for the current page of event occurrences
-    const eventsQuery = knex('event_occurrences')
+    let eventsQuery = knex('event_occurrences')
         .select(
             'event_occurrences.event_occurrence_id',
             'event_occurrences.event_template_id',
@@ -223,12 +226,32 @@ app.get('/manage-event-occurrences', (req, res) => {
             'event_occurrences.event_location',
             'event_occurrences.event_capacity',
             'event_occurrences.event_registration_deadline'
-        )
+        );
+
+    // If there's a search query, filter by event name or location
+    if (searchQuery.trim() !== '') {
+        const searchTerm = '%' + searchQuery.trim() + '%';
+        eventsQuery = eventsQuery.where(function () {
+            this.where('event_occurrences.event_name', 'ilike', searchTerm)
+                .orWhere('event_occurrences.event_location', 'ilike', searchTerm);
+        });
+    }
+
+    eventsQuery = eventsQuery
         .orderBy('event_occurrences.event_date_time_start', 'desc')
         .limit(perPage)
         .offset(offset);
 
-    const countQuery = getCount('event_occurrences');
+    // Count query with same filter
+    let countQuery = knex('event_occurrences');
+    if (searchQuery.trim() !== '') {
+        const searchTerm = '%' + searchQuery.trim() + '%';
+        countQuery = countQuery.where(function () {
+            this.where('event_name', 'ilike', searchTerm)
+                .orWhere('event_location', 'ilike', searchTerm);
+        });
+    }
+    countQuery = countQuery.count('* as count').first();
 
     // Also fetch templates for the edit modal dropdown
     const templatesQuery = knex('event_templates')
@@ -246,6 +269,7 @@ app.get('/manage-event-occurrences', (req, res) => {
                 currentPage: page,
                 totalPages,
                 totalCount,
+                searchQuery: searchQuery,
                 error_message: errorMessage
             });
         }).catch(err => {
@@ -256,6 +280,7 @@ app.get('/manage-event-occurrences', (req, res) => {
                 currentPage: page,
                 totalPages: 0,
                 totalCount: 0,
+                searchQuery: searchQuery,
                 error_message: 'Error fetching event information'
             });
         });
@@ -391,6 +416,9 @@ app.post('/manage-event-occurrences/:id/delete', (req, res) => {
 
 // ~~~~~ Manage Event Templates ~~~~~
 app.get('/manage-events', (req, res) => {
+    // Get search query from URL
+    const searchQuery = req.query.search || '';
+    
     // Pagination logic
     const page = parseInt(req.query.page, 10) || 1;
     const perPage = 20;
@@ -400,7 +428,7 @@ app.get('/manage-events', (req, res) => {
     const errorMessage = req.query.error || "";
 
     // Query for the current page of events
-    const eventsQuery = knex('event_templates')
+    let eventsQuery = knex('event_templates')
         .select(
             'event_template_id',
             'event_name',
@@ -408,12 +436,26 @@ app.get('/manage-events', (req, res) => {
             'event_description',
             'event_recurrence_pattern',
             'event_default_capacity'
-        )
+        );
+
+    // If there's a search query, filter by event name
+    if (searchQuery.trim() !== '') {
+        const searchTerm = '%' + searchQuery.trim() + '%';
+        eventsQuery = eventsQuery.where('event_name', 'ilike', searchTerm);
+    }
+
+    eventsQuery = eventsQuery
         .orderBy('event_name')
         .limit(perPage)
-        .offset(offset)
+        .offset(offset);
 
-    const countQuery = getCount('event_templates')
+    // Count query with same filter
+    let countQuery = knex('event_templates');
+    if (searchQuery.trim() !== '') {
+        const searchTerm = '%' + searchQuery.trim() + '%';
+        countQuery = countQuery.where('event_name', 'ilike', searchTerm);
+    }
+    countQuery = countQuery.count('* as count').first();
 
     Promise.all([eventsQuery, countQuery])
         .then(([events, countResult]) => {
@@ -425,6 +467,7 @@ app.get('/manage-events', (req, res) => {
                 currentPage: page,
                 totalPages,
                 totalCount,
+                searchQuery: searchQuery,
                 error_message: errorMessage
             });
         }).catch(err => {
@@ -434,6 +477,7 @@ app.get('/manage-events', (req, res) => {
                 currentPage: page,
                 totalPages: 0,
                 totalCount: 0,
+                searchQuery: searchQuery,
                 error_message: 'Error fetching event information'
             });
         });
@@ -644,19 +688,36 @@ app.get('/milestone-progress', (req, res) => {
 });
 
 app.get('/manage-milestones', (req, res) => {
+    // Get search query from URL
+    const searchQuery = req.query.search || '';
+    
     // Pagination Logic
     const page = parseInt(req.query.page, 10) || 1;
     const perPage = 20;
     const offset = (page - 1) * perPage;
 
     // Query for the current page of milestones
-    const milestonesQuery = knex('milestones')
-        .select('milestone_id', 'milestone_title')
+    let milestonesQuery = knex('milestones')
+        .select('milestone_id', 'milestone_title');
+
+    // If there's a search query, filter by milestone title
+    if (searchQuery.trim() !== '') {
+        const searchTerm = '%' + searchQuery.trim() + '%';
+        milestonesQuery = milestonesQuery.where('milestone_title', 'ilike', searchTerm);
+    }
+
+    milestonesQuery = milestonesQuery
         .orderBy('milestone_title')
         .limit(perPage)
-        .offset(offset)
+        .offset(offset);
 
-    const countQuery = getCount('milestones')
+    // Count query with same filter
+    let countQuery = knex('milestones');
+    if (searchQuery.trim() !== '') {
+        const searchTerm = '%' + searchQuery.trim() + '%';
+        countQuery = countQuery.where('milestone_title', 'ilike', searchTerm);
+    }
+    countQuery = countQuery.count('* as count').first();
 
     Promise.all([milestonesQuery, countQuery])
         .then(([milestones, countResult]) => {
@@ -668,12 +729,14 @@ app.get('/manage-milestones', (req, res) => {
                 currentPage: page,
                 totalPages,
                 totalCount,
+                searchQuery: searchQuery,
                 error_message: ""
             })
         }).catch(err => {
             console.log('Error fetching milestone information: ', err);
             res.render('manage-milestones', {
                 milestone: [],
+                searchQuery: searchQuery,
                 error_message: 'Error fetching milestone information'
             });
         });
@@ -778,8 +841,8 @@ app.get('/my-donations', (req, res) => {
 });
 
 app.get('/manage-donations', (req, res) => {
-    // Entered the route?
-    // console.log('Managing donations');
+    // Get search query from URL
+    const searchQuery = req.query.search || '';
 
     // Pagination logic
     const page = parseInt(req.query.page, 10) || 1;
@@ -787,7 +850,7 @@ app.get('/manage-donations', (req, res) => {
     const offset = (page - 1) * perPage;
 
     // Query for the current page of donations
-    const donationsQuery = knex('donations')
+    let donationsQuery = knex('donations')
         .innerJoin('users', 'donations.user_id', '=', 'users.user_id') // Join user and donations tables
         .select( // Select necessary information
             'donations.donation_id',
@@ -797,7 +860,19 @@ app.get('/manage-donations', (req, res) => {
             'user_email',
             'user_first_name',
             'user_last_name'
-        )
+        );
+
+    // If there's a search query, filter by donor name
+    if (searchQuery.trim() !== '') {
+        const searchTerm = '%' + searchQuery.trim() + '%';
+        donationsQuery = donationsQuery.where(function () {
+            this.where('user_first_name', 'ilike', searchTerm)
+                .orWhere('user_last_name', 'ilike', searchTerm)
+                .orWhere(knex.raw("concat_ws(' ', user_first_name, user_last_name) ilike ?", [searchTerm]));
+        });
+    }
+
+    donationsQuery = donationsQuery
         .orderByRaw('donation_date DESC NULLS LAST') // Order by date newest to oldest
         .limit(perPage)
         .offset(offset); // Offset is the number of rows to skip
@@ -829,8 +904,18 @@ app.get('/manage-donations', (req, res) => {
         .andWhere('donation_date', '<=', endOfMonth)
         .first();
         
-    // Query for the total count of donations (for pagination)
-    const countQuery = getCount('donations')
+    // Query for the total count of donations (for pagination) - with same search filter
+    let countQuery = knex('donations')
+        .innerJoin('users', 'donations.user_id', '=', 'users.user_id');
+    if (searchQuery.trim() !== '') {
+        const searchTerm = '%' + searchQuery.trim() + '%';
+        countQuery = countQuery.where(function () {
+            this.where('user_first_name', 'ilike', searchTerm)
+                .orWhere('user_last_name', 'ilike', searchTerm)
+                .orWhere(knex.raw("concat_ws(' ', user_first_name, user_last_name) ilike ?", [searchTerm]));
+        });
+    }
+    countQuery = countQuery.count('* as count').first();
 
     Promise.all([donationsQuery, countQuery, totalDonationsQuery, totalYearlyDonationsQuery, totalMonthlyDonationsQuery]) // Ensures that both queries are executed before running
         .then(([donations, countResult, totalDonationsResult, totalYearlyDonationsResult, totalMonthlyDonationsResult]) => {
@@ -849,6 +934,7 @@ app.get('/manage-donations', (req, res) => {
                 totalMonthlyDonations,
                 year,
                 month,
+                searchQuery: searchQuery,
                 error_message: ''
             });
         })
@@ -859,6 +945,7 @@ app.get('/manage-donations', (req, res) => {
                 currentPage: page,
                 totalPages: 0,
                 totalCount: 0,
+                searchQuery: searchQuery,
                 error_message: 'Error fetching donation/user information.'
             });
         });
@@ -1263,16 +1350,19 @@ app.post('/registration/:user_id/register/:event_occurrence_id', (req, res) => {
 
 // ~~~ ~~~ MANAGE SURVEYS ~~~ ~~~
 app.get('/manage-surveys', (req, res) => { // Get the manage surveys page
+    // Get search query from URL
+    const searchQuery = req.query.search || '';
+    
     // Pagination logic
     const page = parseInt(req.query.page, 10) || 1;
     const perPage = 20;
     const offset = (page - 1) * perPage;
 
     // Query for the current page of surveys
-    const surveyQuery = knex('surveys')
-        .innerJoin('registration', 'surveys.registration_id', '=', 'registration.registration_id') // Inner join "registration" on registration_id
-        .innerJoin('users', 'registration.user_id', '=', 'users.user_id') // INNER JOIN "users" ON user_id
-        .innerJoin('event_occurrences', 'registration.event_occurrence_id', '=', 'event_occurrences.event_occurrence_id') // INNER JOIN "event_occurrences" on "event_occurrence_id"
+    let surveyQuery = knex('surveys')
+        .innerJoin('registration', 'surveys.registration_id', '=', 'registration.registration_id')
+        .innerJoin('users', 'registration.user_id', '=', 'users.user_id')
+        .innerJoin('event_occurrences', 'registration.event_occurrence_id', '=', 'event_occurrences.event_occurrence_id')
         .select(
             'survey_id',
             'overall_score',
@@ -1284,17 +1374,40 @@ app.get('/manage-surveys', (req, res) => { // Get the manage surveys page
             'users.user_id',
             'user_first_name',
             'user_last_name'
-        )
+        );
+
+    // If there's a search query, filter by user name or event name
+    if (searchQuery.trim() !== '') {
+        const searchTerm = '%' + searchQuery.trim() + '%';
+        surveyQuery = surveyQuery.where(function () {
+            this.where('user_first_name', 'ilike', searchTerm)
+                .orWhere('user_last_name', 'ilike', searchTerm)
+                .orWhere('event_name', 'ilike', searchTerm)
+                .orWhere(knex.raw("concat_ws(' ', user_first_name, user_last_name) ilike ?", [searchTerm]));
+        });
+    }
+
+    surveyQuery = surveyQuery
         .orderBy('survey_submission_date', 'desc')
         .limit(perPage)
-        .offset(offset)
+        .offset(offset);
 
-    const countQuery = knex('surveys')
-        .innerJoin('registration', 'surveys.registration_id', '=', 'registration.registration_id') // Inner join "registration" on registration_id
-        .innerJoin('users', 'registration.user_id', '=', 'users.user_id') // INNER JOIN "users" ON user_id
-        .innerJoin('event_occurrences', 'registration.event_occurrence_id', '=', 'event_occurrences.event_occurrence_id') // INNER JOIN "event_occurrences" on "event_occurrence_id"
-        .count('* as count')
-        .first()
+    // Count query with same filter
+    let countQuery = knex('surveys')
+        .innerJoin('registration', 'surveys.registration_id', '=', 'registration.registration_id')
+        .innerJoin('users', 'registration.user_id', '=', 'users.user_id')
+        .innerJoin('event_occurrences', 'registration.event_occurrence_id', '=', 'event_occurrences.event_occurrence_id');
+    
+    if (searchQuery.trim() !== '') {
+        const searchTerm = '%' + searchQuery.trim() + '%';
+        countQuery = countQuery.where(function () {
+            this.where('user_first_name', 'ilike', searchTerm)
+                .orWhere('user_last_name', 'ilike', searchTerm)
+                .orWhere('event_name', 'ilike', searchTerm)
+                .orWhere(knex.raw("concat_ws(' ', user_first_name, user_last_name) ilike ?", [searchTerm]));
+        });
+    }
+    countQuery = countQuery.count('* as count').first();
     
     Promise.all([surveyQuery, countQuery])
         .then(([surveys, countResult]) => {
@@ -1306,12 +1419,14 @@ app.get('/manage-surveys', (req, res) => { // Get the manage surveys page
                 currentPage: page,
                 totalPages,
                 totalCount,
+                searchQuery: searchQuery,
                 error_message: ""
             })
         }).catch(err => {
             console.log('Error fetching surveys: ', err);
             res.render('manage-surveys', {
                 survey: [],
+                searchQuery: searchQuery,
                 error_message: 'Error fetching surveys'
             });
         });
@@ -1368,13 +1483,16 @@ app.post('/manage-surveys/:survey_id/delete', (req, res) => {
 
 // ~~~ ~~~ ~~~ ~~~ ~~~ Participants (Admin only) ~~~ ~~~ ~~~ ~~~ ~~~ 
 app.get('/manage-participants', (req, res) => {
+    // Get search query from URL
+    const searchQuery = req.query.search || '';
+    
     // Pagination Logic
     const page = parseInt(req.query.page, 10) || 1;
     const perPage = 20;
     const offset = (page - 1) * perPage;
 
-    // Gets users for a page for the pagination
-    const usersQuery = knex('users')
+    // Build the users query
+    let usersQuery = knex('users')
         .select(
             'user_id',
             'user_first_name',
@@ -1389,13 +1507,41 @@ app.get('/manage-participants', (req, res) => {
             'user_school',
             'user_employer',
             'user_field_of_interest'
-        )
+        );
+
+    // If there's a search query, filter the database
+    if (searchQuery.trim() !== '') {
+        const searchTerm = '%' + searchQuery.trim() + '%';
+        usersQuery = usersQuery.where(function () {
+            this.where('user_first_name', 'ilike', searchTerm)
+                .orWhere('user_last_name', 'ilike', searchTerm)
+                // Also allow searching for full name:
+                .orWhere(
+                    knex.raw(
+                        "concat_ws(' ', user_first_name, user_last_name) ilike ?",
+                        [searchTerm]
+                    )
+                );
+        });
+    }
+
+    // Add ordering and pagination
+    usersQuery = usersQuery
         .orderBy('user_last_name')
         .orderBy('user_first_name')
         .limit(perPage)
-        .offset(offset)
+        .offset(offset);
 
-    const countQuery = getCount('users')
+    // Build count query with same filter
+    let countQuery = knex('users');
+    if (searchQuery.trim() !== '') {
+        const searchTerm = '%' + searchQuery.trim() + '%';
+        countQuery = countQuery.where(function() {
+            this.where('user_first_name', 'ilike', searchTerm)
+                .orWhere('user_last_name', 'ilike', searchTerm);
+        });
+    }
+    countQuery = countQuery.count('* as count').first();
 
     Promise.all([usersQuery, countQuery])
         .then(([users, countResult]) => {
@@ -1407,12 +1553,14 @@ app.get('/manage-participants', (req, res) => {
                 currentPage: page,
                 totalPages,
                 totalCount,
+                searchQuery: searchQuery,
                 error_message: ""
             })
         }).catch(err => {
             console.log('Error fetching users: ', err);
             res.render('manage-participants', {
                 user: [],
+                searchQuery: searchQuery,
                 error_message: 'Error fetching users.'
             });
         });

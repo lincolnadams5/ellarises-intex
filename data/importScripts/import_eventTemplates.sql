@@ -9,3 +9,6 @@ COPY event_templates (
 )
 FROM '/absolute/path/event_templates.csv'
 WITH (FORMAT csv, HEADER true);
+
+-- Reset the sequence to avoid primary key conflicts
+SELECT setval('event_templates_event_template_id_seq', (SELECT MAX(event_template_id) FROM event_templates));

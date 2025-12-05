@@ -82,7 +82,34 @@
                 <div class="error-message"><%= error_message %></div>
             <% } %>
 
-            <a href="/manage-events/new" class="btn-primary btn-create-event">+ Create New Event Template</a>
+            <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                <a href="/manage-events/new" class="btn-primary btn-create-event">+ Create New Event Template</a>
+                
+                <!-- Search Bar -->
+                <form action="/manage-events" method="GET" style="display: flex; gap: 0.5rem; flex: 1; min-width: 250px; max-width: 400px;">
+                    <input 
+                        type="text" 
+                        name="search"
+                        placeholder="Search by event name..." 
+                        value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>"
+                        style="flex: 1; padding: 0.5rem 1rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem;"
+                    >
+                    <button type="submit" style="padding: 0.5rem 1rem; background-color: var(--color-secondary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                        Search
+                    </button>
+                    <% if (typeof searchQuery !== 'undefined' && searchQuery && searchQuery.trim() !== '') { %>
+                    <a href="/manage-events" style="padding: 0.5rem 1rem; background-color: #6c757d; color: white; border-radius: 8px; text-decoration: none;">
+                        Clear
+                    </a>
+                    <% } %>
+                </form>
+            </div>
+            
+            <% if (typeof searchQuery !== 'undefined' && searchQuery && searchQuery.trim() !== '') { %>
+            <div style="margin-bottom: 1rem; color: #71717a; font-size: 0.95rem;">
+                Showing results for "<strong><%= searchQuery %></strong>" (<%= typeof totalCount !== 'undefined' ? totalCount : 0 %> found)
+            </div>
+            <% } %>
 
             <!-- Events Table -->
             <% if (event && event.length > 0) { %>
@@ -125,8 +152,14 @@
 
             <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
                 <div class="manage-donations-pagination">
+                    <%
+                        var searchParam = '';
+                        if (typeof searchQuery !== 'undefined' && searchQuery && searchQuery.trim() !== '') {
+                            searchParam = '&search=' + encodeURIComponent(searchQuery);
+                        }
+                    %>
                     <% if (currentPage > 1) { %>
-                        <a href="/manage-events?page=<%= currentPage - 1 %>" class="pagination-btn">Previous</a>
+                        <a href="/manage-events?page=<%= currentPage - 1 %><%= searchParam %>" class="pagination-btn">Previous</a>
                     <% } else { %>
                         <span class="pagination-btn disabled">Previous</span>
                     <% } %>
@@ -144,19 +177,19 @@
                             }
                         %>
                         <% if (startPage > 1) { %>
-                            <a href="/manage-events?page=1" class="pagination-page <%= currentPage === 1 ? 'active' : '' %>">1</a>
+                            <a href="/manage-events?page=1<%= searchParam %>" class="pagination-page <%= currentPage === 1 ? 'active' : '' %>">1</a>
                             <% if (startPage > 2) { %><span class="pagination-ellipsis">…</span><% } %>
                         <% } %>
                         <% for (let i = startPage; i <= endPage; i++) { %>
-                            <a href="/manage-events?page=<%= i %>" class="pagination-page <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+                            <a href="/manage-events?page=<%= i %><%= searchParam %>" class="pagination-page <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
                         <% } %>
                         <% if (endPage < totalPages) { %>
                             <% if (endPage < totalPages - 1) { %><span class="pagination-ellipsis">…</span><% } %>
-                            <a href="/manage-events?page=<%= totalPages %>" class="pagination-page <%= currentPage === totalPages ? 'active' : '' %>"><%= totalPages %></a>
+                            <a href="/manage-events?page=<%= totalPages %><%= searchParam %>" class="pagination-page <%= currentPage === totalPages ? 'active' : '' %>"><%= totalPages %></a>
                         <% } %>
                     </div>
                     <% if (currentPage < totalPages) { %>
-                        <a href="/manage-events?page=<%= currentPage + 1 %>" class="pagination-btn">Next</a>
+                        <a href="/manage-events?page=<%= currentPage + 1 %><%= searchParam %>" class="pagination-btn">Next</a>
                     <% } else { %>
                         <span class="pagination-btn disabled">Next</span>
                     <% } %>
