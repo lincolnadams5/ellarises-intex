@@ -1574,13 +1574,15 @@ app.get('/manage-participants/new', (req, res) => {
 
 // ~~~ ~~~ ~~~ ~~~ ~~~ Dashboard ~~~ ~~~ ~~~ ~~~ ~~~ 
 app.get('/dashboard', (req, res) => {
+    const currentUserId = req.session.user_id;
+    const currentDate = new Date();
+
+    // ===== ADMIN KPIs =====
     // Get the total number of participants
     const totalParticipantsQuery = knex('users')
         .count('* as count')
         .first()
-        .then(count => {
-            return parseInt(count.count, 10);
-        })
+        .then(count => parseInt(count.count, 10))
         .catch(err => {
             console.log('Error fetching total participants: ', err);
             return 0;
@@ -1590,35 +1592,97 @@ app.get('/dashboard', (req, res) => {
     const totalDonationsQuery = knex('donations')
         .sum('donation_amount as total_donations')
         .first()
-        .then(result => {
-            return result.total_donations || 0;
-        })
+        .then(result => result.total_donations || 0)
         .catch(err => {
             console.log('Error fetching total donations: ', err);
             return 0;
         });
 
-    // Get the upcoming event
+    // Get count of upcoming events (for admin)
+    const upcomingEventsCountQuery = knex('event_occurrences')
+        .where('event_date_time_start', '>=', currentDate)
+        .count('* as count')
+        .first()
+        .then(result => parseInt(result.count, 10))
+        .catch(err => {
+            console.log('Error fetching upcoming events count: ', err);
+            return 0;
+        });
+
+    // Get the upcoming event details
     const upcomingEventQuery = knex('event_occurrences')
         .select('event_occurrence_id', 'event_name', 'event_date_time_start', 'event_date_time_end', 'event_location')
-        .where('event_date_time_start', '>=', new Date())
+        .where('event_date_time_start', '>=', currentDate)
         .orderBy('event_date_time_start', 'asc')
         .first()
-        .then(upcomingEvent => {
-            return upcomingEvent || null;
-        })
+        .then(upcomingEvent => upcomingEvent || null)
         .catch(err => {
             console.log('Error fetching upcoming event: ', err);
             return null;
         });
 
-    Promise.all([totalDonationsQuery, upcomingEventQuery, totalParticipantsQuery])
-        .then(([totalDonations, upcomingEvent, totalParticipants]) => {
+    // ===== PARTICIPANT KPIs =====
+    // 1. Upcoming Reservations: registrations with NULL status for future events
+    const upcomingReservationsQuery = knex('registration')
+        .join('event_occurrences', 'registration.event_occurrence_id', '=', 'event_occurrences.event_occurrence_id')
+        .where('registration.user_id', currentUserId)
+        .whereNull('registration.registration_status')
+        .where('event_occurrences.event_date_time_start', '>=', currentDate)
+        .count('* as count')
+        .first()
+        .then(result => parseInt(result.count, 10))
+        .catch(err => {
+            console.log('Error fetching upcoming reservations: ', err);
+            return 0;
+        });
+
+    // 2. Milestones Completed: count of user_milestones for this user
+    const milestonesCompletedQuery = knex('user_milestones')
+        .where('user_id', currentUserId)
+        .count('* as count')
+        .first()
+        .then(result => parseInt(result.count, 10))
+        .catch(err => {
+            console.log('Error fetching milestones completed: ', err);
+            return 0;
+        });
+
+    // 3. Surveys Pending: past event registrations without a survey
+    const surveysPendingQuery = knex('registration')
+        .join('event_occurrences', 'registration.event_occurrence_id', '=', 'event_occurrences.event_occurrence_id')
+        .leftJoin('surveys', 'registration.registration_id', '=', 'surveys.registration_id')
+        .where('registration.user_id', currentUserId)
+        .where('event_occurrences.event_date_time_start', '<', currentDate)
+        .whereNull('surveys.survey_id')
+        .count('registration.registration_id as count')
+        .first()
+        .then(result => parseInt(result.count, 10))
+        .catch(err => {
+            console.log('Error fetching surveys pending: ', err);
+            return 0;
+        });
+
+    Promise.all([
+        totalDonationsQuery, 
+        upcomingEventQuery, 
+        totalParticipantsQuery,
+        upcomingEventsCountQuery,
+        upcomingReservationsQuery,
+        milestonesCompletedQuery,
+        surveysPendingQuery
+    ])
+        .then(([totalDonations, upcomingEvent, totalParticipants, upcomingEvents, upcomingReservations, milestonesCompleted, surveysPending]) => {
             res.render('dashboard', {
                 error_message: "",
+                // Admin KPIs
                 totalDonations: totalDonations,
                 upcomingEvent: upcomingEvent,
-                totalParticipants: totalParticipants
+                totalParticipants: totalParticipants,
+                upcomingEvents: upcomingEvents,
+                // Participant KPIs
+                upcomingReservations: upcomingReservations,
+                milestonesCompleted: milestonesCompleted,
+                surveysPending: surveysPending
             });
         }).catch(err => {
             console.log('Error fetching dashboard information: ', err);
@@ -1626,7 +1690,11 @@ app.get('/dashboard', (req, res) => {
                 error_message: 'Error fetching dashboard information',
                 totalDonations: null,
                 upcomingEvent: null,
-                totalParticipants: null
+                totalParticipants: null,
+                upcomingEvents: null,
+                upcomingReservations: null,
+                milestonesCompleted: null,
+                surveysPending: null
             });
         });
 });
