@@ -19,10 +19,12 @@
   "homepage": "https://github.com/lincolnadams5/ellarises-intex#readme",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.3",
     "ejs": "^3.1.10",
     "express": "^5.2.0",
     "express-session": "^1.18.2",
+    "i18n": "^0.15.3",
     "knex": "^3.1.0",
     "pg": "^8.16.3",
     "xlsx": "^0.18.5"

@@ -5,9 +5,23 @@ require('dotenv').config(); // Load environment variables from .env file into me
 const express = require("express"); 
 const session = require("express-session"); // Needed for the session variable
 const XLSX = require("xlsx"); // For Excel file generation
+const i18n = require("i18n"); // For internationalization
+const cookieParser = require("cookie-parser"); // For reading cookies (needed by i18n)
 let path = require("path");
 let app = express();
 const bcrypt = require("bcrypt");
+
+// Configure i18n
+i18n.configure({
+    locales: ['en', 'es'],
+    directory: path.join(__dirname, 'locales'),
+    defaultLocale: 'en',
+    cookie: 'lang',
+    queryParameter: 'lang',
+    autoReload: true,
+    syncFiles: true,
+    objectNotation: true
+});
 
 app.set("view engine", "ejs");
 
@@ -16,6 +30,7 @@ app.use(express.static(path.join(__dirname))); // Making sure that Express can s
 const port = process.env.PORT || 3000; // Use AWS port, or 3000 if local
 
 app.use(express.urlencoded({extended: true}));
+app.use(cookieParser()); // Parse cookies (needed for i18n language preference)
 
 // Initializing Knex and connecting to the database
 const knexConfig = require("./knexfile"); 
@@ -31,6 +46,9 @@ app.use(
     })
 );
 
+// Initialize i18n middleware
+app.use(i18n.init);
+
 // ========== MIDDLEWARE ==========
 
 // Makes session variables automatically available on each EJS view without having to pass them individually through each route
@@ -41,6 +59,8 @@ app.use((req, res, next) => {
     res.locals.level = req.session.level || '';
     res.locals.first_name = req.session.first_name || '';
     res.locals.last_name = req.session.last_name || '';
+    // Make current language available in templates
+    res.locals.currentLang = req.getLocale();
     next();
 });
 
@@ -48,7 +68,8 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
     // Skip authentication for login routes
     let public_routes = ['/', '/login', '/register', '/about', '/events', '/donate', '/analytics', '/teapot'];
-    if (public_routes.includes(req.path)) {
+    // Allow language switch routes
+    if (public_routes.includes(req.path) || req.path.startsWith('/lang/')) {
         return next();
     }
 
@@ -99,6 +120,18 @@ function getCount (tableName) {
         .first()
 }
 
+
+// ========== LANGUAGE SWITCH ==========
+app.get('/lang/:locale', (req, res) => {
+    const locale = req.params.locale;
+    if (['en', 'es'].includes(locale)) {
+        res.cookie('lang', locale, { maxAge: 365 * 24 * 60 * 60 * 1000 }); // 1 year
+        req.setLocale(locale);
+    }
+    // Redirect back to the previous page, or home if no referer
+    const referer = req.get('Referer') || '/';
+    res.redirect(referer);
+});
 
 // ========== VIEWS ==========
 app.get('/', (req, res) => {

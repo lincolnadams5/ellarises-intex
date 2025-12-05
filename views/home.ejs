@@ -45,7 +45,15 @@
                     <a href="/about#contact" role="menuitem">Contact Us</a>
                 </div>
             </li>
-                <li><a href="/donate">Donate</a></li>
+                <li><a href="/donate"><%= __('nav.donate') %></a></li>
+                <!-- Language Switcher -->
+                <li class="lang-switcher">
+                    <% if (currentLang === 'en') { %>
+                        <a href="/lang/es" class="lang-toggle" title="Cambiar a Español">🌐 ES</a>
+                    <% } else { %>
+                        <a href="/lang/en" class="lang-toggle" title="Switch to English">🌐 EN</a>
+                    <% } %>
+                </li>
             </ul>
             <div class="nav-logo">
                 <h1><a href="/" style="text-decoration: none; color: inherit;">ELLA RISES</a></h1>
@@ -78,11 +86,11 @@
     <main id="main-content">
     <section class="hero">
         <div class="hero-content">
-            <h2 class="hero-tagline">Empowering the future generation of women.</h2>
-            <p class="hero-mission">Inviting young women to pursue higher education and embrace their heritage by providing culturally rooted programs and educational experiences.</p>
+            <h2 class="hero-tagline"><%= __('home.tagline') %></h2>
+            <p class="hero-mission"><%= __('home.mission') %></p>
             <div class="hero-cta">
-                <a href="/events" class="btn-primary">Join Our Events</a>
-                <a href="/donate" class="btn-secondary">Support Our Mission</a>
+                <a href="/events" class="btn-primary"><%= __('home.join_events') %></a>
+                <a href="/donate" class="btn-secondary"><%= __('home.support_mission') %></a>
             </div>
         </div>
         <div class="hero-image">
@@ -94,25 +102,25 @@
     <section class="impact-hero">
         <div class="impact-hero-content">
             <div class="impact-hero-header">
-                <h2>Our Impact</h2>
-                <p>Making a difference in the lives of young women through culturally rooted programs and educational experiences.</p>
+                <h2><%= __('home.our_impact') %></h2>
+                <p><%= __('home.impact_description') %></p>
             </div>
             <div class="impact-hero-stats">
                 <div class="impact-stat-card">
                     <div class="impact-stat-number">500+</div>
-                    <div class="impact-stat-label">Young Women Served</div>
+                    <div class="impact-stat-label"><%= __('home.women_served') %></div>
                 </div>
                 <div class="impact-stat-card">
                     <div class="impact-stat-number">50+</div>
-                    <div class="impact-stat-label">Events Hosted</div>
+                    <div class="impact-stat-label"><%= __('home.events_hosted') %></div>
                 </div>
                 <div class="impact-stat-card">
                     <div class="impact-stat-number">+ 20%</div>
-                    <div class="impact-stat-label">Self-Confidence Survey</div>
+                    <div class="impact-stat-label"><%= __('home.self_confidence') %></div>
                 </div>
                 <div class="impact-stat-card">
                     <div class="impact-stat-number">+ 20%</div>
-                    <div class="impact-stat-label">Leadership Ability Survey</div>
+                    <div class="impact-stat-label"><%= __('home.leadership_ability') %></div>
                 </div>
             </div>
         </div>
@@ -121,8 +129,8 @@
     <!-- Programs Section -->
     <section class="programs">
         <div class="section-header">
-            <h2>Join Programs</h2>
-            <p>Our signature programs and the Ella Rises Summit serve over 150 women each year.</p>
+            <h2><%= __('home.join_programs') %></h2>
+            <p><%= __('home.programs_description') %></p>
         </div>
         <div class="program-grid">
             <div class="program-flip-card" data-program="mariachi">
@@ -131,8 +139,8 @@
                         <img src="/public/images/mariachi.jpeg" alt="Mariachi Program">
                     </div>
                     <div class="program-flip-back">
-                        <h3>Mariachi</h3>
-                        <p>Connect with cultural heritage through traditional music and performance.</p>
+                        <h3><%= __('nav.mariachi') %></h3>
+                        <p><%= __('home.mariachi_description') %></p>
                     </div>
                 </div>
             </div>
@@ -142,8 +150,8 @@
                         <img src="/public/images/ballet_folklorico1.jpeg" alt="Ballet Folklorico Program">
                     </div>
                     <div class="program-flip-back">
-                        <h3>Ballet Folklorico</h3>
-                        <p>Celebrate Mexican culture through vibrant dance and storytelling.</p>
+                        <h3><%= __('nav.ballet') %></h3>
+                        <p><%= __('home.ballet_description') %></p>
                     </div>
                 </div>
             </div>
@@ -153,8 +161,8 @@
                         <img src="/public/images/ER STEM Workshop Aug 2022-03.jpg" alt="STEAM Workshops Program">
                     </div>
                     <div class="program-flip-back">
-                        <h3>STEAM Workshops</h3>
-                        <p>Hands-on learning in Science, Technology, Engineering, Art, and Math.</p>
+                        <h3><%= __('nav.steam') %></h3>
+                        <p><%= __('home.steam_description') %></p>
                     </div>
                 </div>
             </div>
@@ -164,8 +172,8 @@
                         <img src="/public/images/summer_summit2.jpg" alt="Ella Rises Summit Program">
                     </div>
                     <div class="program-flip-back">
-                        <h3>Ella Rises Summit</h3>
-                        <p>Annual gathering focused on higher education and leadership development.</p>
+                        <h3><%= __('nav.summit') %></h3>
+                        <p><%= __('home.summit_description') %></p>
                     </div>
                 </div>
             </div>
@@ -344,8 +352,8 @@
     <!-- Sponsors Carousel -->
     <section class="sponsors">
         <div class="section-header">
-            <h2>Our Partners</h2>
-            <p>Thank you to our generous sponsors</p>
+            <h2><%= __('home.our_partners') %></h2>
+            <p><%= __('home.thank_sponsors') %></p>
         </div>
         <div class="sponsors-carousel">
             <div class="sponsor-track">
@@ -453,11 +461,11 @@
     <!-- Call to Action -->
     <section class="cta-section">
         <div class="cta-content">
-            <h2>Ready to Make a Difference?</h2>
-            <p>Join us in empowering the next generation of women leaders</p>
+            <h2><%= __('home.ready_to_make_difference') %></h2>
+            <p><%= __('home.join_empowering') %></p>
             <div class="cta-buttons">
-                <a href="#" class="btn-primary btn-large">Sign Up for Events</a>
-                <a href="#" class="btn-secondary btn-large">Donate Now</a>
+                <a href="/events" class="btn-primary btn-large"><%= __('home.sign_up_events') %></a>
+                <a href="/donate" class="btn-secondary btn-large"><%= __('home.donate_now') %></a>
             </div>
         </div>
     </section>
@@ -468,39 +476,39 @@
         <div class="footer-content">
             <div class="footer-section">
                 <h3>Ella Rises</h3>
-                <p>Empowering young women through culturally rooted educational programs.</p>
+                <p><%= __('footer.empowering') %></p>
             </div>
             <div class="footer-section">
-                <h4>Quick Links</h4>
+                <h4><%= __('footer.quick_links') %></h4>
                 <ul>
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/events">Event Information</a></li>
-                    <li><a href="/about">About Us</a></li>
-                    <li><a href="/about#contact">Contact</a></li>
+                    <li><a href="/"><%= __('footer.home') %></a></li>
+                    <li><a href="/events"><%= __('footer.event_info') %></a></li>
+                    <li><a href="/about"><%= __('footer.about_us') %></a></li>
+                    <li><a href="/about#contact"><%= __('footer.contact') %></a></li>
                     <li><a href="/teapot">Teapot</a></li>
                 </ul>
             </div>
             <div class="footer-section">
-                <h4>Programs</h4>
+                <h4><%= __('footer.programs') %></h4>
                 <ul>
-                    <li><a href="/about#mariachi">Mariachi</a></li>
-                    <li><a href="/about#ballet">Ballet Folklorico</a></li>
-                    <li><a href="/about#steam">STEAM Workshops</a></li>
-                    <li><a href="/about#summit">Ella Rises Summit</a></li>
+                    <li><a href="/about#mariachi"><%= __('nav.mariachi') %></a></li>
+                    <li><a href="/about#ballet"><%= __('nav.ballet') %></a></li>
+                    <li><a href="/about#steam"><%= __('nav.steam') %></a></li>
+                    <li><a href="/about#summit"><%= __('nav.summit') %></a></li>
                 </ul>
             </div>
             <div class="footer-section">
-                <h4>Get Involved</h4>
+                <h4><%= __('footer.get_involved') %></h4>
                 <ul>
-                    <li><a href="/about#contact">Volunteer</a></li>
-                    <li><a href="/donate">Donate</a></li>
-                    <li><a href="/about#contact">Sponsor</a></li>
-                    <li><a href="/analytics">Dashboard</a></li>
+                    <li><a href="/about#contact"><%= __('footer.volunteer') %></a></li>
+                    <li><a href="/donate"><%= __('footer.donate') %></a></li>
+                    <li><a href="/about#contact"><%= __('footer.sponsor') %></a></li>
+                    <li><a href="/analytics"><%= __('footer.dashboard') %></a></li>
                 </ul>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2025 Ella Rises. All rights reserved.</p>
+            <p><%= __('footer.copyright') %></p>
         </div>
     </footer>
 

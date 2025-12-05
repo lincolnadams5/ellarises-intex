@@ -177,6 +177,32 @@ h1, h2, h3 {
     color: var(--color-text-hover);
 }
 
+/* Language Switcher */
+.lang-switcher {
+    display: flex;
+    align-items: center;
+}
+
+.lang-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.35rem 0.75rem;
+    background-color: var(--color-primary);
+    color: var(--color-white) !important;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none !important;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.lang-toggle:hover {
+    background-color: var(--color-secondary);
+    transform: scale(1.05);
+    color: var(--color-white) !important;
+}
+
 .nav-menu a:focus-visible {
     outline: 2px solid var(--color-secondary);
     outline-offset: 2px;
