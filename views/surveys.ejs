@@ -118,12 +118,12 @@
                                             </form>
                                         </td>
                                     <% } else { %>
+                                        <td>—</td>
                                         <td>
                                             <form action="/add-survey/<%= registration.registration_id %>/<%= registration.event_occurrence_id %>" method="get" style="display:inline;">
                                                 <button type="submit" class="btn-complete-survey">Complete Survey</button>
                                             </form>
                                         </td>
-                                        <td></td>
                                     <% } %>
                                 </tr>
                             <% }); %>
