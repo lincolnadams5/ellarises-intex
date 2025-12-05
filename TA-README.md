@@ -11,7 +11,7 @@ Username: penelope.martinez4@studentmail.org
 Password: default
 
 404:
-The Web server is accessible over the Internt using and EC2 instance in AWS with appropriate services and settings pertaining to the parameters of this assignment. There is a custom DNS record pointing to the site (lincolnadams.com). The website uses HTTPS (you can see that in the search bar) and there is a link to a page that displays the HTTP 418 status code found at the bottom of the site in the footer, under a link that says Teapot.
+The Web server is accessible over the Internet using an EC2 instance and an Elastic Beanstalk environment in AWS with appropriate services and settings pertaining to the parameters of this assignment. The database is hosted on AWS RDS with a PostgreSQL engine. There is a custom DNS record pointing to the site (lincolnadams.com) with the subdomain "intex". The website uses HTTPS (you can see that in the search bar) and there is a link to a page that displays the HTTP 418 status code found at the bottom of the site in the footer, under a link that says Teapot.
 
 402:
 There is a spreadsheet titled "Normalization" that contains the steps of the normalization process.
@@ -25,7 +25,7 @@ contains preliminary feedback on the Presentation.
 In the website, there is an External Landing Page with the proper navigations, visitor
 donations, user maintenance, participant maintenance, event maintenance, post surveys
 maintenance, milestones maintenance, donations maintenance, and commenting within the code.
-There are respective ejs files to the relative pages and routes in the index.js file.
+There are respective ejs files to the relative pages and routes in the index.js file. We also used bcrypt to encrypt passwords and have english to spanish fucntionality.
 
 415:
 There is a text file titled INTEX EDA with a link to a google colab file that contains our Python Exploratory Analysis with the proper requirements. There are clean headers and markdowns after the sections with insights. The folder looks professional. The charts are embedded in the presentation slides. There are four charts. There is a file called INTEX Presentation that has the link to the slides. There is also a text file to
