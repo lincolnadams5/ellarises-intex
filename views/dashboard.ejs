@@ -122,18 +122,36 @@
                     <!-- Participant KPIs -->
                     <div class="kpi-card">
                         <div class="kpi-icon">🎟️</div>
-                        <div class="kpi-value"><%= typeof upcomingReservations !== 'undefined' ? upcomingReservations : '—' %></div>
-                        <div class="kpi-label">Active Reservations</div>
+                        <div class="kpi-value">
+                            <% if (typeof upcomingReservations !== 'undefined' && upcomingReservations !== null) { %>
+                                <%= upcomingReservations %>
+                            <% } else { %>
+                                —
+                            <% } %>
+                        </div>
+                        <div class="kpi-label">Upcoming Reservations</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-icon">🏆</div>
-                        <div class="kpi-value"><%= typeof milestonesCompleted !== 'undefined' ? milestonesCompleted : '—' %></div>
+                        <div class="kpi-value">
+                            <% if (typeof milestonesCompleted !== 'undefined' && milestonesCompleted !== null) { %>
+                                <%= milestonesCompleted %>
+                            <% } else { %>
+                                —
+                            <% } %>
+                        </div>
                         <div class="kpi-label">Milestones Completed</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-icon">📝</div>
-                        <div class="kpi-value"><%= typeof surveysPending !== 'undefined' ? surveysPending : '—' %></div>
-                        <div class="kpi-label">Pending Surveys</div>
+                        <div class="kpi-value">
+                            <% if (typeof surveysPending !== 'undefined' && surveysPending !== null) { %>
+                                <%= surveysPending %>
+                            <% } else { %>
+                                —
+                            <% } %>
+                        </div>
+                        <div class="kpi-label">Surveys Pending</div>
                     </div>
                 <% } %>
             </div>
