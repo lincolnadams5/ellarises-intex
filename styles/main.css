@@ -2286,6 +2286,18 @@ h1, h2, h3 {
     background-color: #6a8fa0;
 }
 
+.btn-reserve.btn-disabled {
+    background-color: #b0b0b0;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.btn-reserve.btn-disabled:hover {
+    background-color: #b0b0b0;
+    transform: none;
+    box-shadow: none;
+}
+
 /* Events CTA Section */
 .events-cta {
     background-color: transparent;
